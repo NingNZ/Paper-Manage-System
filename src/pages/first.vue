@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <!-- 顶部导航栏 -->
-     <bar></bar>
+    <bar></bar>
 
     <!-- 中部搜索区域 -->
     <div class="search-wrapper">

@@ -21,6 +21,9 @@ pages中当前已经存入的界面有
 - Home.vue 主界面
 - MyNotices 我的消息界面
 
+components中存放封装好的vue组件
+- bar.vue 导航栏
+
 距离第一次迭代还需要完成
 - [ ] #查询结果界面
 - [ ] #我的团队界面
