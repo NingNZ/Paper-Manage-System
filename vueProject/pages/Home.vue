@@ -13,7 +13,9 @@
           <option>关键词</option>
         </select>
         <input type="text" placeholder="请输入查找内容" />
-        <button>搜索</button>
+        <router-link to="/search">
+          <button>搜索</button>
+        </router-link>
       </div>
     </main>
   </div>
