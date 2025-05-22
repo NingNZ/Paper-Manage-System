@@ -45,8 +45,8 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(paper, index) in papers" :key="index">
-                <td>#{{ index + 1 }}</td>
+              <tr v-for="(paper, index) in pagedPapers" :key="index">
+                <td>#{{ (currentPage - 1) * pageSize + index + 1 }}</td>
                 <td><em>{{ paper.title }}</em></td>
                 <td>{{ paper.category }}</td>
                 <td>{{ paper.uploader }}</td>
@@ -62,10 +62,14 @@
 
         <el-pagination
           background
-          layout="prev, pager, next"
-          :total="20"
-          :page-size="6"
-          style="margin-top: 10px"
+          layout="prev, pager, next, sizes, jumper"
+          :total="papers.length"
+          :page-size="pageSize"
+          :page-sizes="[5, 10, 20]"
+          :current-page="currentPage"
+          @current-change="handlePageChange"
+          @size-change="handleSizeChange"
+          class="pagination-right"
         />
       </section>
     </main>
@@ -73,7 +77,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { ElButton, ElPagination } from 'element-plus'
 import bar from '../components/bar.vue';
 
@@ -86,14 +90,28 @@ const members = [
   { id: 'uid06', name: 'Lily', role: '组员' }
 ]
 
-const papers = [
-  { title: 'Title of paper 1', category: 'AI', uploader: 'xxx' },
-  { title: 'Title of paper 2', category: 'AI', uploader: 'xxx' },
-  { title: 'Title of paper 3', category: 'AI', uploader: 'xxx' },
-  { title: 'Title of paper 4', category: 'AI', uploader: 'xxx' },
-  { title: 'Title of paper 5', category: 'AI', uploader: 'xxx' },
-  { title: 'Title of paper 6', category: 'AI', uploader: 'xxx' }
-]
+const papers = Array.from({ length: 20 }, (_, i) => ({
+  title: `Title of paper ${i + 1}`,
+  category: 'AI',
+  uploader: 'xxx'
+}))
+
+const currentPage = ref(1)
+const pageSize = ref(5)
+
+const pagedPapers = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  return papers.slice(start, start + pageSize.value)
+})
+
+function handlePageChange(val) {
+  currentPage.value = val
+}
+
+function handleSizeChange(val) {
+  pageSize.value = val
+  currentPage.value = 1
+}
 </script>
 
 <style scoped>
@@ -111,7 +129,6 @@ const papers = [
   gap: 20px;
 }
 
-/* 左侧成员表 */
 .left-table {
   width: 260px;
   background: white;
@@ -120,10 +137,12 @@ const papers = [
   max-height: 400px;
   overflow-y: auto;
 }
+
 .member-table {
   width: 100%;
   border-collapse: collapse;
 }
+
 .member-table th,
 .member-table td {
   border: 1px solid #ccc;
@@ -131,31 +150,37 @@ const papers = [
   font-size: 14px;
   text-align: center;
 }
+
 .buttons {
   display: flex;
   justify-content: space-around;
   margin-top: 10px;
 }
 
-/* 右侧内容 */
 .content {
   flex: 1;
+  display: flex;
+  flex-direction: column;
 }
+
 .breadcrumb {
   font-size: 12px;
   margin-bottom: 8px;
   color: #555;
 }
+
 .table-wrapper {
   max-height: 300px;
   overflow-y: auto;
   background: white;
   border: 1px solid #ccc;
 }
+
 .custom-table {
   width: 100%;
   border-collapse: collapse;
 }
+
 .custom-table th,
 .custom-table td {
   border: 1px solid #ccc;
@@ -163,7 +188,6 @@ const papers = [
   text-align: center;
 }
 
-/* 操作图标样式 */
 .action-icon {
   width: 20px;
   height: 20px;
@@ -171,8 +195,15 @@ const papers = [
   cursor: pointer;
   transition: transform 0.2s ease, filter 0.2s ease;
 }
+
 .action-icon:hover {
   transform: scale(1.2);
   filter: brightness(1.2);
+}
+
+/* 分页器右对齐 */
+:deep(.el-pagination) {
+  align-self: flex-end;
+  margin-top: 20px;
 }
 </style>

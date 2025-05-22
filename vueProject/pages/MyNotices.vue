@@ -3,6 +3,7 @@
   <div class="container">
     <!-- 顶部导航栏 -->
     <bar></bar>
+
     <!-- 页面主体 -->
     <main class="main-wrapper">
       <!-- 左侧菜单 -->
@@ -43,7 +44,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(item, index) in papers" :key="index">
+              <tr v-for="(item, index) in pagedPapers" :key="index">
                 <td>{{ item.title }}</td>
                 <td>{{ item.authors }}</td>
                 <td>{{ item.team }}</td>
@@ -63,10 +64,13 @@
         <el-pagination
           background
           layout="prev, pager, next, sizes, jumper"
-          :total="50"
-          :page-size="5"
+          :total="papers.length"
+          :page-size="pageSize"
+          :current-page="currentPage"
+          @current-change="handlePageChange"
+          @size-change="handleSizeChange"
           :page-sizes="[5, 10, 20]"
-          style="margin-top: 20px"
+          class="pagination-right"
         />
       </section>
     </main>
@@ -74,66 +78,54 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import bar from '../components/bar.vue';
+import { ref, computed } from 'vue'
+import bar from '../components/bar.vue'
 
 const activeSidebar = ref('待处理的通知')
-
 const setActive = (item) => {
   activeSidebar.value = item
 }
 
+const currentPage = ref(1)
+const pageSize = ref(5)
+
 const papers = [
-  {
-    title: "Hello's life",
-    authors: "Linda, Jack",
-    team: "AI科研小组",
-    journal: "IEEE",
-    date: "2025-02"
-  },
-  {
-    title: "Moore's raw",
-    authors: "Jason, Alice",
-    team: "CS科研小组",
-    journal: "IEEE",
-    date: "2025-03"
-  },
-  {
-    title: "Graph Theory",
-    authors: "Alice, Jky",
-    team: "Web小队",
-    journal: "IEEE",
-    date: "2025-03"
-  },
-  {
-    title: "Algebra",
-    authors: "Mock, Chicaco",
-    team: "机器学习研究",
-    journal: "IEEE",
-    date: "2025-04"
-  },
-  {
-    title: "Set Theory",
-    authors: "Jack",
-    team: "算法设计",
-    journal: "IEEE",
-    date: "2025-05"
-  },
-  {
-    title: "Extra Paper",
-    authors: "John Doe",
-    team: "New Lab",
-    journal: "Nature",
-    date: "2025-06"
-  },
-  {
-    title: "Another Paper",
-    authors: "Jane Doe",
-    team: "Deep Lab",
-    journal: "Science",
-    date: "2025-07"
-  }
+  { title: "Hello's life", authors: "Linda, Jack", team: "AI科研小组", journal: "IEEE", date: "2025-02" },
+  { title: "Moore's raw", authors: "Jason, Alice", team: "CS科研小组", journal: "IEEE", date: "2025-03" },
+  { title: "Graph Theory", authors: "Alice, Jky", team: "Web小队", journal: "IEEE", date: "2025-03" },
+  { title: "Algebra", authors: "Mock, Chicaco", team: "机器学习研究", journal: "IEEE", date: "2025-04" },
+  { title: "Set Theory", authors: "Jack", team: "算法设计", journal: "IEEE", date: "2025-05" },
+  { title: "Extra Paper", authors: "John Doe", team: "New Lab", journal: "Nature", date: "2025-06" },
+  { title: "Another Paper", authors: "Jane Doe", team: "Deep Lab", journal: "Science", date: "2025-07" },
+  { title: "Big Data", authors: "Zhang Wei", team: "数据科学", journal: "IEEE", date: "2025-07" },
+  { title: "Quantum Net", authors: "Li Hua", team: "量子计算", journal: "Nature", date: "2025-08" },
+  { title: "Neural Graph", authors: "Tom, Jerry", team: "AI Lab", journal: "IEEE", date: "2025-08" },
+  { title: "Knowledge Mining", authors: "Emma", team: "语义小组", journal: "ACM", date: "2025-09" },
+  { title: "Multimodal", authors: "Liu Qiang", team: "认知组", journal: "Science", date: "2025-09" },
+  { title: "GAN Vision", authors: "Sam", team: "生成网络", journal: "CVPR", date: "2025-10" },
+  { title: "Text Encoder", authors: "Jin", team: "自然语言", journal: "ACL", date: "2025-10" },
+  { title: "MLP & GNN", authors: "Chen", team: "神经网络", journal: "ICLR", date: "2025-11" },
+  { title: "Hybrid Systems", authors: "Lee", team: "控制组", journal: "CDC", date: "2025-11" },
+  { title: "Vision Transformers", authors: "Kim", team: "视觉小组", journal: "NeurIPS", date: "2025-11" },
+  { title: "Prompt Tuning", authors: "Zhao", team: "大模型组", journal: "EMNLP", date: "2025-12" },
+  { title: "Meta Learning", authors: "Wang", team: "迁移学习", journal: "AAAI", date: "2025-12" },
+  { title: "Low-rank Adaptation", authors: "Zhang", team: "LoRA", journal: "ICML", date: "2025-12" }
 ]
+
+const pagedPapers = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  const end = start + pageSize.value
+  return papers.slice(start, end)
+})
+
+const handlePageChange = (page) => {
+  currentPage.value = page
+}
+
+const handleSizeChange = (size) => {
+  pageSize.value = size
+  currentPage.value = 1
+}
 </script>
 
 <style scoped>
@@ -144,13 +136,12 @@ const papers = [
   display: flex;
   flex-direction: column;
 }
-/* 页面布局 */
+
 .main-wrapper {
   display: flex;
   flex: 1;
 }
 
-/* 左侧菜单栏 */
 .sidebar {
   width: 180px;
   background-color: #e8f4ff;
@@ -180,10 +171,12 @@ const papers = [
   font-weight: bold;
 }
 
-/* 右侧内容区 */
 .content {
   flex: 1;
   padding: 20px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
 }
 
 .breadcrumb {
@@ -192,7 +185,6 @@ const papers = [
   margin-bottom: 10px;
 }
 
-/* 表格样式 */
 .table-wrapper {
   max-height: 300px;
   overflow-y: auto;
@@ -221,4 +213,11 @@ const papers = [
   transform: scale(1.1);
   filter: brightness(1.1);
 }
+
+/* 分页器靠右 */
+:deep(.el-pagination) {
+  align-self: flex-end;
+  margin-top: 20px;
+}
 </style>
+
