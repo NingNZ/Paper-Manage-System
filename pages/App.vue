@@ -65,6 +65,15 @@ html, body {
   color: white;
   margin: 0 1rem;
   text-decoration: none;
+  padding: 12px 16px; /* 增加点击区域 */
+  border-radius: 4px; /* 添加圆角 */
+  transition: background-color 0.3s ease; /* 添加过渡动画 */
+  display: inline-block; /* 使padding生效 */
+}
+
+.menu a:hover {
+  background-color: rgba(0, 0, 0, 0.1); /* 半透明黑色叠加 */
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1); /* 可选：添加内阴影增强效果 */
 }
 
 .user-icon img {
