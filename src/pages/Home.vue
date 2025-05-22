@@ -1,17 +1,8 @@
+<!-- 主界面 -->
+
 <template>
   <div class="container">
-    <header class="navbar">
-      <div class="logo">Paper<br>Manage</div>
-      <nav class="menu">
-        <a href="https://www.baidu.com">首页</a>
-        <a href="#">我的团队</a>
-        <a href="#">我的论文</a>
-        <a href="#">我的消息</a>
-      </nav>
-      <div class="user-icon">
-        <img src="https://img.icons8.com/ios-filled/50/user-male-circle.png" alt="user" />
-      </div>
-    </header>
+    
 
     <main class="main-content">
       <div class="breadcrumb">首页&gt;</div>
@@ -45,42 +36,6 @@ html, body {
   display: flex;
   flex-direction: column;
 }
-
-.navbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background-color: #3398ff;
-  color: white;
-  padding: 0.5rem 2rem;
-}
-
-.logo {
-  font-weight: bold;
-  font-size: 1rem;
-  line-height: 1.2;
-}
-
-.menu a {
-  color: white;
-  margin: 0 1rem;
-  text-decoration: none;
-  padding: 12px 16px; /* 增加点击区域 */
-  border-radius: 4px; /* 添加圆角 */
-  transition: background-color 0.3s ease; /* 添加过渡动画 */
-  display: inline-block; /* 使padding生效 */
-}
-
-.menu a:hover {
-  background-color: rgba(0, 0, 0, 0.1); /* 半透明黑色叠加 */
-  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1); /* 可选：添加内阴影增强效果 */
-}
-
-.user-icon img {
-  width: 32px;
-  height: 32px;
-}
-
 .main-content {
   flex: 1;
   text-align: center;

@@ -1,22 +1,11 @@
+<!-- 我的消息界面 -->
+<script setup>
+  import bar from '../components/bar.vue'; //导入导航栏
+</script>
 <template>
   <div class="container">
     <!-- 顶部导航栏 -->
-    <header class="navbar">
-      <div class="logo">
-        <img src="../assets/logo.svg" alt="logo" class="logo-icon" />
-        <span>Paper<br>Manage</span>
-      </div>
-      <nav class="menu">
-        <a href="#">首页</a>
-        <a href="#">我的团队</a>
-        <a href="#">我的论文</a>
-        <a href="#">我的消息</a>
-      </nav>
-      <div class="user-icon">
-        <img src="https://img.icons8.com/ios-filled/50/user-male-circle.png" alt="user" />
-      </div>
-    </header>
-
+    <bar></bar>  //直接使用导航栏
     <!-- 页面主体 -->
     <main class="main-wrapper">
       <!-- 左侧菜单 -->
@@ -157,52 +146,6 @@ const papers = [
   display: flex;
   flex-direction: column;
 }
-
-/* 顶部导航 */
-.navbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background-color: #3398ff;
-  color: white;
-  padding: 0.5rem 2rem;
-}
-
-.logo {
-  font-weight: bold;
-  font-size: 1rem;
-  line-height: 1.2;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.logo-icon {
-  width: 32px;
-  height: 32px;
-  color: #FFFFFF;
-}
-
-.menu a {
-  color: white;
-  margin: 0 1rem;
-  text-decoration: none;
-  padding: 12px 16px;
-  border-radius: 4px;
-  transition: background 0.3s ease, transform 0.2s ease;
-  display: inline-block;
-}
-
-.menu a:hover {
-  background: linear-gradient(45deg, #6fb1fc, #1c92f2);
-  transform: scale(1.05);
-}
-
-.user-icon img {
-  width: 40px;
-  height: 40px;
-}
-
 /* 页面布局 */
 .main-wrapper {
   display: flex;
