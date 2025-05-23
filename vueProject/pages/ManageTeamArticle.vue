@@ -2,6 +2,7 @@
   <div class="container">
     <!-- 顶部导航栏 -->
     <bar></bar>
+
     <!-- 页面主体 -->
     <main class="main-wrapper">
       <!-- 左侧表格 -->
@@ -24,8 +25,8 @@
           </tbody>
         </table>
         <div class="buttons">
-          <el-button type="primary" size="small">邀请成员</el-button>
-          <el-button type="info" size="small">管理分类</el-button>
+          <el-button type="primary" size="small" @click="openInviteDialog">邀请成员</el-button>
+          <el-button type="info" size="small" @click="showCategoryManager = true">管理分类</el-button>
         </div>
       </aside>
 
@@ -73,13 +74,35 @@
         />
       </section>
     </main>
+
+    <!-- 管理分类弹窗 -->
+    <el-dialog
+      v-model="showCategoryManager"
+      title="管理分类"
+      width="600px"
+      destroy-on-close
+      :close-on-click-modal="false"
+    >
+      <CategoryManager />
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="showCategoryManager = false">取消</el-button>
+          <el-button type="primary" @click="showCategoryManager = false">确认</el-button>
+        </span>
+      </template>
+    </el-dialog>
+
+    <!-- 邀请成员弹窗 -->
+    <InviteMemberDialog ref="inviteDialogRef" />
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
-import { ElButton, ElPagination } from 'element-plus'
-import bar from '../components/bar.vue';
+import { ElButton, ElPagination, ElDialog } from 'element-plus'
+import bar from '../components/bar.vue'
+import CategoryManager from '../components/CategoryManagerDialog.vue'
+import InviteMemberDialog from '../components/InviteMemberDialog.vue'
 
 const members = [
   { id: 'uid01', name: 'Anda', role: '组长' },
@@ -98,6 +121,8 @@ const papers = Array.from({ length: 20 }, (_, i) => ({
 
 const currentPage = ref(1)
 const pageSize = ref(5)
+const showCategoryManager = ref(false)
+const inviteDialogRef = ref(null)
 
 const pagedPapers = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value
@@ -111,6 +136,10 @@ function handlePageChange(val) {
 function handleSizeChange(val) {
   pageSize.value = val
   currentPage.value = 1
+}
+
+function openInviteDialog() {
+  inviteDialogRef.value.openDialog()
 }
 </script>
 
@@ -201,7 +230,6 @@ function handleSizeChange(val) {
   filter: brightness(1.2);
 }
 
-/* 分页器右对齐 */
 :deep(.el-pagination) {
   align-self: flex-end;
   margin-top: 20px;

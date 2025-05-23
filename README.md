@@ -31,6 +31,10 @@ pages中当前已经存入的界面有
 
 components中存放封装好的vue组件
 - bar.vue 导航栏
+- CategoryManagerDialog.vue 点击“管理分类”的弹窗
+- CreateTeamDialog.vue 创建团队弹窗
+- InviteMemberDialog.vue 邀请成员弹窗
+- JoinTeamDialog.vue 申请加入团队弹窗
 
 距离第一次迭代还需要完成
 - [x] #查询结果界面

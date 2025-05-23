@@ -1,7 +1,9 @@
-<!-- MainPage.vue -->
 <script setup>
 import bar from "../components/bar.vue";
+import CreateTeamDialog from "../components/CreateTeamDialog.vue";
+import JoinTeamDialog from "../components/JoinTeamDialog.vue";
 import { ref } from 'vue';
+import { ElMessage } from 'element-plus';
 
 const tableData = ref([
   { name: 'AI科研小组', number: '#01', leader: 'Linda' },
@@ -11,8 +13,29 @@ const tableData = ref([
   { name: '算法设计', number: '#05', leader: 'Jack' },
 ]);
 
+const joinableTeams = ref([
+  { name: 'AI科研小组', number: '#01', leader: 'Linda' },
+  { name: 'AI算法', number: '#06', leader: 'Jily' },
+  { name: 'AI避障', number: '#07', leader: 'Bob' },
+  { name: 'AI机器人', number: '#08', leader: 'Duck' },
+  { name: 'AI小助手', number: '#09', leader: 'Domb' },
+]);
+
 const currentPage = ref(1);
 const pageSize = ref(5);
+
+const showCreateDialog = ref(false);
+const showJoinDialog = ref(false);
+
+function handleCreateTeam(name) {
+  const newTeam = {
+    name,
+    number: `#${String(tableData.value.length + 1).padStart(2, '0')}`,
+    leader: '未指定',
+  };
+  tableData.value.push(newTeam);
+  ElMessage.success(`团队 "${name}" 创建成功`);
+}
 </script>
 
 <template>
@@ -30,21 +53,18 @@ const pageSize = ref(5);
           <el-table-column prop="leader" label="团队组长" width="180" />
           <el-table-column label="操作">
             <template #default>
-                <router-link to="/other">
-                    <el-button type="primary" size="small" class="action-btn">进入</el-button>
-                </router-link>
-                
-                <el-button type="danger" size="small" class="action-btn">退出</el-button>
-                
-              
+              <router-link to="/other">
+                <el-button type="primary" size="small" class="action-btn">进入</el-button>
+              </router-link>
+              <el-button type="danger" size="small" class="action-btn">退出</el-button>
             </template>
           </el-table-column>
         </el-table>
       </div>
 
       <div class="actions">
-        <el-button type="success" class="action-btn">创建团队</el-button>
-        <el-button type="info" class="action-btn">申请加入团队</el-button>
+        <el-button type="success" class="action-btn" @click="showCreateDialog = true">创建团队</el-button>
+        <el-button type="info" class="action-btn" @click="showJoinDialog = true">申请加入团队</el-button>
       </div>
 
       <div class="pagination">
@@ -58,6 +78,10 @@ const pageSize = ref(5);
         />
       </div>
     </main>
+
+    <!-- 弹窗组件 -->
+    <CreateTeamDialog v-model="showCreateDialog" @create="handleCreateTeam" />
+    <JoinTeamDialog v-model="showJoinDialog" :teams="joinableTeams" />
   </div>
 </template>
 
@@ -96,7 +120,6 @@ const pageSize = ref(5);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-/* 按钮 hover 效果 */
 .action-btn {
   transition: all 0.3s ease;
   margin: 0 5px;
