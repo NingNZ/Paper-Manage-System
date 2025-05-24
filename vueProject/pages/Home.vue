@@ -11,7 +11,7 @@
   .then(response => {
     // 处理返回数据
     console.log("enter")
-    console.log(response.data)
+    console.log(response.data.msg)
   })
   .catch(error => {
     // 处理错误
