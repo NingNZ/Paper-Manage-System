@@ -31,18 +31,17 @@ pages中当前已经存入的界面有
 
 components中存放封装好的vue组件
 - bar.vue 导航栏
-- CategoryManagerDialog.vue 点击“管理分类”的弹窗
-- CreateTeamDialog.vue 创建团队弹窗
-- InviteMemberDialog.vue 邀请成员弹窗
-- JoinTeamDialog.vue 申请加入团队弹窗
-
-距离第一次迭代还需要完成
-- [x] #查询结果界面
-- [x] #我的团队界面
+- MangeTeamArticle
+    - CategoryManagerDialog.vue 点击“管理分类”的弹窗
+    - InviteMemberDialog.vue 邀请成员弹窗
+- MyTeam
+    - CreateTeamDialog.vue 创建团队弹窗
+    - JoinTeamDialog.vue 申请加入团队弹窗
+    - LeaveConfirmDialog.vue 
 
 将vueProject文件夹当作一个vue项目，先npm install,再npm run dev运行
 ```
 注意：
 1. 在进行开发前最好先git pull查看当前项目的进展。减少后续提交时的冲突。
-2. 我更新了.gitignore文件，它忽略了vueProject/node_modules/路径下的任何修改。
+2. 我添加了Home.vue左上角的路径，并把css文件放在了style目录下，这个css文件在index.html中已经作用于全局，因此只需要在界面中添加<a>即可
 ```
