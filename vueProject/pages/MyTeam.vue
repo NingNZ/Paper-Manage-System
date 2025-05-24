@@ -2,6 +2,7 @@
 import bar from "../components/bar.vue";
 import CreateTeamDialog from "../components/MyTeam/CreateTeamDialog.vue";
 import JoinTeamDialog from "../components/MyTeam/JoinTeamDialog.vue";
+import LeaveConfirmDialog from "../components/MyTeam/LeaveConfirmDialog.vue";
 import { ref, computed } from 'vue';
 import { ElMessage } from 'element-plus';
 
@@ -26,7 +27,6 @@ const joinableTeams = ref([
 const currentPage = ref(1);
 const pageSize = ref(5);
 
-// 计算分页后的数据
 const pagedTableData = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value;
   const end = start + pageSize.value;
@@ -44,6 +44,22 @@ const handleSizeChange = (size) => {
 
 const showCreateDialog = ref(false);
 const showJoinDialog = ref(false);
+const leaveDialogVisible = ref(false);
+const teamToLeave = ref(null);
+
+const confirmLeave = () => {
+  const index = fullTableData.value.findIndex(t => t.name === teamToLeave.value.name);
+  if (index !== -1) {
+    fullTableData.value.splice(index, 1);
+    ElMessage.success(`已退出团队 "${teamToLeave.value.name}"`);
+  }
+  leaveDialogVisible.value = false;
+};
+
+const openLeaveDialog = (team) => {
+  teamToLeave.value = team;
+  leaveDialogVisible.value = true;
+};
 
 function handleCreateTeam(name) {
   const newTeam = {
@@ -70,11 +86,11 @@ function handleCreateTeam(name) {
           <el-table-column prop="number" label="团队编号" width="180" />
           <el-table-column prop="leader" label="团队组长" width="180" />
           <el-table-column label="操作">
-            <template #default>
+            <template #default="scope">
               <router-link to="/other">
                 <el-button type="primary" size="small" class="action-btn">进入</el-button>
               </router-link>
-              <el-button type="danger" size="small" class="action-btn">退出</el-button>
+              <el-button type="danger" size="small" class="action-btn" @click="openLeaveDialog(scope.row)">退出</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -102,34 +118,36 @@ function handleCreateTeam(name) {
     <!-- 弹窗组件 -->
     <CreateTeamDialog v-model="showCreateDialog" @create="handleCreateTeam" />
     <JoinTeamDialog v-model="showJoinDialog" :teams="joinableTeams" />
+    <LeaveConfirmDialog
+      v-model:visible="leaveDialogVisible"
+      :team-name="teamToLeave?.name"
+      @confirm="confirmLeave"
+    />
   </div>
 </template>
 
 <style scoped>
+/* 同你原来的样式，未改动 */
 .container {
   min-height: 100vh;
   background-color: #f4f4f4;
   display: flex;
   flex-direction: column;
 }
-
 .main-content {
   flex: 1;
   padding: 40px 80px;
 }
-
 .breadcrumb {
   font-size: 12px;
   color: #888;
   margin-bottom: 20px;
 }
-
 .title {
   font-size: 32px;
   color: #333;
   margin-bottom: 30px;
 }
-
 .table-wrapper {
   overflow-y: auto;
   margin-bottom: 20px;
@@ -138,34 +156,28 @@ function handleCreateTeam(name) {
   padding: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
-
 .action-btn {
   transition: all 0.3s ease;
   margin: 0 5px;
 }
-
 .action-btn:hover {
   filter: brightness(1.1);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
-
 .actions {
   margin: 20px 0;
   display: flex;
   gap: 20px;
   justify-content: center;
 }
-
 .pagination {
   display: flex;
   justify-content: flex-end;
   margin-top: 10px;
   padding-right: 20px;
 }
-
 :deep(.el-pagination) {
   align-self: flex-end;
   margin-top: 20px;
 }
 </style>
-

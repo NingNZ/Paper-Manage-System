@@ -8,12 +8,12 @@
     >
       <template #default="{ node, data }">
         <span class="tree-node">
-          <img src="../assets/文件夹.svg" class="folder-icon" />
+          <img src="../../assets/文件夹.svg" class="folder-icon" />
           <span>{{ data.label }}</span>
           <span class="tree-actions">
-            <img class="action-icon" src="../assets/new.svg" alt="添加" />
-            <img class="action-icon" src="../assets/edit.svg" alt="编辑" />
-            <img class="action-icon" src="../assets/delete.svg" alt="删除" />
+            <img class="action-icon" src="../../assets/new.svg" alt="添加" />
+            <img class="action-icon" src="../../assets/edit.svg" alt="编辑" />
+            <img class="action-icon" src="../../assets/delete.svg" alt="删除" />
           </span>
         </span>
       </template>
