@@ -2,20 +2,23 @@
 <script setup>
   import bar from "../components/bar.vue";
 </script>
+
 <template>
   <div class="container">
     <bar></bar>
     <main class="main-content">
       <div class="breadcrumb">首页&gt;</div>
-      <h1 class="title">Milk&nbsp;&nbsp;Dragon</h1>
-      <div class="search-bar">
-        <select>
-          <option>关键词</option>
-        </select>
-        <input type="text" placeholder="请输入查找内容" />
-        <router-link to="/search">
-          <button>搜索</button>
-        </router-link>
+      <div class="center-box">
+        <h1 class="title">Milk&nbsp;&nbsp;Dragon</h1>
+        <div class="search-bar">
+          <select>
+            <option>关键词</option>
+          </select>
+          <input type="text" placeholder="请输入查找内容" />
+          <router-link to="/search">
+            <button>搜索</button>
+          </router-link>
+        </div>
       </div>
     </main>
   </div>
@@ -31,7 +34,6 @@ html, body {
 }
 </style>
 
-
 <style scoped>
 .container {
   min-height: 100vh;
@@ -39,40 +41,55 @@ html, body {
   display: flex;
   flex-direction: column;
 }
+
 .main-content {
   flex: 1;
-  text-align: center;
-  padding-top: 50px;  /* 关键修改：margin-top改为padding-top */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 50px;
 }
 
 .breadcrumb {
+  width: 100%;
+  max-width: 1200px;
   text-align: left;
-  margin-left: 50px;
   font-size: 12px;
   color: #888;
+  margin-bottom: 20px;
+}
+
+.center-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: scale(1.15); /* 稍微放大一点点 */
 }
 
 .title {
-  font-size: 48px;
+  font-size: 52px; /* 比之前略大 */
   font-family: "Georgia", serif;
   color: #ccc;
-  margin: 30px 0;
+  margin: 36px 0;
 }
 
 .search-bar {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 5px;
+  gap: 10px;
+  margin-top: 10px;
 }
 
 .search-bar select {
-  padding: 6px 10px;
+  padding: 7px 11px;
+  font-size: 16px;
 }
 
 .search-bar input {
-  width: 300px;
-  padding: 6px 12px;
+  width: 340px; /* 略微增大 */
+  padding: 7px 13px;
+  font-size: 16px;
   border: 1px solid #ccc;
   border-radius: 20px 0 0 20px;
   outline: none;
@@ -82,9 +99,9 @@ html, body {
   background-color: #3398ff;
   color: white;
   border: none;
-  padding: 6px 15px;
+  padding: 7px 17px;
+  font-size: 16px;
   border-radius: 0 20px 20px 0;
   cursor: pointer;
 }
 </style>
-
