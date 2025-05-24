@@ -2,15 +2,17 @@
 import bar from "../components/bar.vue";
 import CreateTeamDialog from "../MyTeam/CreateTeamDialog.vue";
 import JoinTeamDialog from "../MyTeam/JoinTeamDialog.vue";
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { ElMessage } from 'element-plus';
 
-const tableData = ref([
+// 全部团队数据
+const fullTableData = ref([
   { name: 'AI科研小组', number: '#01', leader: 'Linda' },
   { name: 'CS科研小组', number: '#02', leader: 'Jason' },
   { name: 'Web小队', number: '#03', leader: 'Alice' },
   { name: '机器人研究', number: '#04', leader: 'Mock' },
   { name: '算法设计', number: '#05', leader: 'Jack' },
+  { name: 'AI算法', number: '#06', leader: 'Jily' },
 ]);
 
 const joinableTeams = ref([
@@ -24,16 +26,32 @@ const joinableTeams = ref([
 const currentPage = ref(1);
 const pageSize = ref(5);
 
+// 计算分页后的数据
+const pagedTableData = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value;
+  const end = start + pageSize.value;
+  return fullTableData.value.slice(start, end);
+});
+
+const handlePageChange = (page) => {
+  currentPage.value = page;
+};
+
+const handleSizeChange = (size) => {
+  pageSize.value = size;
+  currentPage.value = 1;
+};
+
 const showCreateDialog = ref(false);
 const showJoinDialog = ref(false);
 
 function handleCreateTeam(name) {
   const newTeam = {
     name,
-    number: `#${String(tableData.value.length + 1).padStart(2, '0')}`,
+    number: `#${String(fullTableData.value.length + 1).padStart(2, '0')}`,
     leader: '未指定',
   };
-  tableData.value.push(newTeam);
+  fullTableData.value.push(newTeam);
   ElMessage.success(`团队 "${name}" 创建成功`);
 }
 </script>
@@ -47,7 +65,7 @@ function handleCreateTeam(name) {
       <h1 class="title">我的团队</h1>
 
       <div class="table-wrapper">
-        <el-table :data="tableData" height="250" style="width: 100%;">
+        <el-table :data="pagedTableData" style="width: 100%;" max-height="400">
           <el-table-column prop="name" label="团队名" width="180" />
           <el-table-column prop="number" label="团队编号" width="180" />
           <el-table-column prop="leader" label="团队组长" width="180" />
@@ -71,10 +89,12 @@ function handleCreateTeam(name) {
         <el-pagination
           background
           layout="prev, pager, next, sizes, jumper"
-          :total="15"
+          :total="fullTableData.length"
           :page-size="pageSize"
           :current-page="currentPage"
-          @current-change="(val) => currentPage = val"
+          :page-sizes="[5, 10, 20]"
+          @current-change="handlePageChange"
+          @size-change="handleSizeChange"
         />
       </div>
     </main>
@@ -111,7 +131,6 @@ function handleCreateTeam(name) {
 }
 
 .table-wrapper {
-  max-height: 260px;
   overflow-y: auto;
   margin-bottom: 20px;
   border-radius: 8px;
@@ -139,7 +158,14 @@ function handleCreateTeam(name) {
 
 .pagination {
   display: flex;
-  justify-content: center;
+  justify-content: flex-end;
   margin-top: 10px;
+  padding-right: 20px;
+}
+
+:deep(.el-pagination) {
+  align-self: flex-end;
+  margin-top: 20px;
 }
 </style>
+
