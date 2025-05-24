@@ -101,8 +101,8 @@
 import { ref, computed } from 'vue'
 import { ElButton, ElPagination, ElDialog } from 'element-plus'
 import bar from '../components/bar.vue'
-import CategoryManager from '../components/CategoryManagerDialog.vue'
-import InviteMemberDialog from '../components/InviteMemberDialog.vue'
+import CategoryManager from '../ManageTeamArticle/CategoryManagerDialog.vue'
+import InviteMemberDialog from '../ManageTeamArticle/InviteMemberDialog.vue'
 
 const members = [
   { id: 'uid01', name: 'Anda', role: '组长' },
