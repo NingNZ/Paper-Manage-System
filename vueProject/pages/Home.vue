@@ -1,6 +1,22 @@
 <!-- 主界面 -->
 <script setup>
   import bar from "../components/bar.vue";
+  import axios from 'axios'
+  const search = ()=>{
+  axios.get('http://localhost:5123/solve/hello', {
+    params: {
+      keyword: 'hello'
+    }
+  })
+  .then(response => {
+    // 处理返回数据
+    console.log(response.data)
+  })
+  .catch(error => {
+    // 处理错误
+    console.error(error)
+  })
+  }
 </script>
 
 <template>
@@ -16,7 +32,7 @@
           </select>
           <input type="text" placeholder="请输入查找内容" />
           <router-link to="/search">
-            <button>搜索</button>
+            <button @click="search">搜索</button>
           </router-link>
         </div>
       </div>

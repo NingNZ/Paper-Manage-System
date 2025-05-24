@@ -1,7 +1,7 @@
 <script setup>
 import bar from "../components/bar.vue";
-import CreateTeamDialog from "../MyTeam/CreateTeamDialog.vue";
-import JoinTeamDialog from "../MyTeam/JoinTeamDialog.vue";
+import CreateTeamDialog from "../components/MyTeam/CreateTeamDialog.vue";
+import JoinTeamDialog from "../components/MyTeam/JoinTeamDialog.vue";
 import { ref, computed } from 'vue';
 import { ElMessage } from 'element-plus';
 
