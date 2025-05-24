@@ -5,15 +5,17 @@
   const search = ()=>{
   axios.get('http://localhost:5123/solve/hello', {
     params: {
-      keyword: 'hello'
+      param: 'world'
     }
   })
   .then(response => {
     // 处理返回数据
+    console.log("enter")
     console.log(response.data)
   })
   .catch(error => {
     // 处理错误
+    console.log("faile")
     console.error(error)
   })
   }
@@ -22,8 +24,8 @@
 <template>
   <div class="container">
     <bar></bar>
+    <div class="breadcrumb"><a href="/">首页</a>&gt;</div>
     <main class="main-content">
-      <div class="breadcrumb">首页&gt;</div>
       <div class="center-box">
         <h1 class="title">Milk&nbsp;&nbsp;Dragon</h1>
         <div class="search-bar">
@@ -65,16 +67,6 @@ html, body {
   align-items: center;
   padding-top: 50px;
 }
-
-.breadcrumb {
-  width: 100%;
-  max-width: 1200px;
-  text-align: left;
-  font-size: 12px;
-  color: #888;
-  margin-bottom: 20px;
-}
-
 .center-box {
   display: flex;
   flex-direction: column;
