@@ -1,5 +1,34 @@
 <script setup>
 import bar from "../components/bar.vue";
+import { ref, computed } from 'vue';
+
+// 模拟全部论文数据
+const allData = ref(Array.from({ length: 100 }, (_, i) => ({
+  id: i + 1,
+  title: `Short title ${i + 1}`,
+  author: 'Author A',
+  time: '2025-03',
+  journal: 'IEEE'
+})))
+
+const currentPage = ref(1)
+const pageSize = ref(10)
+const total = ref(allData.value.length)
+
+const handlePageChange = (page) => {
+  currentPage.value = page
+}
+
+const handleSizeChange = (size) => {
+  pageSize.value = size
+  currentPage.value = 1 // 切换每页条数时回到第一页
+}
+
+// 当前页展示的数据
+const paginatedData = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  return allData.value.slice(start, start + pageSize.value)
+})
 </script>
 
 <template>
@@ -33,12 +62,12 @@ import bar from "../components/bar.vue";
             </tr>
           </thead>
           <tbody>
-            <tr v-for="i in 10" :key="i">
-              <td>#{{ i }}</td>
-              <td><i>Short title {{ i }}</i></td>
-              <td><span style="color: #666;">Author A</span></td>
-              <td>2025-03</td>
-              <td><b>IEEE</b></td>
+            <tr v-for="item in paginatedData" :key="item.id">
+              <td>#{{ item.id }}</td>
+              <td><i>{{ item.title }}</i></td>
+              <td><span style="color: #666;">{{ item.author }}</span></td>
+              <td>{{ item.time }}</td>
+              <td><b>{{ item.journal }}</b></td>
               <td>
                 <img src="../assets/download.svg" alt="下载" title="下载" class="icon-action" />
                 &nbsp;
@@ -53,13 +82,16 @@ import bar from "../components/bar.vue";
 
       <!-- 分页器 -->
       <div class="pagination">
-        <span>每页显示 <b>10</b> 条记录</span>
-        <div class="pages">
-          <button>1</button>
-          <button>2</button>
-          <button>3</button>
-          <button>4</button>
-        </div>
+        <el-pagination
+          background
+          layout="prev, pager, next, sizes, jumper"
+          :total="total"
+          :page-size="pageSize"
+          :current-page="currentPage"
+          :page-sizes="[10, 20, 50]"
+          @current-change="handlePageChange"
+          @size-change="handleSizeChange"
+        />
       </div>
     </main>
   </div>
@@ -85,7 +117,7 @@ html, body {
 .main-content {
   flex: 1;
   text-align: center;
-  padding-top: 10px; /* 向上移动页面内容，原为20px */
+  padding-top: 10px;
 }
 
 .breadcrumb {
@@ -96,17 +128,15 @@ html, body {
   margin-bottom: 10px;
 }
 
-/* 搜索外层容器 */
 .search-wrapper {
   height: 80px;
   display: flex;
   justify-content: center;
   align-items: center;
   margin-bottom: 10px;
-  margin-top: -10px; /* 向上微调搜索框位置 */
+  margin-top: -10px;
 }
 
-/* 搜索栏 */
 .search-bar {
   display: flex;
   align-items: center;
@@ -137,7 +167,6 @@ html, body {
   font-weight: bold;
 }
 
-/* 表格容器 */
 .table-container {
   width: 90%;
   max-width: 1000px;
@@ -149,7 +178,6 @@ html, body {
   border-radius: 6px;
 }
 
-/* 表格样式 */
 table {
   width: 100%;
   border-collapse: collapse;
@@ -171,7 +199,6 @@ th, td {
   vertical-align: middle;
 }
 
-/* 图标大小和交互效果 */
 .icon-action {
   height: 1em;
   cursor: pointer;
@@ -187,25 +214,36 @@ th, td {
 .pagination {
   width: 90%;
   max-width: 1000px;
-  margin: 10px auto;
+  margin: 20px auto;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 14px;
+  justify-content: flex-end;
 }
 
-.pages button {
-  margin: 0 3px;
-  padding: 5px 10px;
-  border: 1px solid #3398ff;
-  background-color: white;
-  color: #3398ff;
+:deep(.el-pagination) {
+  background: #f4f4f4; /* 与 .container 背景色一致 */
+  padding: 12px 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+:deep(.el-pagination.is-background .btn-prev),
+:deep(.el-pagination.is-background .btn-next),
+:deep(.el-pagination.is-background .el-pager li) {
+  border: 1px solid #ddd;
   border-radius: 4px;
-  cursor: pointer;
 }
 
-.pages button:hover {
+:deep(.el-pagination.is-background .el-pager li:not(.is-disabled).is-active) {
   background-color: #3398ff;
   color: white;
+}
+
+:deep(.el-pagination) {
+  align-self: flex-end;
+  margin-top: 20px;
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  padding: 0 !important;
 }
 </style>
