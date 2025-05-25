@@ -75,9 +75,9 @@ function handleCreateTeam(name) {
 <template>
   <div class="container">
     <bar />
-
+    <div class="breadcrumb"><a href="/">首页</a>&gt;<a href="/myteam">我的团队</a></div>
     <main class="main-content">
-      <div class="breadcrumb">首页&gt;我的团队</div>
+      
       <h1 class="title">我的团队</h1>
 
       <div class="table-wrapper">

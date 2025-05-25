@@ -32,7 +32,7 @@
 
       <!-- 右侧内容 -->
       <section class="content">
-        <div class="breadcrumb">首页 &gt; 我的团队 &gt; 团队xxx</div>
+        <div class="breadcrumb"><a href="/">首页</a> &gt; <a href="/myteam">我的团队</a> &gt; <a href="/other">团队xxx</a></div>
 
         <div class="table-wrapper">
           <table class="custom-table">
