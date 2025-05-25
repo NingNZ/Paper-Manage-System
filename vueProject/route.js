@@ -18,4 +18,13 @@ const router = createRouter({
     history:createWebHistory(),
     routes,
 })
+
+router.beforeEach((to,from,next)=>{
+    if(to.path==='/search'){
+        if(from.path ==='/') next()
+        else if(from.path ==='/search') next()
+        else next('/')
+    }
+    else next()
+})
 export default router
