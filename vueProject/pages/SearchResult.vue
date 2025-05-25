@@ -6,7 +6,7 @@ import { useRoute } from "vue-router";
 // 模拟全部论文数据
 const allData = ref([]);
 var isSearch = localStorage.getItem('isSearch')
-if(isSearch){
+if(true){
   const data = JSON.parse(localStorage.getItem('searchData'))
   console.log(data)
   isSearch = false

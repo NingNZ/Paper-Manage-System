@@ -28,8 +28,7 @@
 
       <!-- 右侧内容 -->
       <section class="content">
-        <div class="breadcrumb">首页 &gt; 我的消息 &gt; {{ activeSidebar }}</div>
-
+        <div class="breadcrumb" style="padding-bottom: 1%;"><a href="/">首页</a>&gt; <a href="/notice">我的消息</a> &gt; {{ activeSidebar }}</div>
         <!-- 表格容器，添加滚动条 -->
         <div class="table-wrapper">
           <table class="custom-table">
@@ -174,17 +173,11 @@ const handleSizeChange = (size) => {
 .content {
   flex: 1;
   padding: 20px;
+  padding-top: 0;
   display: flex;
   flex-direction: column;
   position: relative;
 }
-
-.breadcrumb {
-  font-size: 12px;
-  color: #666;
-  margin-bottom: 10px;
-}
-
 .table-wrapper {
   max-height: 300px;
   overflow-y: auto;

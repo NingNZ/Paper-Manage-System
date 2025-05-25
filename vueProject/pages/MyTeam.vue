@@ -138,11 +138,6 @@ function handleCreateTeam(name) {
   flex: 1;
   padding: 40px 80px;
 }
-.breadcrumb {
-  font-size: 12px;
-  color: #888;
-  margin-bottom: 20px;
-}
 .title {
   font-size: 32px;
   color: #333;
