@@ -4,25 +4,6 @@
   import axios from 'axios'
   import { useRouter } from "vue-router";
   const route = useRouter()
-  const search = ()=>{
-  axios.get('http://localhost:5123/search', {
-    params: {
-      param: 'world'
-    }
-  })
-  .then(response => {
-    // 处理返回数据
-    console.log("enter")
-    localStorage.setItem('searchData', JSON.stringify(response.data))
-    localStorage.setItem('isSearch',true)
-    route.push('/search')
-  })
-  .catch(error => {
-    // 处理错误
-    console.log("faile")
-    console.error(error)
-  })
-  }
 </script>
 
 <template>
