@@ -5,21 +5,6 @@ import { ref, computed } from 'vue';
 import { useRoute } from "vue-router";
 // 模拟全部论文数据
 const allData = ref([]);
-var isSearch = localStorage.getItem('isSearch')
-if(true){
-  const data = JSON.parse(localStorage.getItem('searchData'))
-  console.log(data)
-  isSearch = false
-  console.log(data[0])
-  allData.value = Array.from({length:data.length},(_,i)=>({
-    id: i+1,
-    title:data[i].title,
-    author:data[i].authors,
-    time:data[i].time,
-    journal:data[i].journal
-  }));
-}
-
 const currentPage = ref(1)
 const pageSize = ref(10)
 const total = ref(allData.value.length)
