@@ -4,6 +4,7 @@ import UploadDialog from "../components/UploadTest/UploadTestDialog.vue";
 import { ref, computed } from 'vue';
 import { useRoute } from "vue-router";
 // 模拟全部论文数据
+localStorage.setItem('isSearch',true)
 const allData = ref([]);
 const currentPage = ref(1)
 const pageSize = ref(10)

@@ -19,17 +19,14 @@ const router = createRouter({
     routes,
 })
 
-// router.beforeEach((to,from,next)=>{
-//     if(to.path ==='/search'){    
-//         if(from.path==='/search') next()
-//         else{
-//             const isSearch = localStorage.getItem('isSearch')
-//             if(isSearch) {
-//                 next()
-//                 localStorage.removeItem('isSearch')
-//             }else next('/')
-//         }    
-//     }
-//     else next()
-// })
+router.beforeEach((to,from,next)=>{
+    if(to.path ==='/search'){    
+        const isSearch = localStorage.getItem('isSearch')
+        if(isSearch) {
+            next()
+            localStorage.removeItem('isSearch')
+        }else next('/') 
+    }
+    else next()
+})
 export default router
