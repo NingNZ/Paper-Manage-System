@@ -32,9 +32,10 @@ const handlePageChange = (page) => {
 
 const handleSizeChange = (size) => {
   pageSize.value = size
-  currentPage.value = 1
+  currentPage.value = 1 // 切换每页条数时回到第一页
 }
 
+// 当前页展示的数据
 const paginatedData = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value
   return allData.value.slice(start, start + pageSize.value)
@@ -46,15 +47,12 @@ const showUploadDialog = ref(false)
 
 <template>
   <div class="container">
-    <bar />
-    <!-- 顶部左侧首页 + 上传按钮 -->
+    <bar /><!-- 顶部左侧首页 + 上传按钮 -->
       
-        <div class="breadcrumb"><a href="/">首页</a>&gt;<a href="/search">查询结果</a></div>
-       <div class="upload-button-wrapper" style="margin-left: 20px;">
+    <div class="breadcrumb"><a href="/">首页</a>&gt;<a href="/search">查询结果</a></div>
+    <div class="upload-button-wrapper" style="margin-left: 20px;">
   <button class="upload-btn" @click="showUploadDialog = true">上传论文</button>
 </div>
-
-      
     <main class="main-content">
       
 
@@ -74,7 +72,7 @@ const showUploadDialog = ref(false)
         <table>
           <thead>
             <tr>
-              <th>#</th>
+              <th>序号</th>
               <th>论文标题</th>
               <th>作者</th>
               <th>时间</th>
@@ -83,7 +81,11 @@ const showUploadDialog = ref(false)
             </tr>
           </thead>
           <tbody>
-            <tr v-for="item in paginatedData" :key="item.id">
+            <tr
+            v-for="(item, index) in paginatedData"
+            :key="item.id"
+            :class="index % 2 === 0 ? 'even-row' : 'odd-row'"
+            >
               <td>#{{ item.id }}</td>
               <td><i>{{ item.title }}</i></td>
               <td><span style="color: #666;">{{ item.author }}</span></td>
@@ -131,6 +133,19 @@ html, body {
 </style>
 
 <style scoped>
+.result-item {
+  padding: 16px;
+  border-bottom: 1px solid #ddd;
+}
+.even-row {
+  background-color: #ffffff;
+}
+.odd-row {
+  background-color: #f5f5f5;
+}
+.result-item:hover {
+  background-color: #e0f7fa;
+}
 .container {
   min-height: 100vh;
   background-color: #f4f4f4;
@@ -144,19 +159,11 @@ html, body {
   padding-top: 10px;
 }
 
-/* 顶部左侧“首页”和上传按钮整体区域 */
-.top-left-section {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  margin-left: 50px;
-  margin-bottom: 10px;
-}
-
-/* “首页”文字 */
 .breadcrumb {
+
   font-size: 12px;
   color: #888;
+
 }
 
 /* 上传按钮容器 */
@@ -236,6 +243,14 @@ thead {
   background-color: #f0f0f0;
 }
 
+th {
+  position: sticky;
+  top: 0;
+  background-color: #f0f0f0;
+  z-index: 2; /* 确保不被遮挡 */
+}
+
+
 th, td {
   height: 40px;
   padding: 0 10px;
@@ -257,6 +272,7 @@ th, td {
   filter: brightness(1.2);
 }
 
+/* 分页器样式 */
 .pagination {
   width: 90%;
   max-width: 1000px;
@@ -266,7 +282,7 @@ th, td {
 }
 
 :deep(.el-pagination) {
-  background: #f4f4f4;
+  background: #f4f4f4; /* 与 .container 背景色一致 */
   padding: 12px 20px;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
