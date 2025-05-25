@@ -1,24 +1,15 @@
 <script setup>
 import bar from "../components/bar.vue";
-import UploadDialog from "../components/UploadTest/UploadTestDialog.vue";
 import { ref, computed } from 'vue';
-import { useRoute } from "vue-router";
+
 // 模拟全部论文数据
-const allData = ref([]);
-var isSearch = localStorage.getItem('isSearch')
-if(true){
-  const data = JSON.parse(localStorage.getItem('searchData'))
-  console.log(data)
-  isSearch = false
-  console.log(data[0])
-  allData.value = Array.from({length:data.length},(_,i)=>({
-    id: i+1,
-    title:data[i].title,
-    author:data[i].authors,
-    time:data[i].time,
-    journal:data[i].journal
-  }));
-}
+const allData = ref(Array.from({ length: 100 }, (_, i) => ({
+  id: i + 1,
+  title: `Short title ${i + 1}`,
+  author: 'Author A',
+  time: '2025-03',
+  journal: 'IEEE'
+})))
 
 const currentPage = ref(1)
 const pageSize = ref(10)
@@ -30,31 +21,21 @@ const handlePageChange = (page) => {
 
 const handleSizeChange = (size) => {
   pageSize.value = size
-  currentPage.value = 1
+  currentPage.value = 1 // 切换每页条数时回到第一页
 }
 
+// 当前页展示的数据
 const paginatedData = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value
   return allData.value.slice(start, start + pageSize.value)
 })
-
-// 控制上传弹窗显示
-const showUploadDialog = ref(false)
 </script>
 
 <template>
   <div class="container">
-    <bar />
-    <!-- 顶部左侧首页 + 上传按钮 -->
-      
-        <div class="breadcrumb"><a href="/">首页</a>&gt;<a href="/search">查询结果</a></div>
-       <div class="upload-button-wrapper" style="margin-left: 20px;">
-  <button class="upload-btn" @click="showUploadDialog = true">上传论文</button>
-</div>
-
-      
+    <bar></bar>
     <main class="main-content">
-      
+      <div class="breadcrumb">首页&gt;</div>
 
       <!-- 搜索区域 -->
       <div class="search-wrapper">
@@ -113,9 +94,6 @@ const showUploadDialog = ref(false)
         />
       </div>
     </main>
-
-    <!-- 上传弹窗组件 -->
-    <UploadDialog v-model:visible="showUploadDialog" />
   </div>
 </template>
 
@@ -142,35 +120,12 @@ html, body {
   padding-top: 10px;
 }
 
-/* 顶部左侧“首页”和上传按钮整体区域 */
-.top-left-section {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  margin-left: 50px;
-  margin-bottom: 10px;
-}
-
-/* “首页”文字 */
 .breadcrumb {
+  text-align: left;
+  margin-left: 50px;
   font-size: 12px;
   color: #888;
-}
-
-/* 上传按钮容器 */
-.upload-button-wrapper {
-  margin-top: 6px;
-}
-
-/* 上传按钮样式 */
-.upload-btn {
-  padding: 4px 12px;
-  background-color: #3398ff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 12px;
+  margin-bottom: 10px;
 }
 
 .search-wrapper {
@@ -255,6 +210,7 @@ th, td {
   filter: brightness(1.2);
 }
 
+/* 分页器样式 */
 .pagination {
   width: 90%;
   max-width: 1000px;
@@ -264,7 +220,7 @@ th, td {
 }
 
 :deep(.el-pagination) {
-  background: #f4f4f4;
+  background: #f4f4f4; /* 与 .container 背景色一致 */
   padding: 12px 20px;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
