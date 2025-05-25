@@ -53,7 +53,7 @@ const paginatedData = computed(() => {
         <table>
           <thead>
             <tr>
-              <th>#</th>
+              <th>序号</th>
               <th>论文标题</th>
               <th>作者</th>
               <th>时间</th>
@@ -62,7 +62,11 @@ const paginatedData = computed(() => {
             </tr>
           </thead>
           <tbody>
-            <tr v-for="item in paginatedData" :key="item.id">
+            <tr
+            v-for="(item, index) in paginatedData"
+            :key="item.id"
+            :class="index % 2 === 0 ? 'even-row' : 'odd-row'"
+            >
               <td>#{{ item.id }}</td>
               <td><i>{{ item.title }}</i></td>
               <td><span style="color: #666;">{{ item.author }}</span></td>
@@ -107,6 +111,19 @@ html, body {
 </style>
 
 <style scoped>
+.result-item {
+  padding: 16px;
+  border-bottom: 1px solid #ddd;
+}
+.even-row {
+  background-color: #ffffff;
+}
+.odd-row {
+  background-color: #f5f5f5;
+}
+.result-item:hover {
+  background-color: #e0f7fa;
+}
 .container {
   min-height: 100vh;
   background-color: #f4f4f4;
@@ -188,6 +205,14 @@ table {
 thead {
   background-color: #f0f0f0;
 }
+
+th {
+  position: sticky;
+  top: 0;
+  background-color: #f0f0f0;
+  z-index: 2; /* 确保不被遮挡 */
+}
+
 
 th, td {
   height: 40px;
