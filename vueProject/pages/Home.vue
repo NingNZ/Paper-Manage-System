@@ -3,6 +3,7 @@
   import bar from "../components/bar.vue";
   import axios from 'axios'
   import { useRouter } from "vue-router";
+  localStorage.setItem('isSearch',true)
   const route = useRouter()
   localStorage.setItem('isSearch',true)
   const search = ()=>{
@@ -34,7 +35,11 @@
         <h1 class="title">Milk&nbsp;&nbsp;Dragon</h1>
         <div class="search-bar">
           <select>
-            <option>关键词</option>
+            <option>关键字</option>
+            <option>标题</option>
+            <option>作者</option>
+            <option>刊物</option>
+            <option>类别</option>
           </select>
           <input type="text" placeholder="请输入查找内容" />          
             <button @click="search">搜索</button>

@@ -25,7 +25,7 @@ router.beforeEach((to,from,next)=>{
         if(isSearch) {
             next()
             localStorage.removeItem('isSearch')
-        }else next('/') 
+        }else next('/')
     }
     else next()
 })
