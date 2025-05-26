@@ -2,27 +2,18 @@
 <script setup>
   import bar from "../components/bar.vue";
   import axios from 'axios'
+  import { ref } from "vue";
+  import { ElMessage } from "element-plus";
   import { useRouter } from "vue-router";
   localStorage.setItem('isSearch',true)
   const route = useRouter()
   localStorage.setItem('isSearch',true)
+  const selectedType = ref(0)
+  const searchText = ref("")
   const search = ()=>{
-  axios.get('http://localhost:5123/search', {
-    params: {
-      param: 'world'
-    }
-  })
-  .then(response => {
-    // 处理返回数据
-    console.log("enter")
-    localStorage.setItem('searchData', JSON.stringify(response.data))
+    console.log(selectedType.value)
+    console.log(searchText.value)
     route.push('/search')
-  })
-  .catch(error => {
-    // 处理错误
-    console.log("faile")
-    console.error(error)
-  })
   }
 </script>
 
@@ -34,14 +25,14 @@
       <div class="center-box">
         <h1 class="title">Milk&nbsp;&nbsp;Dragon</h1>
         <div class="search-bar">
-          <select>
-            <option>关键字</option>
-            <option>标题</option>
-            <option>作者</option>
-            <option>刊物</option>
-            <option>类别</option>
+          <select v-model="selectedType">
+            <option :value="0">关键字</option>
+            <option :value="1">标题</option>
+            <option :value="2">作者</option>
+            <option :value="3">刊物</option>
+            <option :value="4">类别</option>
           </select>
-          <input type="text" placeholder="请输入查找内容" />          
+          <input type="text" v-model="searchText" placeholder="请输入查找内容" />          
             <button @click="search">搜索</button>
         </div>
       </div>
