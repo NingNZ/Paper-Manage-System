@@ -5,15 +5,22 @@
   import { ref } from "vue";
   import { ElMessage } from "element-plus";
   import { useRouter } from "vue-router";
-  localStorage.setItem('isSearch',true)
   const route = useRouter()
   localStorage.setItem('isSearch',true)
   const selectedType = ref(0)
-  const searchText = ref("")
+  const searchWord = ref("")
+  if(localStorage.getItem('typeSave')){
+    selectedType.value = localStorage.getItem('typeSave')
+  }
   const search = ()=>{
-    console.log(selectedType.value)
-    console.log(searchText.value)
-    route.push('/search')
+    if(!searchWord.value.trim()){
+      ElMessage.error("输入框不能为空")
+    }
+    else{
+      route.push('/search')
+      localStorage.setItem('typeSave',selectedType.value)
+      localStorage.setItem('keySave',searchWord.value)
+    }
   }
 </script>
 
@@ -32,7 +39,7 @@
             <option :value="3">刊物</option>
             <option :value="4">类别</option>
           </select>
-          <input type="text" v-model="searchText" placeholder="请输入查找内容" />          
+          <input type="text" v-model="searchWord" placeholder="请输入查找内容" />          
             <button @click="search">搜索</button>
         </div>
       </div>

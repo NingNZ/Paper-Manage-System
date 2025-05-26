@@ -3,27 +3,71 @@ import bar from "../components/bar.vue";
 import UploadDialog from "../components/UploadTest/UploadTestDialog.vue";
 import EditDialog from "../components/SearchResult/EditDialog.vue";
 import DeleteDialog from "../components/SearchResult/DeleteDialog.vue";
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRoute } from "vue-router";
-localStorage.setItem('isSearch',true)
-// 模拟全部论文数据
-localStorage.setItem('isSearch',true)
+import { ElMessage } from "element-plus";
+import axios from 'axios'
+
 const allData = ref([]);
-var isSearch = localStorage.getItem('isSearch')
-if(localStorage.getItem('searchData')){
-  const data = JSON.parse(localStorage.getItem('searchData'))
-  console.log(data)
-  isSearch = false
-  console.log(data[0])
-  allData.value = Array.from({length:data.length},(_,i)=>({
-    id: i+1,
+const searchWord = ref("")
+const selectedType = ref('0')
+const route = useRoute()
+var code = 0
+var msg = ""
+
+const setAllData = (data)=>{
+    allData.value = Array.from({length:data.length},(_,i)=>({
+    id:data[i].id,
+    seq: i+1,
     title:data[i].title,
     author:data[i].authors,
     time:data[i].time,
-    journal:data[i].journal
+    journal:data[i].journal,
+    type:data[i].type
   }));
 }
-
+const sendAndGet=()=>{
+    axios.get('http://localhost:5123/search', {
+    params: {
+      type: selectedType.value,
+      key: searchWord.value
+    },
+    timeout:3000
+  })
+  .then(response => {
+    // 处理返回数据
+    console.log("enter")
+    
+    code = response.data[0].code
+    msg = response.data[0].msg
+    if(code==200){
+      ElMessage.success("搜索成功")
+    }
+    else if(code==201){
+      ElMessage.info("数据库中不存在相关论文")
+    }
+    console.log(code)
+    console.log(msg)
+    setAllData(response.data.slice(1))
+  })
+  .catch(error => {
+    // 处理错误
+    ElMessage.error("服务器未连接")
+    allData.value = []
+    console.error(error)
+  })
+}
+onMounted(()=>{
+  if(localStorage.getItem('typeSave')){
+    selectedType.value = localStorage.getItem('typeSave')
+    searchWord.value = localStorage.getItem('keySave')
+    sendAndGet()
+  }else{
+    selectedType.value='0'
+    searchWord.value=[]
+  }
+})
+localStorage.setItem('isSearch',true)
 const currentPage = ref(1)
 const pageSize = ref(10)
 const total = ref(allData.value.length)
@@ -56,7 +100,7 @@ const handleEdit = (item) => {
 }
 
 const updateCategory = (newCategory) => {
-  const index = allData.value.findIndex(i => i.id === currentEditItem.value.id)
+  const index = allData.value.findIndex(i => i.seq === currentEditItem.value.seq)
   if (index !== -1) {
     allData.value[index].category = newCategory
   }
@@ -73,7 +117,7 @@ const handleDelete = (item) => {
 }
 
 const confirmDelete = () => {
-  allData.value = allData.value.filter(i => i.id !== currentDeleteItem.value.id)
+  allData.value = allData.value.filter(i => i.seq !== currentDeleteItem.value.seq)
   showDeleteDialog.value = false
 }
 </script>
@@ -92,9 +136,15 @@ const confirmDelete = () => {
       <!-- 搜索栏 -->
       <div class="search-wrapper">
         <div class="search-bar">
-          <select><option>关键词</option></select>
-          <input type="text" placeholder="请输入查找内容" />
-          <button>搜索</button>
+          <select v-model="selectedType">
+            <option :value="0">关键字</option>
+            <option :value="1">标题</option>
+            <option :value="2">作者</option>
+            <option :value="3">刊物</option>
+            <option :value="4">类别</option>
+          </select>
+          <input type="text" v-model="searchWord" placeholder="请输入查找内容" />          
+            <button @click="search">搜索</button>
         </div>
       </div>
 
@@ -103,25 +153,29 @@ const confirmDelete = () => {
         <table>
           <thead>
             <tr>
+              <th v-if="false">id</th>
               <th>序号</th>
               <th>论文标题</th>
               <th>作者</th>
               <th>时间</th>
               <th>期刊</th>
+              <th>类别</th>
               <th>操作</th>
             </tr>
           </thead>
           <tbody>
             <tr
               v-for="(item, index) in paginatedData"
-              :key="item.id"
+              :key="item.seq"
               :class="index % 2 === 0 ? 'even-row' : 'odd-row'"
             >
-              <td>#{{ item.id }}</td>
+              <td v-if="false">{{ item.id }}</td>
+              <td>#{{ item.seq }}</td>
               <td><i>{{ item.title }}</i></td>
               <td><span style="color: #666;">{{ item.author }}</span></td>
               <td>{{ item.time }}</td>
               <td><b>{{ item.journal }}</b></td>
+              <td><b>{{ item.type }}</b></td>
               <td>
                 <img src="../assets/download.svg" alt="下载" class="icon-action" />
                 &nbsp;
