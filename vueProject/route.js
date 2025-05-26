@@ -18,7 +18,6 @@ const router = createRouter({
     history:createWebHistory(),
     routes,
 })
-
 router.beforeEach((to,from,next)=>{
     if(to.path ==='/search'){    
         const isSearch = localStorage.getItem('isSearch')

@@ -42,9 +42,7 @@
             <option>类别</option>
           </select>
           <input type="text" placeholder="请输入查找内容" />          
-            <router-link to="/search">
-              <button @click="search">搜索</button>
-            </router-link>
+            <button @click="search">搜索</button>
         </div>
       </div>
     </main>
