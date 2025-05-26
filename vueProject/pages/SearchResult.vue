@@ -1,6 +1,8 @@
 <script setup>
 import bar from "../components/bar.vue";
 import UploadDialog from "../components/UploadTest/UploadTestDialog.vue";
+import EditDialog from "../components/SearchResult/EditDialog.vue";
+import DeleteDialog from "../components/SearchResult/DeleteDialog.vue";
 import { ref, computed } from 'vue';
 import { useRoute } from "vue-router";
 localStorage.setItem('isSearch',true)
