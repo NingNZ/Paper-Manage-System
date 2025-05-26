@@ -37,7 +37,7 @@ const sendAndGet=()=>{
   .then(response => {
     // 处理返回数据
     console.log("enter")
-    
+    console.log(response.data[0])
     code = response.data[0].code
     msg = response.data[0].msg
     if(code==200){
@@ -67,6 +67,15 @@ onMounted(()=>{
     searchWord.value=[]
   }
 })
+const search = ()=>{
+    if(!searchWord.value.trim()){
+      ElMessage.error("输入框不能为空")
+    }else{
+      localStorage.setItem('typeSave',selectedType.value)
+      localStorage.setItem('keySave',searchWord.value)
+      sendAndGet()
+    }
+}
 localStorage.setItem('isSearch',true)
 const currentPage = ref(1)
 const pageSize = ref(10)
@@ -296,6 +305,15 @@ const confirmDelete = () => {
 .search-bar input,
 .search-bar button {
   height: 32px;
+}
+.search-bar button {
+  background-color: #3398ff;
+  color: white;
+  border: none;
+  padding: 7px 17px;
+  font-size: 16px;
+  border-radius: 0 20px 20px 0;
+  cursor: pointer;
 }
 .search-bar input {
   width: 500px;
