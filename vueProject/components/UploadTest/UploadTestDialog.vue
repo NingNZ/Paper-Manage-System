@@ -112,10 +112,15 @@ watch(() => props.visible, (val) => {
   else{ //当弹窗显示时
     utils.getSysType("true","")
     .then(({code,data,msg})=>{
-      typeOptions.value = Array.from({length:data.length},(_,i)=>({
-        value:data[i].id,
-        label:data[i].name
-      }));
+      if(code==200){
+        typeOptions.value = Array.from({length:data.length},(_,i)=>({
+          value:data[i].id,
+          label:data[i].name
+        }));
+      }
+      else{
+        ElMessage.info(msg);
+      }
     })
     .catch(({code,data,msg})=>{
       ElMessage.error(msg);
