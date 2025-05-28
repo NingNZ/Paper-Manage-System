@@ -15,7 +15,7 @@ const route = useRoute()
 var code = 0
 var msg = ""
 
-const setAllData = (data)=>{
+const setAllData = (data) =>{
     allData.value = Array.from({length:data.length},(_,i)=>({
     id:data[i].id,
     seq: i+1,
@@ -26,7 +26,7 @@ const setAllData = (data)=>{
     type:data[i].type
   }));
 }
-const sendAndGet=()=>{
+const sendAndGet=() =>{
     axios.get('http://localhost:5123/search', {
     params: {
       type: selectedType.value,
@@ -34,7 +34,7 @@ const sendAndGet=()=>{
     },
     timeout:3000
   })
-  .then(response => {
+  .then((response) => {
     // 处理返回数据
     console.log("enter")
     console.log(response.data[0])
