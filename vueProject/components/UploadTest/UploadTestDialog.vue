@@ -16,9 +16,12 @@
 
       <el-form-item label="类型">
         <el-select v-model="form.type" placeholder="选择论文类型">
-          <el-option label="期刊论文" value="journal" />
-          <el-option label="会议论文" value="conference" />
-          <el-option label="其他" value="other" />
+          <el-option            
+            v-for = "item in options"
+            :key = "item.value"
+            :label = "item.label"
+            :value = "item.value">
+          </el-option>
         </el-select>
       </el-form-item>
 
@@ -80,7 +83,11 @@ const form = ref({
   date: '',
   file: null
 })
-
+const options = ref([
+    { value: 'journal', label: 'A' },
+    { value: 'conference', label: 'B' },
+    { value: 'other', label: 'C' }
+])
 const fileList = ref([])
 
 watch(() => props.visible, (val) => {
