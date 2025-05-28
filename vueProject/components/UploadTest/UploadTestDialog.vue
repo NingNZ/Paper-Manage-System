@@ -17,7 +17,7 @@
       <el-form-item label="类型">
         <el-select v-model="form.type" placeholder="选择论文类型">
           <el-option            
-            v-for = "item in options"
+            v-for = "item in typeOptions"
             :key = "item.value"
             :label = "item.label"
             :value = "item.value">
@@ -27,10 +27,12 @@
 
       <el-form-item label="期刊">
         <el-select v-model="form.journal" placeholder="选择期刊">
-          <el-option label="IEEE" value="IEEE" />
-          <el-option label="ACM" value="ACM" />
-          <el-option label="Nature" value="Nature" />
-          <el-option label="Science" value="Science" />
+          <el-option 
+            v-for = "item in journalOptions"
+            :key = "item.value"
+            :label = "item.label"
+            :value = "item.value"
+          ></el-option>
         </el-select>
       </el-form-item>
 
@@ -69,6 +71,8 @@
 
 <script setup>
 import { ref,watch } from 'vue'
+import utils from "../../scripts/utils"
+import { ElMessage } from 'element-plus'
 
 const props = defineProps({
   visible: Boolean
@@ -83,10 +87,13 @@ const form = ref({
   date: '',
   file: null
 })
-const options = ref([
+const typeOptions = ref([
     { value: 'journal', label: 'A' },
     { value: 'conference', label: 'B' },
     { value: 'other', label: 'C' }
+])
+const journalOptions = ref([
+    { value: "hh",label:'X'}
 ])
 const fileList = ref([])
 
@@ -101,6 +108,33 @@ watch(() => props.visible, (val) => {
       file: null
     }
     fileList.value = []
+  }
+  else{ //当弹窗显示时
+    utils.getSysType("true","")
+    .then(({code,data,msg})=>{
+      typeOptions.value = Array.from({length:data.length},(_,i)=>({
+        value:data[i].id,
+        label:data[i].name
+      }));
+    })
+    .catch(({code,data,msg})=>{
+      ElMessage.error(msg);
+    });
+    utils.getSysJournal()
+    .then(({code,data,msg})=>{
+      if(code==200){
+        journalOptions.value = Array.from({length:data.length},(_,i)=>({
+          value: data[i].id,
+          label: data[i].name
+        }));
+      }
+      else{
+        ElMessage.info(msg);
+      }
+    })
+    .catch(({code,data,msg})=>{
+      ElMessage.error(msg);
+    })
   }
 })
 

@@ -3,10 +3,13 @@ import bar from "../components/bar.vue";
 import UploadDialog from "../components/UploadTest/UploadTestDialog.vue";
 import EditDialog from "../components/SearchResult/EditDialog.vue";
 import DeleteDialog from "../components/SearchResult/DeleteDialog.vue";
+import JournalManagerDialog from "../components/SearchResult/JournalManagerDialog.vue";
+import CategoryManagerDialog from "../components/SearchResult/CategoryManagerDialog.vue";
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from "vue-router";
 import { ElMessage } from "element-plus";
 import axios from 'axios'
+
 
 const allData = ref([]);
 const searchWord = ref("")
@@ -105,13 +108,6 @@ const paginatedData = computed(() => {
   return allData.value.slice(start, start + pageSize.value)
 })
 
-// 上传弹窗
-const showUploadDialog = ref(false)
-
-// 编辑弹窗
-const showEditDialog = ref(false)
-const currentEditItem = ref(null)
-
 const handleEdit = (item) => {
   currentEditItem.value = { ...item }
   showEditDialog.value = true
@@ -124,10 +120,6 @@ const updateCategory = (newCategory) => {
   }
   showEditDialog.value = false
 }
-
-// 删除弹窗
-const showDeleteDialog = ref(false)
-const currentDeleteItem = ref(null)
 
 const handleDelete = (item) => {
   currentDeleteItem.value = item
@@ -228,18 +220,6 @@ const confirmDelete = () => {
 
     <!-- 上传弹窗组件 -->
     <UploadDialog v-model:visible="showUploadDialog" />
-    <EditDialog
-      v-model="showEditDialog"
-      :item="currentEditItem"
-      @confirm="updateCategory"
-      @close="showEditDialog = false"
-    />
-    <DeleteDialog
-      v-model="showDeleteDialog"
-      :item="currentDeleteItem"
-      @confirm="confirmDelete"
-      @close="showDeleteDialog = false"
-    />
     <EditDialog
       v-model="showEditDialog"
       :item="currentEditItem"
