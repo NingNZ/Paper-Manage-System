@@ -140,14 +140,6 @@ const confirmDelete = () => {
     <div class="upload-button-wrapper">
       <button class="upload-btn" @click="showUploadDialog = true">上传论文</button>
     </div>
-
-
-    <div class="breadcrumb"><a href="/">首页</a> &gt; <a href="/search">查询结果</a></div>
-
-    <div class="upload-button-wrapper">
-      <button class="upload-btn" @click="showUploadDialog = true">上传论文</button>
-    </div>
-
     <main class="main-content">
       <!-- 搜索栏 -->
       <div class="search-wrapper">
@@ -194,12 +186,9 @@ const confirmDelete = () => {
               <td><b>{{ item.type }}</b></td>
               <td>
                 <img src="../assets/download.svg" alt="下载" class="icon-action" />
-                <img src="../assets/download.svg" alt="下载" class="icon-action" />
                 &nbsp;
                 <img src="../assets/edit.svg" alt="编辑" class="icon-action" @click="handleEdit(item)" />
-                <img src="../assets/edit.svg" alt="编辑" class="icon-action" @click="handleEdit(item)" />
                 &nbsp;
-                <img src="../assets/delete.svg" alt="删除" class="icon-action" @click="handleDelete(item)" />
                 <img src="../assets/delete.svg" alt="删除" class="icon-action" @click="handleDelete(item)" />
               </td>
             </tr>
@@ -328,16 +317,17 @@ const confirmDelete = () => {
 .search-bar input {
   width: 500px;
   border-radius: 20px 0 0 20px;
-  border: 1px solid black;
-  padding: 0 12px;
+  border: 1px solid #ccc;
+  padding: 6px 12px;
 }
 .search-bar button {
   border-radius: 0 20px 20px 0;
   background-color: #3398ff;
   color: white;
-  padding: 0 18px;
+  padding: 6px 18px;
   border: none;
   font-weight: bold;
+  cursor: pointer;
 }
 .table-container {
   width: 90%;
