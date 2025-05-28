@@ -141,6 +141,13 @@ const confirmDelete = () => {
       <button class="upload-btn" @click="showUploadDialog = true">上传论文</button>
     </div>
 
+
+    <div class="breadcrumb"><a href="/">首页</a> &gt; <a href="/search">查询结果</a></div>
+
+    <div class="upload-button-wrapper">
+      <button class="upload-btn" @click="showUploadDialog = true">上传论文</button>
+    </div>
+
     <main class="main-content">
       <!-- 搜索栏 -->
       <div class="search-wrapper">
@@ -187,9 +194,12 @@ const confirmDelete = () => {
               <td><b>{{ item.type }}</b></td>
               <td>
                 <img src="../assets/download.svg" alt="下载" class="icon-action" />
+                <img src="../assets/download.svg" alt="下载" class="icon-action" />
                 &nbsp;
                 <img src="../assets/edit.svg" alt="编辑" class="icon-action" @click="handleEdit(item)" />
+                <img src="../assets/edit.svg" alt="编辑" class="icon-action" @click="handleEdit(item)" />
                 &nbsp;
+                <img src="../assets/delete.svg" alt="删除" class="icon-action" @click="handleDelete(item)" />
                 <img src="../assets/delete.svg" alt="删除" class="icon-action" @click="handleDelete(item)" />
               </td>
             </tr>
@@ -198,21 +208,27 @@ const confirmDelete = () => {
       </div>
 
       <!-- 分页器 -->
-      <div class="pagination">
-        <el-pagination
-          background
-          layout="prev, pager, next, sizes, jumper"
-          :total="total"
-          :page-size="pageSize"
-          :current-page="currentPage"
-          :page-sizes="[10, 20, 50]"
-          @current-change="handlePageChange"
-          @size-change="handleSizeChange"
-        />
-      </div>
+  <div class="pagination">
+    <div class="bottom-left-buttons">
+      <button class="manage-btn" @click="showJournalDialog = true">管理期刊</button>
+      <button class="manage-btn" @click="showCategoryDialog = true">管理分类</button>
+    </div>
+
+  <el-pagination
+    background
+    layout="prev, pager, next, sizes, jumper"
+    :total="total"
+    :page-size="pageSize"
+    :current-page="currentPage"
+    :page-sizes="[10, 20, 50]"
+    @current-change="handlePageChange"
+    @size-change="handleSizeChange"
+  />
+</div>
+
     </main>
 
-    <!-- 弹窗组件 -->
+    <!-- 上传弹窗组件 -->
     <UploadDialog v-model:visible="showUploadDialog" />
     <EditDialog
       v-model="showEditDialog"
@@ -226,6 +242,20 @@ const confirmDelete = () => {
       @confirm="confirmDelete"
       @close="showDeleteDialog = false"
     />
+    <EditDialog
+      v-model="showEditDialog"
+      :item="currentEditItem"
+      @confirm="updateCategory"
+      @close="showEditDialog = false"
+    />
+    <DeleteDialog
+      v-model="showDeleteDialog"
+      :item="currentDeleteItem"
+      @confirm="confirmDelete"
+      @close="showDeleteDialog = false"
+    />
+    <CategoryManagerDialog v-model:visible="showCategoryDialog" />
+    <JournalManagerDialog v-model:visible="showJournalDialog" />
   </div>
 </template>
 
@@ -249,30 +279,12 @@ const confirmDelete = () => {
   display: flex;
   flex-direction: column;
 }
-
-.main-content {
-  flex: 1;
-  text-align: center;
-  padding-top: 10px;
-}
-
-/* 顶部左侧“首页”和上传按钮整体区域 */
-.top-left-section {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  margin-left: 50px;
-  margin-bottom: 10px;
-}
-
-/* “首页”文字 */
 .breadcrumb {
   font-size: 12px;
   color: #888;
 }
-
-/* 上传按钮容器 */
 .upload-button-wrapper {
+  margin: 6px 0 10px 20px;
   margin: 6px 0 10px 20px;
 }
 .upload-btn {
@@ -283,6 +295,11 @@ const confirmDelete = () => {
   border-radius: 4px;
   cursor: pointer;
   font-size: 12px;
+}
+.main-content {
+  flex: 1;
+  text-align: center;
+  padding-top: 10px;
 }
 .main-content {
   flex: 1;
@@ -301,20 +318,13 @@ const confirmDelete = () => {
   align-items: center;
   gap: 8px;
 }
-.search-bar select,
-.search-bar input,
-.search-bar button {
-  height: 32px;
+
+.search-bar select {
+  padding: 6px 12px;
+  border: 1px solid black;
+  border-radius: 4px;
 }
-.search-bar button {
-  background-color: #3398ff;
-  color: white;
-  border: none;
-  padding: 7px 17px;
-  font-size: 16px;
-  border-radius: 0 20px 20px 0;
-  cursor: pointer;
-}
+
 .search-bar input {
   width: 500px;
   border-radius: 20px 0 0 20px;
@@ -326,7 +336,7 @@ const confirmDelete = () => {
   background-color: #3398ff;
   color: white;
   padding: 0 18px;
-  border: 1px solid black;
+  border: none;
   font-weight: bold;
 }
 .table-container {
@@ -352,7 +362,6 @@ th {
   z-index: 2; /* 确保不被遮挡 */
 }
 
-
 th, td {
   height: 40px;
   padding: 0 10px;
@@ -368,9 +377,19 @@ th {
   z-index: 1;
   background: #f0f0f0;
 }
+thead {
+  background-color: #f0f0f0;
+}
+th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #f0f0f0;
+}
 .icon-action {
   height: 1em;
   cursor: pointer;
+  transition: transform 0.2s, filter 0.2s;
   transition: transform 0.2s, filter 0.2s;
 }
 .icon-action:hover {
@@ -390,34 +409,21 @@ th {
   max-width: 1000px;
   margin: 20px auto;
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
 }
-
-:deep(.el-pagination) {
-  background: #f4f4f4; /* 与 .container 背景色一致 */
-  padding: 12px 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+.bottom-left-buttons {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
 }
-
-:deep(.el-pagination.is-background .btn-prev),
-:deep(.el-pagination.is-background .btn-next),
-:deep(.el-pagination.is-background .el-pager li) {
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
-
-:deep(.el-pagination.is-background .el-pager li:not(.is-disabled).is-active) {
+.manage-btn {
+  padding: 6px 14px;
   background-color: #3398ff;
   color: white;
-}
-
-:deep(.el-pagination) {
-  align-self: flex-end;
-  margin-top: 20px;
-  background: transparent !important;
-  box-shadow: none !important;
-  border: none !important;
-  padding: 0 !important;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
 }
 </style>

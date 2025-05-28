@@ -18,6 +18,7 @@ const router = createRouter({
     history:createWebHistory(),
     routes,
 })
+<<<<<<< HEAD
 router.beforeEach((to,from,next)=>{
     if(to.path ==='/search'){    
         const isSearch = localStorage.getItem('isSearch')
@@ -28,4 +29,6 @@ router.beforeEach((to,from,next)=>{
     }
     else next()
 })
+=======
+>>>>>>> test
 export default router
