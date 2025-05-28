@@ -14,6 +14,15 @@ const selectedType = ref('0')
 const route = useRoute()
 var code = 0
 var msg = ""
+// 弹窗控制
+const showUploadDialog = ref(false)
+const showEditDialog = ref(false)
+const showDeleteDialog = ref(false)
+const showCategoryDialog = ref(false)
+const showJournalDialog = ref(false)
+
+const currentEditItem = ref(null)
+const currentDeleteItem = ref(null)
 
 const setAllData = (data) =>{
     allData.value = Array.from({length:data.length},(_,i)=>({
