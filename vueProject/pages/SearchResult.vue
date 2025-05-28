@@ -3,6 +3,8 @@ import bar from "../components/bar.vue";
 import UploadDialog from "../components/UploadTest/UploadTestDialog.vue";
 import EditDialog from "../components/SearchResult/EditDialog.vue";
 import DeleteDialog from "../components/SearchResult/DeleteDialog.vue";
+import CategoryManagerDialog from "../components/SearchResult/CategoryManagerDialog.vue";
+import JournalManagerDialog from "../components/SearchResult/JournalManagerDialog.vue";
 import { ref, computed } from "vue";
 
 // 数据初始化
@@ -33,12 +35,15 @@ const paginatedData = computed(() => {
   return allData.value.slice(start, start + pageSize.value)
 })
 
-// 上传弹窗
+// 弹窗控制
 const showUploadDialog = ref(false)
-
-// 编辑弹窗
 const showEditDialog = ref(false)
+const showDeleteDialog = ref(false)
+const showCategoryDialog = ref(false)
+const showJournalDialog = ref(false)
+
 const currentEditItem = ref(null)
+const currentDeleteItem = ref(null)
 
 const handleEdit = (item) => {
   currentEditItem.value = { ...item }
@@ -52,10 +57,6 @@ const updateCategory = (newCategory) => {
   }
   showEditDialog.value = false
 }
-
-// 删除弹窗
-const showDeleteDialog = ref(false)
-const currentDeleteItem = ref(null)
 
 const handleDelete = (item) => {
   currentDeleteItem.value = item
@@ -125,19 +126,31 @@ const confirmDelete = () => {
       </div>
 
       <!-- 分页器 -->
-      <div class="pagination">
-        <el-pagination
-          background
-          layout="prev, pager, next, sizes, jumper"
-          :total="total"
-          :page-size="pageSize"
-          :current-page="currentPage"
-          :page-sizes="[10, 20, 50]"
-          @current-change="handlePageChange"
-          @size-change="handleSizeChange"
-        />
-      </div>
+  <div class="pagination">
+    <div class="bottom-left-buttons">
+      <button class="manage-btn" @click="showJournalDialog = true">管理期刊</button>
+      <button class="manage-btn" @click="showCategoryDialog = true">管理分类</button>
+    </div>
+
+  <el-pagination
+    background
+    layout="prev, pager, next, sizes, jumper"
+    :total="total"
+    :page-size="pageSize"
+    :current-page="currentPage"
+    :page-sizes="[10, 20, 50]"
+    @current-change="handlePageChange"
+    @size-change="handleSizeChange"
+  />
+</div>
+
     </main>
+
+    <!-- 左下角管理按钮 -->
+    <!-- <div class="bottom-left-buttons">
+      <button class="manage-btn" @click="showJournalDialog = true">管理期刊</button>
+      <button class="manage-btn" @click="showCategoryDialog = true">管理分类</button>
+    </div> -->
 
     <!-- 弹窗组件 -->
     <UploadDialog v-model:visible="showUploadDialog" />
@@ -153,6 +166,8 @@ const confirmDelete = () => {
       @confirm="confirmDelete"
       @close="showDeleteDialog = false"
     />
+    <CategoryManagerDialog v-model:visible="showCategoryDialog" />
+    <JournalManagerDialog v-model:visible="showJournalDialog" />
   </div>
 </template>
 
@@ -212,7 +227,7 @@ const confirmDelete = () => {
   background-color: #3398ff;
   color: white;
   padding: 0 18px;
-  border: 1px solid black;
+  border: none;
   font-weight: bold;
 }
 .table-container {
@@ -265,6 +280,21 @@ th {
   max-width: 1000px;
   margin: 20px auto;
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
+}
+.bottom-left-buttons {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+.manage-btn {
+  padding: 6px 14px;
+  background-color: #3398ff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
 }
 </style>
