@@ -1,12 +1,13 @@
 import axios from "axios"
 
 const utils = {
+    url:"http://10.68.200.226:5123",
     /**
     * @param {string} isSystem 
     * @param {string} teamId
     */
     getSysType (isSystem="false",teamId=''){
-     return axios.get('http://localhost:5123/type', {
+     return axios.get(utils.url+'/type', {
             params: {
                 isSystem: isSystem,
                 teamId : teamId
@@ -29,7 +30,7 @@ const utils = {
         })
     },
     getSysJournal (){
-     return axios.get('http://localhost:5123/journal', {
+     return axios.get(utils.url+'/journal', {
             timeout:3000
         }).then((response) => {
         // 处理返回数据
@@ -47,5 +48,6 @@ const utils = {
             })
         })
     }
+    
 };
 export default utils;

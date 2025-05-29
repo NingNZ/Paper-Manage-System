@@ -213,7 +213,7 @@ const submit = () => {
     // console.log(form.value)
       form.value = {
         title: '',
-        author: '',
+        authors: '',
         type: '',
         journal: '',
         date: '',

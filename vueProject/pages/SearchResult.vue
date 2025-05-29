@@ -9,6 +9,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useRoute } from "vue-router";
 import { ElMessage } from "element-plus";
 import axios from 'axios'
+import utils from "../scripts/utils";
 
 
 const allData = ref([]);
@@ -39,7 +40,7 @@ const setAllData = (data) =>{
   }));
 }
 const sendAndGet=() =>{
-    axios.get('http://localhost:5123/search', {
+    axios.get(utils.url+'/search', {
     params: {
       type: selectedType.value,
       key: searchWord.value
