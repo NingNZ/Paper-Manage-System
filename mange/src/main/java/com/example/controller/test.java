@@ -6,10 +6,7 @@ import com.example.instance.TypeList;
 import com.example.util.paperUtil;
 import com.example.util.tool;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

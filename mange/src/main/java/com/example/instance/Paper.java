@@ -1,6 +1,8 @@
 package com.example.instance;
 
+import com.example.util.paperUtil;
 import com.example.util.sqlUtil;
+import com.example.util.tool;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -37,6 +39,34 @@ public class Paper {
             this.title = res.getString("title");
             sqlGetAuthors();
         }
+    }
+
+    public static String insertToSysPaper(
+            String title,
+            String jourId,
+            String[] authorsId,
+            String typeid,
+            String teamId,
+            String time
+    ){
+        String id = "#pid"+ paperUtil.generateHash(title);
+        System.out.println(id);
+        String sql1 = "insert into syspaper (id,title,jourId,typeId,teamId,time) values (?,?,?,?,?,?)";
+        try{
+            int res = sqlUtil.update(sql1,id,title,jourId,typeid,teamId,time);
+        }catch (SQLException e){
+            e.printStackTrace();
+            return null;
+        }
+        String sql2 = "insert into authors(paperId,userId) values(?,?)";
+        for(String author:authorsId){
+            try{
+                sqlUtil.update(sql2,id,author);
+            }catch (SQLException e){
+                return null;
+            }
+        }
+        return id;
     }
     private void sqlGetAuthors(){
         authors = "";

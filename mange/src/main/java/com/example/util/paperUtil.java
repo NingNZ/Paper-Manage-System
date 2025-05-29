@@ -1,10 +1,17 @@
 package com.example.util;
 
 import com.mysql.cj.xdevapi.SqlResult;
+import org.springframework.util.DigestUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.sql.Array;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Random;
 
 public class paperUtil {
     public static ArrayList<String> searchByTitleLike(String title) throws SQLException {
@@ -71,5 +78,44 @@ public class paperUtil {
         }
         res.close();
         return paperIdList;
+    }
+    public static String generateHash(String fileName) {
+        if (fileName == null) {
+            return null;
+        }
+        StringBuilder fileNameBuilder = new StringBuilder(fileName);
+        while(fileNameBuilder.length()<6){
+            fileNameBuilder.append(new Random().nextInt(40, 123));
+        }
+        fileName = fileNameBuilder.toString();
+        byte[] bid = DigestUtils.md5Digest(fileName.getBytes());
+        String res = Arrays.toString(bid).substring(2,8);
+        return res.replace(' ','&');
+    }
+    public static boolean fileLocalSave(String id, MultipartFile file){
+        if (file.isEmpty()) {
+            System.out.println("File is empty!");
+            return false;
+        }
+        try {
+            // 设置文件存储路径
+            String uploadFolder = "D:\\code\\idea_java\\mange\\uploadSysFiles";
+            File folder = new File(uploadFolder);
+            if (!folder.exists()) {
+                folder.mkdirs();
+            }
+            // 获取文件名
+            String fileName = id+".pdf";
+            // 设置文件存储路径
+            File targetFile = new File(folder, fileName);
+            // 保存文件
+            file.transferTo(targetFile);
+            System.out.println("File uploaded successfully: " + targetFile.getAbsolutePath());
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("File upload failed: " + e.getMessage());
+            return false;
+        }
+        return true;
     }
 }

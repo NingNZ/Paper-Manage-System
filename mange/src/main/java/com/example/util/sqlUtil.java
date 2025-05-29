@@ -16,4 +16,14 @@ public class sqlUtil {
         }
         return stmt.executeQuery();
     }
+    public static  int update (String sql, Object... params) throws SQLException {
+        Connection conn = DriverManager.getConnection(URL, USERNAME, PASSWORD);
+        PreparedStatement stmt = conn.prepareStatement(sql);
+
+        // 设置参数
+        for (int i = 0; i < params.length; i++) {
+            stmt.setObject(i + 1, params[i]);
+        }
+        return stmt.executeUpdate();
+    }
 }
