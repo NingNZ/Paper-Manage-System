@@ -191,7 +191,7 @@ const handleFileRemove = () => {
 
 const submit = () => {
   if(Object.values(form.value).some(
-      value=> value===null || value.trim()===""||value===undefined
+      value=> value===null || value===[]||value===undefined
     )){
     ElMessage.info("存在字段没有填写或者填写不正确，操作失败")
     // console.log(form.value)
@@ -207,6 +207,7 @@ const submit = () => {
     fileList.value=[]
   }
   else{
+    console.log(form.value)
     emit('update:visible', false)
   }
   
