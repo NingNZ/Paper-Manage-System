@@ -125,13 +125,13 @@ const confirmDelete = () => {
         </table>
       </div>
 
-      <!-- 分页器 -->
   <div class="pagination">
     <div class="bottom-left-buttons">
       <button class="manage-btn" @click="showJournalDialog = true">管理期刊</button>
       <button class="manage-btn" @click="showCategoryDialog = true">管理分类</button>
     </div>
 
+    <!--分页器-->
   <el-pagination
     background
     layout="prev, pager, next, sizes, jumper"

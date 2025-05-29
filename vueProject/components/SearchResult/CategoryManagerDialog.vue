@@ -9,7 +9,11 @@
     <ul>
       <li v-for="(item, index) in categories" :key="index" class="item-row">
         <template v-if="editIndex === index">
-          <input v-model="editText" class="edit-input" />
+          <input
+            v-model="editText"
+            class="edit-input"
+            placeholder="新建分类"
+          />
           <div>
             <button class="save-btn" @click="saveEdit(index)">保存</button>
             <button class="cancel-btn" @click="cancelEdit">取消</button>
@@ -20,11 +24,28 @@
           <div>
             <img src="../../assets/edit.svg" class="icon-action" @click="startEdit(index, item)" />
             &nbsp;
-            <img src="../../assets/delete.svg" class="icon-action" @click="deleteCategory(index)" />
+            <img src="../../assets/delete.svg" class="icon-action" @click="confirmDelete(index)" />
           </div>
         </template>
       </li>
     </ul>
+  </el-dialog>
+
+  <!-- 确认删除弹窗 -->
+  <el-dialog v-model="showDeleteConfirm" title="确认删除" width="400px">
+    <span>确定要删除分类 "{{ categories[deleteIndex] }}" 吗？此操作不可恢复。</span>
+    <template #footer>
+      <el-button @click="showDeleteConfirm = false">取消</el-button>
+      <el-button type="danger" @click="doDelete">确认删除</el-button>
+    </template>
+  </el-dialog>
+
+  <!-- 重复名称警告弹窗 -->
+  <el-dialog v-model="showDuplicateWarning" title="分类名重复" width="400px">
+    <span>已有相同名称的分类，请修改后再保存。</span>
+    <template #footer>
+      <el-button type="primary" @click="showDuplicateWarning = false">确定</el-button>
+    </template>
   </el-dialog>
 </template>
 
@@ -38,8 +59,16 @@ const categories = ref(["默认分类", "AI", "网络安全"])
 const editIndex = ref(null)
 const editText = ref('')
 
+const showDeleteConfirm = ref(false)
+const deleteIndex = ref(null)
+
+const showDuplicateWarning = ref(false)
+
 const addCategory = () => {
-  categories.value.push(`新分类${categories.value.length + 1}`)
+  if (editIndex.value !== null) return // 当前已有正在编辑的项
+  categories.value.push('')
+  editIndex.value = categories.value.length - 1
+  editText.value = ''
 }
 
 const startEdit = (index, value) => {
@@ -48,19 +77,42 @@ const startEdit = (index, value) => {
 }
 
 const cancelEdit = () => {
+  // 删除空的新建分类
+  if (categories.value[editIndex.value] === '' && editIndex.value === categories.value.length - 1) {
+    categories.value.pop()
+  }
+
   editIndex.value = null
   editText.value = ''
 }
 
 const saveEdit = (index) => {
-  if (editText.value.trim()) {
-    categories.value[index] = editText.value.trim()
+  const newName = editText.value.trim()
+  if (!newName) {
+    cancelEdit()
+    return
   }
+
+  // 判断是否有重名（除自己）
+  const duplicate = categories.value.some((c, i) => i !== index && c === newName)
+  if (duplicate) {
+    showDuplicateWarning.value = true
+    return
+  }
+
+  categories.value[index] = newName
   cancelEdit()
 }
 
-const deleteCategory = (index) => {
-  categories.value.splice(index, 1)
+const confirmDelete = (index) => {
+  deleteIndex.value = index
+  showDeleteConfirm.value = true
+}
+
+const doDelete = () => {
+  categories.value.splice(deleteIndex.value, 1)
+  showDeleteConfirm.value = false
+  deleteIndex.value = null
 }
 </script>
 
