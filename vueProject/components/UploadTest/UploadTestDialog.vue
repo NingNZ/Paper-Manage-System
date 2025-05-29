@@ -51,10 +51,13 @@
           action="#"
           :limit = "1"
           :multiple = "false"
-          :file-list="fileList"
           :auto-upload="false"
+          v-model:file-list="fileList"
           :on-exceed="()=>{
             ElMessage.info('只能上传一个文件')
+          }"
+          :on-remove="()=>{
+            form.file=null
           }"
           :on-change="handleFileChange"
         >
@@ -68,7 +71,9 @@
     </el-form>
 
     <template #footer>
-      <el-button @click="emit('update:visible', false)">取消</el-button>
+      <el-button @click="()=>{
+        emit('update:visible', false)
+        }">取消</el-button>
       <el-button type="primary" @click="submit">确认</el-button>
     </template>
   </el-dialog>
@@ -79,6 +84,7 @@ import { ref,watch } from 'vue'
 import utils from "../../scripts/utils"
 import { ElMessage } from 'element-plus'
 
+const fileList = ref([]) // 维护文件列表状态
 const props = defineProps({
   visible: Boolean
 })
@@ -100,7 +106,6 @@ const typeOptions = ref([
 const journalOptions = ref([
     { value: "hh",label:'X'}
 ])
-const fileList = ref([])
 
 watch(() => props.visible, (val) => {
   if (!val) {
@@ -148,13 +153,34 @@ watch(() => props.visible, (val) => {
   }
 })
 
-const handleFileChange = (file) => {
+const handleFileChange = (file,files) => {
   form.value.file = file.raw
+  fileList.value = files
 }
 
 const submit = () => {
-  console.log('上传信息：', form.value)
-  emit('update:visible', false)
+  if(Object.values(form.value).some(
+      value=> value===null || value.trim()===""||value===undefined
+    )){
+    ElMessage.info("存在字段没有填写或者填写不正确，操作失败")
+    // console.log(form.value)
+      form.value = {
+        title: '',
+        author: '',
+        type: '',
+        journal: '',
+        date: '',
+        file: null
+      }
+    // console.log(form.value)
+    fileList.value=[]
+  }
+  else{
+    emit('update:visible', false)
+  }
+  
+  
+  
 }
 </script>
 
