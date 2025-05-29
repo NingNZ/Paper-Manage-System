@@ -59,7 +59,6 @@
           action=""
           :file-list="fileList"
           :auto-upload="false"
-          v-model:file-list="fileList"
           :on-change="handleFileChange"
           :on-remove="handleFileRemove"
           accept=".pdf"
