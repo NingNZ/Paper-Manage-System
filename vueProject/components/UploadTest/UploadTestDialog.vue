@@ -93,6 +93,7 @@
 import { ref,watch } from 'vue'
 import utils from "../../scripts/utils"
 import { ElMessage } from 'element-plus'
+import axios from 'axios'
 
 const fileList = ref([]) // 维护文件列表状态
 const props = defineProps({
@@ -226,25 +227,40 @@ const submit = () => {
       value=> value===null || value===[]||value===undefined
     )){
     ElMessage.info("存在字段没有填写或者填写不正确，操作失败")
-    // console.log(form.value)
-      form.value = {
-        title: '',
-        authors: '',
-        type: '',
-        journal: '',
-        date: '',
-        file: null
-      }
-    // console.log(form.value)
+    resetForm()
     fileList.value=[]
   }
   else{
     console.log(form.value)
+    submitForm()
     emit('update:visible', false)
   }
-  
-  
-  
+}
+const submitForm=()=>{
+  const formData = new FormData();
+  formData.append('title', form.value.title);
+  formData.append('authors', JSON.stringify(form.value.authors)); // 数组转字符串
+  formData.append('type', form.value.type);
+  formData.append('journal', form.value.journal);
+
+  const dateObj = new Date(form.value.date)
+  formData.append('date',String(dateObj.getFullYear())+"-"+String(dateObj.getMonth()+1).padStart(2,0));
+  formData.append('file', form.value.file); // 文件
+  //测试代码
+  const teamId = localStorage.getItem("teamId");
+  formData.append('teamId',teamId);
+  //
+  axios.post(utils.url+"/sysPaper/new",formData,{
+    headers:{
+      'Content-Type':'multipart/form-data'
+    },
+  })
+  .then(response =>{
+    console.log('submit success',response.data);
+  })
+  .catch(error=>{
+    console.log("submit fail",error)
+  })
 }
 </script>
 

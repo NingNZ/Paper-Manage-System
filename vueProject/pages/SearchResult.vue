@@ -348,6 +348,7 @@ th, td {
   border-bottom: 1px solid #eee;
   text-align: center;
 }
+
 thead {
   background-color: #f0f0f0;
 }
@@ -356,6 +357,13 @@ th {
   top: 0;
   z-index: 1;
   background: #f0f0f0;
+}
+td{
+  max-width: 200px; /* 限制最大宽度 */
+  padding: 8px;
+  white-space: normal; /* 允许换行 */
+  word-wrap: break-word; /* 强制换行 */
+  overflow-wrap: break-word; /* 兼容性更好 */
 }
 thead {
   background-color: #f0f0f0;
