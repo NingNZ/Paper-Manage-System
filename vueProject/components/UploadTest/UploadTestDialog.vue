@@ -11,15 +11,21 @@
       </el-form-item>
 
       <el-form-item label="作者">
-        <el-checkbox-group v-model="form.authors">
-          <el-checkbox
+        <el-select
+          v-model="form.authors"
+          multiple
+          collapse-tags
+          collapse-tags-tooltip
+          placeholder="选择作者"
+          :formatter="authorFormatter"
+        >
+          <el-option
             v-for="member in teamMembers"
             :key="member.id"
             :label="member.name"
-          >
-            {{ member.name }}
-          </el-checkbox>
-        </el-checkbox-group>
+            :value="member.id"
+          />
+        </el-select>
       </el-form-item>
 
       <el-form-item label="类型">
@@ -100,12 +106,11 @@ const teamMembers = ref([
   { id: 2, name: '李四' },
   { id: 3, name: '王五' },
   { id: 4, name: '赵六' }
-
 ])
 
 const form = ref({
   title: '',
-  authors: [],
+  authors: [],  // 绑定成员id
   type: '',
   journal: '',
   date: '',
@@ -169,7 +174,18 @@ const resetForm = () => {
   fileList.value = []
 }
 
-// 文件变更时触发
+// 显示作者名顿号分隔
+const authorFormatter = () => {
+  const names = form.value.authors
+    .map(id => {
+      const member = teamMembers.value.find(m => m.id === id)
+      return member ? member.name : ''
+    })
+    .filter(name => name !== '')
+  return names.join('、')
+}
+
+// 文件变更
 const handleFileChange = (uploadFile, uploadFiles) => {
   const isPDF = uploadFile.raw.type === 'application/pdf'
   if (!isPDF) {
@@ -183,7 +199,7 @@ const handleFileChange = (uploadFile, uploadFiles) => {
   form.value.file = uploadFile.raw
 }
 
-// 删除文件时
+// 文件删除
 const handleFileRemove = () => {
   fileList.value = []
   form.value.file = null
