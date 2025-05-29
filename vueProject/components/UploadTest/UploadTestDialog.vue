@@ -159,6 +159,22 @@ watch(() => props.visible, (val) => {
     .catch(({code,data,msg})=>{
       ElMessage.error(msg);
     })
+
+    const teamId = localStorage.getItem("teamId");
+    utils.getMemberList(teamId)
+    .then(({code,data,msg})=>{
+      if(code==200){
+        teamMembers.value = Array.from({length:data.length},(_,i)=>({
+          id: data[i].id,
+          name:data[i].name
+        }));
+      }else{
+        ElMessage.info(msg)
+      }
+    })
+    .catch(({code,data,msg})=>{
+      ElMessage.info(msg);
+    })
   }
 })
 

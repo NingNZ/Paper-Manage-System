@@ -47,7 +47,34 @@ const utils = {
                 msg:"服务不可用"
             })
         })
-    }
+    },
+    /**
+     * 
+     * @param {String} teamId 
+     * @returns 
+     */
+    getMemberList (teamId){
+     return axios.get(utils.url+'/teamMember', {
+            params:{
+                teamId:teamId
+            },
+            timeout:3000
+        }).then((response) => {
+        // 处理返回数据
+            return {
+                code: response.data[0].code,
+                data: response.data.slice(1),
+                msg: response.data[0].msg
+            }
+        }).catch(error => {
+        // 处理错误
+            return Promise.reject({
+                code:404,
+                data:[],
+                msg:"服务不可用"
+            })
+        })
+    },
     
 };
 export default utils;
