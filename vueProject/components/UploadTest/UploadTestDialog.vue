@@ -179,7 +179,6 @@ const handleFileChange = (uploadFile, uploadFiles) => {
     form.value.file = null
     return
   }
-
   // 只保留一个文件（覆盖旧文件）
   fileList.value = [uploadFile]
   form.value.file = uploadFile.raw
