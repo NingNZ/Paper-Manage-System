@@ -98,7 +98,7 @@ function handleCreateTeam(name) {
 
       <div class="actions">
         <el-button type="success" class="action-btn" @click="showCreateDialog = true">创建团队</el-button>
-        <el-button type="info" class="action-btn" @click="showJoinDialog = true">申请加入团队</el-button>
+        <el-button type="primary" class="action-btn" @click="showJoinDialog = true">申请加入团队</el-button>
       </div>
 
       <div class="pagination">

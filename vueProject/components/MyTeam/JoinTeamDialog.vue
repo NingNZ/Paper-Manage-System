@@ -26,7 +26,7 @@
         <el-table-column prop="leader" label="团队组长" />
         <el-table-column label="操作">
           <template #default="scope">
-            <el-button type="info" size="small" @click="joinTeam(scope.row)">加入</el-button>
+            <el-button type="primary" size="small" @click="joinTeam(scope.row)">加入</el-button>
           </template>
         </el-table-column>
       </el-table>
