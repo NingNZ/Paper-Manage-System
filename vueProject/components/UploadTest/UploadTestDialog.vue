@@ -11,7 +11,15 @@
       </el-form-item>
 
       <el-form-item label="作者">
-        <el-input v-model="form.author" placeholder="请输入作者名称" />
+        <el-checkbox-group v-model="form.authors">
+          <el-checkbox
+            v-for="member in teamMembers"
+            :key="member.id"
+            :label="member.name"
+          >
+            {{ member.name }}
+          </el-checkbox>
+        </el-checkbox-group>
       </el-form-item>
 
       <el-form-item label="类型">
@@ -43,15 +51,19 @@
       <el-form-item label="上传文件">
         <el-upload
           drag
-          action="#"
+          action=""
           :file-list="fileList"
           :auto-upload="false"
           :on-change="handleFileChange"
+          :on-remove="handleFileRemove"
+          accept=".pdf"
         >
           <i class="el-icon-upload"></i>
-          <div class="el-upload__text">将 PDF 拖到此处，或 <em>点击上传</em></div>
+          <div class="el-upload__text">
+            将 PDF 拖到此处，或 <em>点击上传</em>
+          </div>
           <template #tip>
-            <div class="el-upload__tip">只能上传 PDF 文件</div>
+            <div class="el-upload__tip">只能上传一个 PDF 文件</div>
           </template>
         </el-upload>
       </el-form-item>
@@ -66,15 +78,25 @@
 
 <script setup>
 import { ref, watch } from 'vue'
+import { ElMessage } from 'element-plus'
 
 const props = defineProps({
   visible: Boolean
 })
 const emit = defineEmits(['update:visible'])
 
+// 模拟团队成员数据
+const teamMembers = ref([
+  { id: 1, name: '张三' },
+  { id: 2, name: '李四' },
+  { id: 3, name: '王五' },
+  { id: 4, name: '赵六' }
+
+])
+
 const form = ref({
   title: '',
-  author: '',
+  authors: [],
   type: '',
   journal: '',
   date: '',
@@ -85,23 +107,49 @@ const fileList = ref([])
 
 watch(() => props.visible, (val) => {
   if (!val) {
-    form.value = {
-      title: '',
-      author: '',
-      type: '',
-      journal: '',
-      date: '',
-      file: null
-    }
-    fileList.value = []
+    resetForm()
   }
 })
 
-const handleFileChange = (file) => {
-  form.value.file = file.raw
+const resetForm = () => {
+  form.value = {
+    title: '',
+    authors: [],
+    type: '',
+    journal: '',
+    date: '',
+    file: null
+  }
+  fileList.value = []
+}
+
+// 文件变更时触发
+const handleFileChange = (uploadFile, uploadFiles) => {
+  const isPDF = uploadFile.raw.type === 'application/pdf'
+  if (!isPDF) {
+    ElMessage.error('只能上传 PDF 文件')
+    fileList.value = []
+    form.value.file = null
+    return
+  }
+
+  // 只保留一个文件（覆盖旧文件）
+  fileList.value = [uploadFile]
+  form.value.file = uploadFile.raw
+}
+
+// 删除文件时
+const handleFileRemove = () => {
+  fileList.value = []
+  form.value.file = null
 }
 
 const submit = () => {
+  if (!form.value.file) {
+    ElMessage.error('请上传一个 PDF 文件')
+    return
+  }
+
   console.log('上传信息：', form.value)
   emit('update:visible', false)
 }
