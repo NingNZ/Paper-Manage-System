@@ -49,8 +49,13 @@
         <el-upload
           drag
           action="#"
+          :limit = "1"
+          :multiple = "false"
           :file-list="fileList"
           :auto-upload="false"
+          :on-exceed="()=>{
+            ElMessage.info('只能上传一个文件')
+          }"
           :on-change="handleFileChange"
         >
           <i class="el-icon-upload"></i>
