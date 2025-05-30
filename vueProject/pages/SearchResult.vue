@@ -72,17 +72,18 @@ const sendAndGet=() =>{
     // 处理错误
     allData.value = []
     console.error(error)
-    return {
+    return Promise.reject({
       code:404,
       msg:"服务器未连接"
-    }
+    })
   })
 }
 onMounted(()=>{
   if(localStorage.getItem('typeSave')){
     selectedType.value = localStorage.getItem('typeSave')
     searchWord.value = localStorage.getItem('keySave')
-    sendAndGet().then(({code,msg})=>{
+    sendAndGet()
+    .then(({code,msg})=>{
       if(code==200){
         ElMessage.success(msg)
       }else{
