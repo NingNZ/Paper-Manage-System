@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
 @RestController
 public class sysPaperControl {
     @PostMapping("/sysPaper/new")
-    public void solveNewSysPaper(
+    public Map<String,Object> solveNewSysPaper(
             @RequestParam("title") String title,
             @RequestParam("authors") String authorsJson, // 接收 JSON 字符串
             @RequestParam("type") String typeId,
@@ -46,13 +46,16 @@ public class sysPaperControl {
             Paper paper = null;
             try {
                 paper = new Paper(id);
-                paper.fileLocalSave(file);
+                if(paper.fileLocalSave(file)){
+                    return tool.msgCreate(200,"upload success");
+                }
             } catch (SQLException e) {
-                throw new RuntimeException(e);
+                e.printStackTrace();
             }
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
+        return tool.msgCreate(400,"file upload fail");
     }
     @GetMapping("/sysPaper/download")
     public ResponseEntity<Resource> downloadFile(@RequestParam String paperId) {
@@ -95,6 +98,23 @@ public class sysPaperControl {
         } catch (SQLException e) {
             e.printStackTrace();
             return tool.msgCreate(400,"删除错误,检查文件是否存在");
+        }
+    }
+    @GetMapping("/sysPaper/update")
+    public Map<String,Object> updateFile(@RequestParam String paperId,@RequestParam String typeId){
+        try {
+            Paper paper = new Paper(paperId);
+            if(paper.isNull()){
+                return tool.msgCreate(400,"文件不存在");
+            }else;
+            if(paper.fileSqlTypeUpdate(typeId)){
+                return tool.msgCreate(200,"更新成功");
+            }else{
+                return tool.msgCreate(400,"更新失败");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return tool.msgCreate(400,"系统错误");
         }
     }
 }

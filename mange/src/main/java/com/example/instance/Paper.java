@@ -157,10 +157,20 @@ public class Paper {
             return false;
         }
         if(this.getRelateFile().exists()){
-            this.getRelateFile().delete();
+            boolean delRes = this.getRelateFile().delete();
         }
         return  true;
     }
-
+    public boolean fileSqlTypeUpdate(String typeid){
+        String sql1 = "update syspaper set typeid=?  where id =?";
+        try{
+            int res = sqlUtil.update(sql1,typeid,this.id);
+            if(res!=1) return false;
+        }catch (SQLException e){
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
 }
 
