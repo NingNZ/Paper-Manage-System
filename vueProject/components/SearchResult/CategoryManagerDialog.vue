@@ -17,7 +17,7 @@
             placeholder="新建分类"
           />
           <div>
-            <button class="save-btn" @click="saveEdit(index)">保存</button>
+            <button class="save-btn" @click="saveEdit()">保存</button>
             <button class="cancel-btn" @click="cancelEdit">取消</button>
           </div>
         </template>
@@ -69,7 +69,7 @@ watch(internalVisible,(val)=>{
     .catch(({code,data,msg})=>{ElMessage.error(msg)})
   }
 })
-let isAdding = false
+const isAdding = ref(false)
 const categories = ref([{label:'A',value:'0'}, {label:'B',value:'1'},{label:'C',value:'2'}])
 const editIndex = ref(null)
 const editId = ref(null)
@@ -78,32 +78,45 @@ const showDuplicateWarning = ref(false)
 
 const addCategory = () => {
   if (editIndex.value !== null) return // 当前已有正在编辑的项
-  categories.value.push('')
-  isAdding = true
+  categories.value.push({label:'',value:'0'})
+  isAdding.value = true
   editIndex.value = categories.value.length - 1
   editText.value = ''
 }
 
 const startEdit = (index,name,id=null) => {
-  console.log("start edit");
+  if(isAdding.value) return
   editIndex.value = index
   editText.value = name
   editId.value = id
 }
 
-const cancelEdit = () => {
+const cancelEdit = (newName) => {
   // 删除空的新建分类
-  if (categories.value[editIndex.value] === '' && editIndex.value === categories.value.length - 1) {
+  if (newName === '' && isAdding.value) {
     categories.value.pop()
   }
   editIndex.value = null
   editText.value = ''
   editId.value = null
-  isAdding = false
+  isAdding.value = false
+  // internalVisible.value = false
+  utils.getSysType("true","")
+    .then(({code,data,msg})=>{
+      if(code==200){
+        categories.value= Array.from({length:data.length},(_,i)=>({
+          value:data[i].id,
+          label:data[i].name
+        }))
+      }
+    })
+    .catch(({code,data,msg})=>{ElMessage.error(msg)})
+  categories.value = [...categories.value]
 }
 
-const saveEdit = (index) => {
+const saveEdit = () => {
   const newName = editText.value.trim()
+  let index = editIndex.value
   if (!newName) {
     cancelEdit()
     return
@@ -114,14 +127,36 @@ const saveEdit = (index) => {
     showDuplicateWarning.value = true
     return
   }
-  if(isAdding){
+  if (newName === "未分类"){
+    ElMessage.info("你不可以设置这个分类")
+    return
+  }
+  if(isAdding.value){
     utils.newSysType(newName)
     .then(({code,msg})=>{
-      if(code==200) ElMessage.
+      if(code==200) ElMessage.success("添加成功")
+      else {
+        ElMessage.error(msg)
+        categories.value[index]= {label:'',value:0}
+      }
     })
+    .catch((code,msg)=>{
+      ElMessage.error(msg)
+      categories.value[index]= {label:'',value:0}
+    }).finally(()=>cancelEdit(newName))
+  }else{
+    utils.updateSysType(newName,editId.value)
+    .then(({code,msg})=>{
+      if(code==200) ElMessage.success("修改成功")
+      else {
+        ElMessage.error(msg)
+      }
+    })
+    .catch((code,msg)=>{
+      ElMessage.error(msg)
+    }).finally(()=>cancelEdit(newName))
   }
-  categories.value[index] = newName
-  cancelEdit()
+  
 }
 </script>
 

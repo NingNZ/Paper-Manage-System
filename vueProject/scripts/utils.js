@@ -90,9 +90,6 @@ const utils = {
             },
             responseType: 'blob' // 告诉 axios 返回二进制数据（Blob）
         }).then((response)=>{
-
-            console.log("download enter");
-            // console.log(JSON.stringify(response,null,2))
             //**** */
             const contentDisposition = response.headers['content-disposition']||response.headers['Content-Disposition'];
             let finalFileName = 'default';
@@ -186,6 +183,82 @@ const utils = {
      return axios.get(utils.url+'/sysType/new', {
             params: {
                 name:name
+            },
+            timeout:3000
+        }).then((response) => {
+            return {
+                code: response.data.code,
+                msg: response.data.msg
+            }
+        }).catch(error => {
+        // 处理错误
+            return Promise.reject({
+                code:404,
+                msg:"服务不可用"
+            })
+        })
+    },
+    /**
+     * 
+     * @param {String} name 
+     * @param {String} id 
+     * @returns 
+     */
+    updateSysType (name,id){
+     return axios.get(utils.url+'/sysType/update', {
+            params: {
+                name:name,
+                id:id
+            },
+            timeout:3000
+        }).then((response) => {
+            return {
+                code: response.data.code,
+                msg: response.data.msg
+            }
+        }).catch(error => {
+        // 处理错误
+            return Promise.reject({
+                code:404,
+                msg:"服务不可用"
+            })
+        })
+    },
+        /**
+     * 
+     * @param {String} name 
+     * @returns 
+     */
+    newSysJournal (name){
+     return axios.get(utils.url+'/sysJournal/new', {
+            params: {
+                name:name
+            },
+            timeout:3000
+        }).then((response) => {
+            return {
+                code: response.data.code,
+                msg: response.data.msg
+            }
+        }).catch(error => {
+        // 处理错误
+            return Promise.reject({
+                code:404,
+                msg:"服务不可用"
+            })
+        })
+    },
+    /**
+     * 
+     * @param {String} name 
+     * @param {String} id 
+     * @returns 
+     */
+    updateSysJournal (name,id){
+     return axios.get(utils.url+'/sysJournal/update', {
+            params: {
+                name:name,
+                id:id
             },
             timeout:3000
         }).then((response) => {

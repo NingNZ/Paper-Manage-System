@@ -231,7 +231,6 @@ const submit = () => {
     fileList.value=[]
   }
   else{
-    console.log(form.value)
     submitForm()
     emit('update:visible', false)
   }
