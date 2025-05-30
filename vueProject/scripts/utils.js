@@ -95,18 +95,11 @@ const utils = {
             // console.log(JSON.stringify(response,null,2))
             //**** */
             const contentDisposition = response.headers['content-disposition']||response.headers['Content-Disposition'];
-            console.log(contentDisposition)
             let finalFileName = 'default';
             if (contentDisposition) {
                 const match = contentDisposition.match(/filename*="(.+?)"$/);
                 if (match) finalFileName = match[1];
             }
-            console.log(finalFileName)
-            
-           
-
-
-
             // 2. 将响应数据转为 Blob 对象
             const blob = new Blob([response.data], { 
                 type: response.headers['content-type'] // 设置文件类型（如 application/pdf）
@@ -127,7 +120,33 @@ const utils = {
             console.log("download fail");
             ElMessage.error("下载失败")
             console.error('Download error:', error); // 错误处理
-        }) 
-},
+        })         
+    },
+    /**
+     * 
+     * @param {String} paperId 
+     */
+    deleteSysPaper(paperId){
+     return axios.delete(utils.url+'/sysPaper/delete', {
+            params: {
+                paperId: paperId,
+            },
+            timeout:3000
+        }).then((response) => {
+        // 处理返回数据
+            return {
+                code: response.data.code,
+                data:[],
+                msg: response.data.msg
+            }
+        }).catch(error => {
+        // 处理错误
+            return Promise.reject({
+                code:404,
+                data:[],
+                msg:"服务不可用"
+            })
+        })
+    },
 };
 export default utils;

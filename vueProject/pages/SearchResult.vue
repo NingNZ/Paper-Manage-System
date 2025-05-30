@@ -40,7 +40,7 @@ const setAllData = (data) =>{
   }));
 }
 const sendAndGet=() =>{
-    axios.get(utils.url+'/search', {
+  return axios.get(utils.url+'/search', {
     params: {
       type: selectedType.value,
       key: searchWord.value
@@ -54,27 +54,43 @@ const sendAndGet=() =>{
     code = response.data[0].code
     msg = response.data[0].msg
     if(code==200){
-      ElMessage.success("搜索成功")
+      setAllData(response.data.slice(1))
+      return {
+        code:code,
+        msg:"搜索成功"
+      }
     }
     else if(code==201){
-      ElMessage.info("数据库中不存在相关论文")
+      setAllData(response.data.slice(1))
+      return {
+        code:code,
+        msg:"数据库中不存在相关论文"
+      }
     }
-    console.log(code)
-    console.log(msg)
-    setAllData(response.data.slice(1))
   })
   .catch(error => {
     // 处理错误
-    ElMessage.error("服务器未连接")
     allData.value = []
     console.error(error)
+    return {
+      code:404,
+      msg:"服务器未连接"
+    }
   })
 }
 onMounted(()=>{
   if(localStorage.getItem('typeSave')){
     selectedType.value = localStorage.getItem('typeSave')
     searchWord.value = localStorage.getItem('keySave')
-    sendAndGet()
+    sendAndGet().then(({code,msg})=>{
+      if(code==200){
+        ElMessage.success(msg)
+      }else{
+        ElMessage.info(msg)
+      }
+    }).catch(({code,msg})=>{
+      ElMessage.error(msg)
+    })
   }else{
     selectedType.value='0'
     searchWord.value=[]
@@ -87,6 +103,15 @@ const search = ()=>{
       localStorage.setItem('typeSave',selectedType.value)
       localStorage.setItem('keySave',searchWord.value)
       sendAndGet()
+      .then(({code,msg})=>{
+        if(code==200){
+          ElMessage.success(msg)
+        }else{
+          ElMessage.info(msg)
+        }})
+      .catch(({code,msg})=>{
+          ElMessage.error(msg)
+        })
     }
 }
 localStorage.setItem('isSearch',true)
@@ -114,7 +139,6 @@ const handleEdit = (item) => {
   showEditDialog.value = true
 }
 const handleDownload = (item) =>{
-  // console.log(item.id)
   utils.downloadSysPaper(item.id)
 
 }
@@ -133,8 +157,22 @@ const handleDelete = (item) => {
 }
 
 const confirmDelete = () => {
-  allData.value = allData.value.filter(i => i.seq !== currentDeleteItem.value.seq)
+  console.log(currentDeleteItem.value)
   showDeleteDialog.value = false
+  utils.deleteSysPaper(currentDeleteItem.value.id)
+  .then(({code,data,msg})=>{
+    if(code==200){
+      ElMessage.success("删除成功")
+      sendAndGet()
+      .catch(({code,msg})=>{
+        ElMessage.error(msg)
+      })
+    }
+    else ElMessage.error(msg)
+  }).catch(({code,data,msg})=>{
+    ElMessage.error(msg)
+  })
+  
 }
 </script>
 
@@ -230,7 +268,7 @@ const confirmDelete = () => {
       v-model="showEditDialog"
       :item="currentEditItem"
       @confirm="updateCategory"
-      @close="showEditDialog = false"
+      @close="showEditDialog = false;"
     />
     <DeleteDialog
       v-model="showDeleteDialog"
