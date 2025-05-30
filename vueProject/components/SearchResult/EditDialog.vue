@@ -14,9 +14,9 @@
       >
         <el-option
           v-for="option in categoryOptions"
-          :key="option"
-          :label="option"
-          :value="option"
+          :key="option.value"
+          :label="option.label"
+          :value="option.value"
         />
       </el-select>
     </div>
@@ -35,7 +35,7 @@ const props = defineProps({
   item: Object,
   categoryOptions: {
     type: Array,
-    default: () => ['默认分类', '科技类', '综述类', '其他']  // 可选
+    default: () => [{label:'A',value:'0'}, {label:'B',value:'1'}]  // 可选
   }
 })
 

@@ -28,6 +28,8 @@ const showJournalDialog = ref(false)
 const currentEditItem = ref(null)
 const currentDeleteItem = ref(null)
 
+const editTypeOption = ref([])
+
 const setAllData = (data) =>{
     allData.value = Array.from({length:data.length},(_,i)=>({
     id:data[i].id,
@@ -49,8 +51,6 @@ const sendAndGet=() =>{
   })
   .then((response) => {
     // 处理返回数据
-    console.log("enter")
-    console.log(response.data[0])
     code = response.data[0].code
     msg = response.data[0].msg
     if(code==200){
@@ -137,6 +137,18 @@ const paginatedData = computed(() => {
 
 const handleEdit = (item) => {
   currentEditItem.value = { ...item }
+  utils.getSysType("true",'')
+  .then(({code,data,msg})=>{
+    if(code==200){
+      editTypeOption.value = Array.from({length:data.length},(_,i)=>({
+        value:data[i].id,
+        label:data[i].name
+      }))
+    }
+  })
+  .catch(({code,data,msg})=>{
+    ElMessage.error("服务器未连接")
+  })
   showEditDialog.value = true
 }
 const handleDownload = (item) =>{
@@ -145,10 +157,18 @@ const handleDownload = (item) =>{
 }
 
 const updateCategory = (newCategory) => {
-  const index = allData.value.findIndex(i => i.seq === currentEditItem.value.seq)
-  if (index !== -1) {
-    allData.value[index].category = newCategory
-  }
+  utils.updateSysPaper(currentEditItem.value.id,newCategory)
+  .then(({code,data,msg})=>{
+    if(code==200){
+      ElMessage.success("更新成功");
+      sendAndGet();
+    }else{
+      ElMessage.error(msg)
+    }
+  })
+  .catch(({code,data,msg})=>{
+    ElMessage.error(msg)
+  })
   showEditDialog.value = false
 }
 
@@ -268,6 +288,7 @@ const confirmDelete = () => {
     <EditDialog
       v-model="showEditDialog"
       :item="currentEditItem"
+      :categoryOptions="editTypeOption"
       @confirm="updateCategory"
       @close="showEditDialog = false;"
     />

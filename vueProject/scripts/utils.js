@@ -148,5 +148,34 @@ const utils = {
             })
         })
     },
+    /**
+     * 
+     * @param {String} paperId 
+     * @param {String} typeId 
+     * @returns 
+     */
+    updateSysPaper(paperId,typeId){
+     return axios.get(utils.url+'/sysPaper/update', {
+            params: {
+                paperId: paperId,
+                typeId:typeId
+            },
+            timeout:3000
+        }).then((response) => {
+        // 处理返回数据
+            return {
+                code: response.data.code,
+                data:[],
+                msg: response.data.msg
+            }
+        }).catch(error => {
+        // 处理错误
+            return Promise.reject({
+                code:404,
+                data:[],
+                msg:"服务不可用"
+            })
+        })
+    },
 };
 export default utils;
