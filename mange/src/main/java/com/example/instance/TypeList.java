@@ -34,4 +34,32 @@ public class TypeList {
             }
         }
     }
+    public boolean insertType(String name){
+        String sql1 = "Insert into sysType (name,sid) values (?,null)";
+        try{
+            int res = sqlUtil.update(sql1,name);
+            if(res!=1){
+                return false;
+            }
+            return true;
+        }catch (SQLException e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+    public boolean updateType(String name,String id){
+        String sql1 = "update sysType set name=? where id=?";
+        try{
+            int res = sqlUtil.update(sql1,name,id);
+            if(res!=1) return false;
+            else return true;
+        }catch (SQLException e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+    public TypeList update() throws SQLException {
+        getSqlTypeInfo("");
+        return this;
+    }
 }

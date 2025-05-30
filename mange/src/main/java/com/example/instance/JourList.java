@@ -27,4 +27,28 @@ public class JourList {
             this.jourList.add(row);
         }
     }
+    public boolean insertJournal(String name){
+        String sql1 = "Insert into sysJournal (name) values (?)";
+        try{
+            int res = sqlUtil.update(sql1,name);
+            if(res!=1){
+                return false;
+            }
+            return true;
+        }catch (SQLException e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+    public boolean updateJournal(String name,String id){
+        String sql1 = "update sysJournal set name=? where id=?";
+        try{
+            int res = sqlUtil.update(sql1,name,id);
+            if(res!=1) return false;
+            else return true;
+        }catch (SQLException e){
+            e.printStackTrace();
+            return false;
+        }
+    }
 }
