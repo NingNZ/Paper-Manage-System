@@ -255,11 +255,16 @@ const submitForm=()=>{
     },
   })
   .then(response =>{
-    console.log('submit success',response.data);
-    ElMessage.success("上传成功")
+    if(response.data.code==200){
+      ElMessage.success("上传成功")
+    }else{
+      ElMessage.error("上传失败")
+    }
+    
   })
   .catch(error=>{
     console.log("submit fail",error)
+    ElMessage.error("上传失败")
   })
 }
 </script>
