@@ -24,23 +24,12 @@
         <template v-else>
           <span>{{ item.label }}</span>
           <div>
-            <img src="../../assets/edit.svg" class="icon-action" @click="startEdit(index,item.value, item.label)" />
-            <!-- &nbsp;
-            <img src="../../assets/delete.svg" class="icon-action" @click="confirmDelete(index)" /> -->
+            <img src="../../assets/edit.svg" class="icon-action" @click="startEdit(index,item.value, item.label)" />            
           </div>
         </template>
       </li>
     </ul>
   </el-dialog>
-
-  <!-- 确认删除弹窗 -->
-  <!-- <el-dialog v-model="showDeleteConfirm" title="确认删除" width="400px">
-    <span>确定要删除分类 "{{ categories[deleteIndex].label }}" 吗？此操作不可恢复。</span>
-    <template #footer>
-      <el-button @click="showDeleteConfirm = false">取消</el-button>
-      <el-button type="danger" @click="doDelete">确认删除</el-button>
-    </template>
-  </el-dialog> -->
 
   <!-- 重复名称警告弹窗 -->
   <el-dialog v-model="showDuplicateWarning" title="分类名重复" width="400px">
@@ -86,9 +75,6 @@ const editIndex = ref(null)
 const editId = ref(0)
 const editText = ref('')
 
-const showDeleteConfirm = ref(false)
-const deleteIndex = ref(null)
-
 const showDuplicateWarning = ref(false)
 
 const addCategory = () => {
@@ -130,17 +116,6 @@ const saveEdit = (index) => {
 
   categories.value[index] = newName
   cancelEdit()
-}
-
-const confirmDelete = (index) => {
-  deleteIndex.value = index
-  showDeleteConfirm.value = true
-}
-
-const doDelete = () => {
-  categories.value.splice(deleteIndex.value, 1)
-  showDeleteConfirm.value = false
-  deleteIndex.value = null
 }
 </script>
 
