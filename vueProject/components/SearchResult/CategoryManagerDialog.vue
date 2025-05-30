@@ -1,5 +1,5 @@
 <template>
-  <el-dialog :model-value="visible" @update:model-value="emit('update:visible', $event)" title="管理分类" width="400px">
+  <el-dialog :model-value="internalVisible" @update:modelValue="val=>internalVisible=val" title="管理分类" width="400px">
     <template #header>
       <div style="display: flex; justify-content: space-between; align-items: center;">
         <span>管理分类</span>
@@ -7,7 +7,9 @@
       </div>
     </template>
     <ul>
-      <li v-for="(item, index) in categories" :key="index" class="item-row">
+      <li v-for="(item,index) in categories" 
+          :key="item.value"
+          class="item-row">
         <template v-if="editIndex === index">
           <input
             v-model="editText"
@@ -20,11 +22,11 @@
           </div>
         </template>
         <template v-else>
-          <span>{{ item }}</span>
+          <span>{{ item.label }}</span>
           <div>
-            <img src="../../assets/edit.svg" class="icon-action" @click="startEdit(index, item)" />
-            &nbsp;
-            <img src="../../assets/delete.svg" class="icon-action" @click="confirmDelete(index)" />
+            <img src="../../assets/edit.svg" class="icon-action" @click="startEdit(index,item.value, item.label)" />
+            <!-- &nbsp;
+            <img src="../../assets/delete.svg" class="icon-action" @click="confirmDelete(index)" /> -->
           </div>
         </template>
       </li>
@@ -32,13 +34,13 @@
   </el-dialog>
 
   <!-- 确认删除弹窗 -->
-  <el-dialog v-model="showDeleteConfirm" title="确认删除" width="400px">
-    <span>确定要删除分类 "{{ categories[deleteIndex] }}" 吗？此操作不可恢复。</span>
+  <!-- <el-dialog v-model="showDeleteConfirm" title="确认删除" width="400px">
+    <span>确定要删除分类 "{{ categories[deleteIndex].label }}" 吗？此操作不可恢复。</span>
     <template #footer>
       <el-button @click="showDeleteConfirm = false">取消</el-button>
       <el-button type="danger" @click="doDelete">确认删除</el-button>
     </template>
-  </el-dialog>
+  </el-dialog> -->
 
   <!-- 重复名称警告弹窗 -->
   <el-dialog v-model="showDuplicateWarning" title="分类名重复" width="400px">
@@ -50,13 +52,38 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
+import utils from '../../scripts/utils'
+import { ElMessage } from 'element-plus'
 
 const props = defineProps({ visible: Boolean })
+const internalVisible = ref(props.visible)
 const emit = defineEmits(['update:visible'])
+watch(()=>props.visible,(val)=>{
+  if(val){
+    internalVisible.value=props.visible
+  }
+})
+watch(internalVisible,(val)=>{
+  if(!val){
+    emit("update:visible",val)
+  }else{
+    utils.getSysType("true","")
+    .then(({code,data,msg})=>{
+      if(code==200){
+        categories.value= Array.from({length:data.length},(_,i)=>({
+          value:data[i].id,
+          label:data[i].name
+        }))
+      }
+    })
+    .catch(({code,data,msg})=>{ElMessage.error(msg)})
+  }
+})
 
-const categories = ref(["默认分类", "AI", "网络安全"])
+const categories = ref([{label:'A',value:'0'}, {label:'B',value:'1'},{label:'C',value:'2'}])
 const editIndex = ref(null)
+const editId = ref(0)
 const editText = ref('')
 
 const showDeleteConfirm = ref(false)
@@ -71,9 +98,11 @@ const addCategory = () => {
   editText.value = ''
 }
 
-const startEdit = (index, value) => {
+const startEdit = (index,id,name) => {
   editIndex.value = index
-  editText.value = value
+  console.log(index)
+  editId.value = id
+  editText.value = name
 }
 
 const cancelEdit = () => {
@@ -81,7 +110,6 @@ const cancelEdit = () => {
   if (categories.value[editIndex.value] === '' && editIndex.value === categories.value.length - 1) {
     categories.value.pop()
   }
-
   editIndex.value = null
   editText.value = ''
 }
