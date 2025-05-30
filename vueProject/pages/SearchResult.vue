@@ -113,6 +113,11 @@ const handleEdit = (item) => {
   currentEditItem.value = { ...item }
   showEditDialog.value = true
 }
+const handleDownload = (item) =>{
+  // console.log(item.id)
+  utils.downloadSysPaper(item.id)
+
+}
 
 const updateCategory = (newCategory) => {
   const index = allData.value.findIndex(i => i.seq === currentEditItem.value.seq)
@@ -187,7 +192,7 @@ const confirmDelete = () => {
               <td><b>{{ item.journal }}</b></td>
               <td><b>{{ item.type }}</b></td>
               <td>
-                <img src="../assets/download.svg" alt="下载" class="icon-action" />
+                <img src="../assets/download.svg" alt="下载" class="icon-action" @click="handleDownload(item)" />
                 &nbsp;
                 <img src="../assets/edit.svg" alt="编辑" class="icon-action" @click="handleEdit(item)" />
                 &nbsp;

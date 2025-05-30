@@ -238,12 +238,11 @@ const submit = () => {
 }
 const submitForm=()=>{
   const formData = new FormData();
-  formData.append('title', form.value.title);
+  formData.append('title', form.value.title.trim().replaceAll(" ","_"));
   formData.append('authors', JSON.stringify(form.value.authors)); // 数组转字符串
   formData.append('type', form.value.type);
   formData.append('journal', form.value.journal);
-
-  const dateObj = new Date(form.value.date)
+  const dateObj = new Date(form.value.date) //日期
   formData.append('date',String(dateObj.getFullYear())+"-"+String(dateObj.getMonth()+1).padStart(2,0));
   formData.append('file', form.value.file); // 文件
   //测试代码
@@ -257,6 +256,7 @@ const submitForm=()=>{
   })
   .then(response =>{
     console.log('submit success',response.data);
+    ElMessage.success("上传成功")
   })
   .catch(error=>{
     console.log("submit fail",error)
