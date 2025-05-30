@@ -24,7 +24,7 @@
         <template v-else>
           <span>{{ item.label }}</span>
           <div>
-            <img src="../../assets/edit.svg" class="icon-action" @click="startEdit(index,item.value, item.label)" />            
+            <img src="../../assets/edit.svg" class="icon-action" @click="startEdit(index,item.label,item.value)" />            
           </div>
         </template>
       </li>
@@ -69,26 +69,26 @@ watch(internalVisible,(val)=>{
     .catch(({code,data,msg})=>{ElMessage.error(msg)})
   }
 })
-
+let isAdding = false
 const categories = ref([{label:'A',value:'0'}, {label:'B',value:'1'},{label:'C',value:'2'}])
 const editIndex = ref(null)
-const editId = ref(0)
+const editId = ref(null)
 const editText = ref('')
-
 const showDuplicateWarning = ref(false)
 
 const addCategory = () => {
   if (editIndex.value !== null) return // 当前已有正在编辑的项
   categories.value.push('')
+  isAdding = true
   editIndex.value = categories.value.length - 1
   editText.value = ''
 }
 
-const startEdit = (index,id,name) => {
+const startEdit = (index,name,id=null) => {
+  console.log("start edit");
   editIndex.value = index
-  console.log(index)
-  editId.value = id
   editText.value = name
+  editId.value = id
 }
 
 const cancelEdit = () => {
@@ -98,6 +98,8 @@ const cancelEdit = () => {
   }
   editIndex.value = null
   editText.value = ''
+  editId.value = null
+  isAdding = false
 }
 
 const saveEdit = (index) => {
@@ -106,14 +108,18 @@ const saveEdit = (index) => {
     cancelEdit()
     return
   }
-
   // 判断是否有重名（除自己）
-  const duplicate = categories.value.some((c, i) => i !== index && c === newName)
+  const duplicate = categories.value.some((c, i) => i !== index && c.label === newName)
   if (duplicate) {
     showDuplicateWarning.value = true
     return
   }
-
+  if(isAdding){
+    utils.newSysType(newName)
+    .then(({code,msg})=>{
+      if(code==200) ElMessage.
+    })
+  }
   categories.value[index] = newName
   cancelEdit()
 }

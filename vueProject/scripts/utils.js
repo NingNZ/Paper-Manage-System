@@ -177,5 +177,29 @@ const utils = {
             })
         })
     },
+    /**
+     * 
+     * @param {String} name 
+     * @returns 
+     */
+    newSysType (name){
+     return axios.get(utils.url+'/sysType/new', {
+            params: {
+                name:name
+            },
+            timeout:3000
+        }).then((response) => {
+            return {
+                code: response.data.code,
+                msg: response.data.msg
+            }
+        }).catch(error => {
+        // 处理错误
+            return Promise.reject({
+                code:404,
+                msg:"服务不可用"
+            })
+        })
+    },
 };
 export default utils;
