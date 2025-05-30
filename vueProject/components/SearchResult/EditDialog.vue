@@ -48,6 +48,9 @@ watch(() => props.modelValue, (val) => {
   internalVisible.value = val
 })
 watch(internalVisible, (val) => {
+  if(val){
+    selectedCategory.value=''
+  }
   emit('update:modelValue', val)
 })
 
