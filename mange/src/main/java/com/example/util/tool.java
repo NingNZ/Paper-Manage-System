@@ -18,11 +18,4 @@ public class tool {
         row.put("msg",msg);
         return row;
     }
-    public static boolean checkFileExist(String filepath){
-        Path path = Paths.get(filepath);
-        return Files.exists(path);
-    }
-
-
-
 }

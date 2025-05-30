@@ -3,7 +3,10 @@ package com.example.instance;
 import com.example.util.paperUtil;
 import com.example.util.sqlUtil;
 import com.example.util.tool;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -41,6 +44,12 @@ public class Paper {
         }
     }
 
+    public String getTitle() {
+        return title+".pdf";
+    }
+    public boolean isNull(){
+        return this.id==null;
+    }
     public static String insertToSysPaper(
             String title,
             String jourId,
@@ -70,7 +79,7 @@ public class Paper {
     }
     private void sqlGetAuthors(){
         authors = "";
-        if(this.id!=null){
+        if(!this.isNull()){
             String sql2 ="select users.name  from users,authors " +
                     "where authors.userId = users.id and authors.paperId= ? ;";
             try(ResultSet resAuthor = sqlUtil.query(sql2,this.id)){
@@ -100,5 +109,58 @@ public class Paper {
         row.put("typeid",typeid);
         return row;
     }
+    public File getRelateFile(){
+        if(this.isNull()) return null;
+        String filepath = "D:\\code\\idea_java\\mange\\uploadSysFiles";
+        return new File(filepath,this.id+".pdf");
+    }
+    public  boolean fileLocalSave(MultipartFile file){
+        if (file.isEmpty()) {
+            System.out.println("File is empty!");
+            return false;
+        }
+        try {
+            // 设置文件存储路径
+            String uploadFolder = "D:\\code\\idea_java\\mange\\uploadSysFiles";
+            File folder = new File(uploadFolder);
+            if (!folder.exists()) {
+                folder.mkdirs();
+            }
+            // 获取文件名
+            String fileName = id+".pdf";
+            // 设置文件存储路径
+            File targetFile = new File(folder, fileName);
+            // 保存文件
+            file.transferTo(targetFile);
+            System.out.println("File uploaded successfully: " + targetFile.getAbsolutePath());
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("File upload failed: " + e.getMessage());
+            return false;
+        }
+        return true;
+    }
+    public boolean fileSqlDelete(){
+        String sql1 = "delete from syspaper where id =?";
+        String sql2 = "delete from authors where paperId =?";
+        if(this.isNull()) return false;
+        try{
+            int res2 = sqlUtil.update(sql2,this.id);
+        }catch (SQLException e){
+            e.printStackTrace();
+            return false;
+        }
+        try{
+            int res1 = sqlUtil.update(sql1,this.id);
+        }catch (SQLException e){
+            e.printStackTrace();
+            return false;
+        }
+        if(this.getRelateFile().exists()){
+            this.getRelateFile().delete();
+        }
+        return  true;
+    }
+
 }
 

@@ -90,32 +90,7 @@ public class paperUtil {
         fileName = fileNameBuilder.toString();
         byte[] bid = DigestUtils.md5Digest(fileName.getBytes());
         String res = Arrays.toString(bid).substring(2,8);
-        return res.replace(' ','&');
-    }
-    public static boolean fileLocalSave(String id, MultipartFile file){
-        if (file.isEmpty()) {
-            System.out.println("File is empty!");
-            return false;
-        }
-        try {
-            // 设置文件存储路径
-            String uploadFolder = "D:\\code\\idea_java\\mange\\uploadSysFiles";
-            File folder = new File(uploadFolder);
-            if (!folder.exists()) {
-                folder.mkdirs();
-            }
-            // 获取文件名
-            String fileName = id+".pdf";
-            // 设置文件存储路径
-            File targetFile = new File(folder, fileName);
-            // 保存文件
-            file.transferTo(targetFile);
-            System.out.println("File uploaded successfully: " + targetFile.getAbsolutePath());
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("File upload failed: " + e.getMessage());
-            return false;
-        }
-        return true;
+        res = res.replace(' ','&');
+        return res.replace('.','%');
     }
 }
