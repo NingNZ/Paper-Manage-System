@@ -3,25 +3,52 @@ import bar from "../components/bar.vue";
 import CreateTeamDialog from "../components/MyTeam/CreateTeamDialog.vue";
 import JoinTeamDialog from "../components/MyTeam/JoinTeamDialog.vue";
 import LeaveConfirmDialog from "../components/MyTeam/LeaveConfirmDialog.vue";
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { ElMessage } from 'element-plus';
+import teamUtils from "../scripts/team";
 
+const setAllData = (data)=>{
+  fullTableData.value = Array.from({length:data.length},(_,i)=>({
+    name:data[i].name,
+    id:data[i].id,
+    leader:data[i].leaderName
+  }));
+  fullTableData.value=[...fullTableData.value]
+}
+const sendAndSet = (userId)=>{
+  teamUtils.getMyTeamList(userId)
+  .then(({code,data,msg})=>{
+    if(code==200){
+      if(data.length==0){
+        ElMessage.info("你还没有加入任何团队")
+      }else{
+        ElMessage.success("导入已加入的团队")
+      }
+    }else{
+      ElMessage.error(msg)
+    }
+    setAllData(data)
+  })
+  .catch(({code,data,msg})=>{
+    ElMessage.error(msg)
+    setAllData(data)
+  }) 
+}
+onMounted(()=>{
+  const userId = localStorage.getItem("userId")
+  sendAndSet(userId)
+})
 // 全部团队数据
 const fullTableData = ref([
-  { name: 'AI科研小组', number: '#01', leader: 'Linda' },
-  { name: 'CS科研小组', number: '#02', leader: 'Jason' },
-  { name: 'Web小队', number: '#03', leader: 'Alice' },
-  { name: '机器人研究', number: '#04', leader: 'Mock' },
-  { name: '算法设计', number: '#05', leader: 'Jack' },
-  { name: 'AI算法', number: '#06', leader: 'Jily' },
+  { name: null, id: null, leader: null },
 ]);
 
 const joinableTeams = ref([
-  { name: 'AI科研小组', number: '#01', leader: 'Linda' },
-  { name: 'AI算法', number: '#06', leader: 'Jily' },
-  { name: 'AI避障', number: '#07', leader: 'Bob' },
-  { name: 'AI机器人', number: '#08', leader: 'Duck' },
-  { name: 'AI小助手', number: '#09', leader: 'Domb' },
+  { name: 'AI科研小组', id: '#01', leader: 'Linda' },
+  { name: 'AI算法', id: '#06', leader: 'Jily' },
+  { name: 'AI避障', id: '#07', leader: 'Bob' },
+  { name: 'AI机器人', id: '#08', leader: 'Duck' },
+  { name: 'AI小助手', id: '#09', leader: 'Domb' },
 ]);
 
 const currentPage = ref(1);
@@ -62,13 +89,15 @@ const openLeaveDialog = (team) => {
 };
 
 function handleCreateTeam(name) {
-  const newTeam = {
-    name,
-    number: `#${String(fullTableData.value.length + 1).padStart(2, '0')}`,
-    leader: '未指定',
-  };
-  fullTableData.value.push(newTeam);
-  ElMessage.success(`团队 "${name}" 创建成功`);
+  console.log(name)
+  // const newTeam = {
+  //   name,
+  //   id: `#${String(fullTableData.value.length + 1).padStart(2, '0')}`,
+  //   leader: '未指定',
+  // };
+  // fullTableData.value.push(newTeam);
+  // ElMessage.success(`团队 "${name}" 创建成功`);
+
 }
 </script>
 
@@ -83,7 +112,7 @@ function handleCreateTeam(name) {
       <div class="table-wrapper">
         <el-table :data="pagedTableData" style="width: 100%;" max-height="400">
           <el-table-column prop="name" label="团队名" width="180" />
-          <el-table-column prop="number" label="团队编号" width="180" />
+          <el-table-column prop="id" label="团队编号" width="180" />
           <el-table-column prop="leader" label="团队组长" width="180" />
           <el-table-column label="操作">
             <template #default="scope">

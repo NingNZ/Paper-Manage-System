@@ -40,6 +40,7 @@ const setAllData = (data) =>{
     journal:data[i].journal,
     type:data[i].type
   }));
+    allData.value = [...allData.value]
 }
 const sendAndGet=() =>{
   return axios.get(utils.url+'/search', {
