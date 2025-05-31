@@ -58,7 +58,7 @@ public class Paper {
             String teamId,
             String time
     ){
-        String id = "#pid"+ paperUtil.generateHash(title);
+        String id = "#pid"+ paperUtil.generateHash(title,6);
         System.out.println(id);
         String sql1 = "insert into syspaper (id,title,jourId,typeId,teamId,time) values (?,?,?,?,?,?)";
         try{

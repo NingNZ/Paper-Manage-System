@@ -79,17 +79,17 @@ public class paperUtil {
         res.close();
         return paperIdList;
     }
-    public static String generateHash(String fileName) {
-        if (fileName == null) {
+    public static String generateHash(String Name,int length) {
+        if (Name == null) {
             return null;
         }
-        StringBuilder fileNameBuilder = new StringBuilder(fileName);
+        StringBuilder fileNameBuilder = new StringBuilder(Name);
         while(fileNameBuilder.length()<6){
             fileNameBuilder.append(new Random().nextInt(40, 123));
         }
-        fileName = fileNameBuilder.toString();
-        byte[] bid = DigestUtils.md5Digest(fileName.getBytes());
-        String res = Arrays.toString(bid).substring(2,8);
+        Name = fileNameBuilder.toString();
+        byte[] bid = DigestUtils.md5Digest(Name.getBytes());
+        String res = Arrays.toString(bid).substring(2,2+length);
         res = res.replace(' ','&');
         return res.replace('.','%');
     }

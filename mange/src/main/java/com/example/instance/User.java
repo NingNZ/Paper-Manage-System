@@ -46,4 +46,7 @@ public class User {
             return row;
         }
     }
+    public boolean equalToUserId(String uid){
+        return this.id.equals(uid);
+    }
 }
