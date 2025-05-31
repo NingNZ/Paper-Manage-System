@@ -119,7 +119,7 @@ const search = ()=>{
 localStorage.setItem('isSearch',true)
 const currentPage = ref(1)
 const pageSize = ref(10)
-const total = ref(allData.value.length)
+const total = computed(()=>allData.value.length)
 
 const handlePageChange = (page) => {
   currentPage.value = page
