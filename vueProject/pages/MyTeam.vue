@@ -3,7 +3,7 @@ import bar from "../components/bar.vue";
 import CreateTeamDialog from "../components/MyTeam/CreateTeamDialog.vue";
 import JoinTeamDialog from "../components/MyTeam/JoinTeamDialog.vue";
 import LeaveConfirmDialog from "../components/MyTeam/LeaveConfirmDialog.vue";
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, useId } from 'vue';
 import { ElMessage } from 'element-plus';
 import teamUtils from "../scripts/team";
 
@@ -22,7 +22,7 @@ const sendAndSet = (userId)=>{
       if(data.length==0){
         ElMessage.info("你还没有加入任何团队")
       }else{
-        ElMessage.success("导入已加入的团队")
+        ElMessage.success("刷新已加入的团队")
       }
     }else{
       ElMessage.error(msg)
@@ -39,18 +39,14 @@ onMounted(()=>{
   sendAndSet(userId)
 })
 // 全部团队数据
-const fullTableData = ref([
-  { name: null, id: null, leader: null },
-]);
-
-const joinableTeams = ref([
-  { name: 'AI科研小组', id: '#01', leader: 'Linda' },
-  { name: 'AI算法', id: '#06', leader: 'Jily' },
-  { name: 'AI避障', id: '#07', leader: 'Bob' },
-  { name: 'AI机器人', id: '#08', leader: 'Duck' },
-  { name: 'AI小助手', id: '#09', leader: 'Domb' },
-]);
-
+/**
+ * @type {Array<{name:string,id:string,leader:string}>}
+ */
+const fullTableData = ref([]);
+/**
+ * @type {Array<{name:string,id:string,leader:string}>}
+ */
+const joinableTeams = ref([]);
 const currentPage = ref(1);
 const pageSize = ref(5);
 
@@ -75,12 +71,23 @@ const leaveDialogVisible = ref(false);
 const teamToLeave = ref(null);
 
 const confirmLeave = () => {
-  const index = fullTableData.value.findIndex(t => t.name === teamToLeave.value.name);
-  if (index !== -1) {
-    fullTableData.value.splice(index, 1);
-    ElMessage.success(`已退出团队 "${teamToLeave.value.name}"`);
-  }
-  leaveDialogVisible.value = false;
+  // console.log(teamToLeave.value)
+  const teamId = teamToLeave.value.id
+  const uid = localStorage.getItem("userId");
+  teamUtils.dropMember(teamId,uid)
+  .then(({code,msg})=>{
+    if(code==200){
+      sendAndSet(uid);
+      ElMessage.success("退出成功")
+    }else if(code==390){
+      ElMessage.error("组长不可以退出团队")
+    }else{
+      ElMessage.error(msg)
+    }
+  })
+  .catch(({code,msg})=>{
+    ElMessage.error(msg);
+  })
 };
 
 const openLeaveDialog = (team) => {
@@ -88,16 +95,21 @@ const openLeaveDialog = (team) => {
   leaveDialogVisible.value = true;
 };
 
-function handleCreateTeam(name) {
+const handleCreateTeam = (name)=>{
   console.log(name)
-  // const newTeam = {
-  //   name,
-  //   id: `#${String(fullTableData.value.length + 1).padStart(2, '0')}`,
-  //   leader: '未指定',
-  // };
-  // fullTableData.value.push(newTeam);
-  // ElMessage.success(`团队 "${name}" 创建成功`);
-
+  const leaderId = localStorage.getItem("userId")
+  teamUtils.createTeam(name,leaderId)
+  .then(({code,msg})=>{
+    if(code==200){
+      sendAndSet(leaderId)
+      ElMessage.success(`团队"${name}"创建成功`)
+    }else{
+      ElMessage.error(msg)
+    }
+  })
+  .catch(({code,msg})=>{
+    ElMessage.error(msg)
+  })
 }
 </script>
 

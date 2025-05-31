@@ -22,7 +22,7 @@
 
       <el-table :data="filteredTeams" border stripe style="margin-top: 20px;">
         <el-table-column prop="name" label="团队名" />
-        <el-table-column prop="number" label="团队编号" />
+        <el-table-column prop="nid" label="团队编号" />
         <el-table-column prop="leader" label="团队组长" />
         <el-table-column label="操作">
           <template #default="scope">

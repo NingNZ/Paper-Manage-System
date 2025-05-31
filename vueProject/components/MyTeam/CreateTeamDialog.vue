@@ -14,7 +14,6 @@
       <el-input
         v-model="teamName"
         placeholder="请输入团队名"
-        prefix-icon="UserFilled"
         class="input"
       />
       <div class="button-group">
@@ -28,7 +27,7 @@
 <script setup>
 import { ref, watch } from 'vue';
 import { ElMessage } from 'element-plus';
-
+import teamUtils from '../../scripts/team';
 const props = defineProps({
   modelValue: Boolean,
 });
@@ -38,16 +37,35 @@ const visible = ref(props.modelValue);
 const teamName = ref('');
 
 watch(() => props.modelValue, val => (visible.value = val));
-watch(visible, val => emits('update:modelValue', val));
+watch(visible, val => {
+  if(!val){
+    teamName.value=''
+  }
+  emits('update:modelValue', val)
+});
 
 function handleCreate() {
   if (!teamName.value.trim()) {
     ElMessage.warning('请输入团队名称');
     return;
   }
-  emits('create', teamName.value.trim());
-  visible.value = false;
-  teamName.value = '';
+  teamUtils.checkTeamExists(teamName.value.trim())
+  .then(({code,msg})=>{
+    if(code==400){
+      emits('create', teamName.value.trim());
+    }else if(code==200){
+      ElMessage.info("团队名已经被使用");
+      return;
+    }else{
+      ElMessage.error(msg)
+    }
+    visible.value = false;
+  })
+  .catch(({code,msg})=>{
+    ElMessage.error(msg)
+    visible.value = false;
+  })
+
 }
 
 function handleCancel() {
