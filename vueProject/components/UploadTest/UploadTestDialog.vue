@@ -257,9 +257,8 @@ const submitForm=()=>{
     if(response.data.code==200){
       ElMessage.success("上传成功")
     }else{
-      ElMessage.error("上传失败")
+      ElMessage.error(response.data.msg)
     }
-    
   })
   .catch(error=>{
     console.log("submit fail",error)
