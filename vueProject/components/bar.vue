@@ -23,7 +23,8 @@
   justify-content: space-between;
   background-color: #3398ff;
   color: white;
-  padding: 0.5rem 2rem;
+  padding: 0.5rem 2rem ;
+  border-radius: 12px 12px 0 0;
 }
 
 .logo {

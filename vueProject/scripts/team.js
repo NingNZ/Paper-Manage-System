@@ -128,6 +128,33 @@ const teamUtils = {
             })
         })
     },
+    /**
+     * 
+     * @param {String} teamId 
+     * @param {String} uid 
+     * @returns 
+     */
+    addMember(teamId,uid){
+       return axios.get(utils.url+'/myTeam/addMember', {
+            params: {
+                teamId:teamId,
+                uid:uid
+            },
+            timeout:3000
+        }).then((response) => {
+        // 处理返回数据
+            return {
+                code: response.data.code,
+                msg: response.data.msg
+            }
+        }).catch(error => {
+        // 处理错误
+            return Promise.reject({
+                code:404,
+                msg:"服务不可用"
+            })
+        })      
+    },
 
 }
 export default teamUtils

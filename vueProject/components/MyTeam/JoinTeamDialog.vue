@@ -5,7 +5,7 @@
     width="600px"
     center
     :before-close="closeDialog"
-    :show-close="false"
+    :show-close="true"
     modal-class="join-dialog-bg"
   >
     <div class="dialog-content">
@@ -61,17 +61,43 @@ const searchText = ref('');
 const search = ()=>{
   if(searchText.value.trim()==''){
     ElMessage.info("输入不能为空")
+    return;
   }
   teamUtils.searchOneTeam(searchText.value.trim())
   .then(({code,data,msg})=>{
     if(code==200){
-      joinableTeams.value = Array.
+      joinableTeams.value = Array.from({length:data.length},(_,i)=>({
+        name:data[i].name,
+        id:data[i].id,
+        leader:data[i].leaderName
+      }))
+      ElMessage.success("搜索成功")
+      joinableTeams.value = [...joinableTeams.value]
+    }else{
+      ElMessage.info(`团队id"${searchText.value.trim()}"不存在`)
     }
+  })
+  .catch(({code,data,msg})=>{
+    ElMessage.error(msg)
   })
 }
 
 function joinTeam(team) {
-  ElMessage.success(`已申请加入 ${team.name}`);
+  // ElMessage.success(`已申请加入 ${team.name}`);
+  const uid = localStorage.getItem("userId");
+  teamUtils.addMember(team.id,uid)
+  .then(({code,msg})=>{
+    if(code==200){
+      ElMessage.success(msg)
+    }else if(code==201){
+      ElMessage.info(msg)
+    }else{
+      ElMessage.error(msg);
+    }
+  })
+  .catch(({code,msg})=>{
+    ElMessage.error(msg);
+  })
 }
 
 function closeDialog() {

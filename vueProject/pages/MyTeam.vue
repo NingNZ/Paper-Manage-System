@@ -3,7 +3,7 @@ import bar from "../components/bar.vue";
 import CreateTeamDialog from "../components/MyTeam/CreateTeamDialog.vue";
 import JoinTeamDialog from "../components/MyTeam/JoinTeamDialog.vue";
 import LeaveConfirmDialog from "../components/MyTeam/LeaveConfirmDialog.vue";
-import { ref, computed, onMounted, useId } from 'vue';
+import { ref, computed, onMounted, useId, watch } from 'vue';
 import { ElMessage } from 'element-plus';
 import teamUtils from "../scripts/team";
 
@@ -52,7 +52,6 @@ const pagedTableData = computed(() => {
   const end = start + pageSize.value;
   return fullTableData.value.slice(start, end);
 });
-
 const handlePageChange = (page) => {
   currentPage.value = page;
 };
