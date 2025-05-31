@@ -11,18 +11,20 @@
     <div class="dialog-content">
       <el-input
         v-model="searchText"
-        placeholder="输入要搜索的团队"
+        placeholder="输入要搜索的团队编号"
         clearable
         class="search-box"
       >
         <template #suffix>
           <el-icon><Search /></el-icon>
         </template>
+        
       </el-input>
+      <button @click="search">搜索</button>
 
-      <el-table :data="filteredTeams" border stripe style="margin-top: 20px;">
+      <el-table :data="joinableTeams" border stripe style="margin-top: 20px;">
         <el-table-column prop="name" label="团队名" />
-        <el-table-column prop="nid" label="团队编号" />
+        <el-table-column prop="id" label="团队编号" />
         <el-table-column prop="leader" label="团队组长" />
         <el-table-column label="操作">
           <template #default="scope">
@@ -38,25 +40,35 @@
 import { ref, watch, computed } from 'vue';
 import { ElMessage } from 'element-plus';
 import { Search } from '@element-plus/icons-vue';
+import teamUtils from '../../scripts/team';
 
 const props = defineProps({
   modelValue: Boolean,
-  teams: Array,
 });
 const emits = defineEmits(['update:modelValue']);
-
+/**
+ * @type {Array<{name:string,id:string,leader:string}>}
+ */
+const joinableTeams = ref([]);
 const visible = ref(props.modelValue);
-watch(() => props.modelValue, val => visible.value = val);
+watch(() => props.modelValue, val => {
+  if(val) joinableTeams.value = []
+  visible.value = val
+});
 watch(visible, val => emits('update:modelValue', val));
 
 const searchText = ref('');
-
-const filteredTeams = computed(() => {
-  if (!searchText.value) return props.teams;
-  return props.teams.filter(team =>
-    team.name.includes(searchText.value.trim())
-  );
-});
+const search = ()=>{
+  if(searchText.value.trim()==''){
+    ElMessage.info("输入不能为空")
+  }
+  teamUtils.searchOneTeam(searchText.value.trim())
+  .then(({code,data,msg})=>{
+    if(code==200){
+      joinableTeams.value = Array.
+    }
+  })
+}
 
 function joinTeam(team) {
   ElMessage.success(`已申请加入 ${team.name}`);
@@ -73,7 +85,18 @@ function closeDialog() {
   padding: 10px 20px;
 }
 .search-box {
-  width: 100%;
+  margin-top: -1%;
+  width: 85%
+}
+.dialog-content>button {
+  background-color: #3398ff;
+  color: white;
+  border: none;
+  margin-left: 1%;
+  padding: 4px 10px;
+  font-size: 16px;
+  border-radius: 0 20px 20px 0;
+  cursor: pointer;
 }
 </style>
 

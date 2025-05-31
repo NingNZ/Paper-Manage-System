@@ -43,10 +43,7 @@ onMounted(()=>{
  * @type {Array<{name:string,id:string,leader:string}>}
  */
 const fullTableData = ref([]);
-/**
- * @type {Array<{name:string,id:string,leader:string}>}
- */
-const joinableTeams = ref([]);
+
 const currentPage = ref(1);
 const pageSize = ref(5);
 
@@ -158,7 +155,7 @@ const handleCreateTeam = (name)=>{
 
     <!-- 弹窗组件 -->
     <CreateTeamDialog v-model="showCreateDialog" @create="handleCreateTeam" />
-    <JoinTeamDialog v-model="showJoinDialog" :teams="joinableTeams" />
+    <JoinTeamDialog v-model="showJoinDialog" />
     <LeaveConfirmDialog
       v-model:visible="leaveDialogVisible"
       :team-name="teamToLeave?.name"
