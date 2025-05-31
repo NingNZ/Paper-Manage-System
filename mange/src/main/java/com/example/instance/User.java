@@ -1,5 +1,6 @@
 package com.example.instance;
 
+import com.example.util.ResultSetWrapper;
 import com.example.util.sqlUtil;
 
 import java.sql.ResultSet;
@@ -16,7 +17,8 @@ public class User {
     }
     public User(String id) {
         String sql1 = "select id,name,email from users where id = ?";
-        try(ResultSet res = sqlUtil.query(sql1,id)) {
+        try{
+            ResultSetWrapper res = sqlUtil.query(sql1,id);
             if(!res.isBeforeFirst()) {
                 this.id = null;
                 this.name = null;

@@ -1,4 +1,5 @@
 package com.example.instance;
+import com.example.util.ResultSetWrapper;
 import com.example.util.sqlUtil;
 
 import java.sql.ResultSet;
@@ -19,7 +20,7 @@ public class JourList {
     }
     void getSqlJourInfo() throws SQLException{
         String sql1 = "select id,name from sysjournal where id!=1;";
-        ResultSet res = sqlUtil.query(sql1);
+        ResultSetWrapper res = sqlUtil.query(sql1);
         while(res.next()){
             Map<String,Object> row = new HashMap<>();
             row.put("id",res.getString("id"));

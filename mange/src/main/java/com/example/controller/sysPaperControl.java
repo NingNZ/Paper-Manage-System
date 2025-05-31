@@ -45,12 +45,14 @@ public class sysPaperControl {
             String id = Paper.insertToSysPaper(title, journalId, authors, typeId, teamId, date);
             Paper paper = null;
             try {
+                if(id==null) return tool.msgCreate(400,"文件主键重复,上传失败");
                 paper = new Paper(id);
                 if(paper.fileLocalSave(file)){
                     return tool.msgCreate(200,"upload success");
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
+
             }
         } catch (JsonProcessingException e) {
             e.printStackTrace();

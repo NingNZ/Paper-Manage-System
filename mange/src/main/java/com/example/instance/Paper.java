@@ -1,5 +1,6 @@
 package com.example.instance;
 
+import com.example.util.ResultSetWrapper;
 import com.example.util.paperUtil;
 import com.example.util.sqlUtil;
 import com.example.util.tool;
@@ -30,7 +31,7 @@ public class Paper {
                 "syspaper.teamId=team.id and " +
                 "syspaper.typeId=systype.id and " +
                 "syspaper.jourId=sysjournal.id;";
-        ResultSet res = sqlUtil.query(sql1,id);
+        ResultSetWrapper res = sqlUtil.query(sql1,id);
         if(res.isBeforeFirst()){
             res.next();
             this.id = res.getString("id");
@@ -82,8 +83,8 @@ public class Paper {
         if(!this.isNull()){
             String sql2 ="select users.name  from users,authors " +
                     "where authors.userId = users.id and authors.paperId= ? ;";
-            try(ResultSet resAuthor = sqlUtil.query(sql2,this.id)){
-                if(resAuthor!=null) {
+            try{
+                ResultSetWrapper resAuthor = sqlUtil.query(sql2,this.id);
                     resAuthor.next();
                     String tmp = resAuthor.getString("name");
                     this.authors = this.authors.concat(tmp);
@@ -91,7 +92,6 @@ public class Paper {
                         tmp = resAuthor.getString("name");
                         this.authors = this.authors.concat(", "+tmp);
                     }
-                }
             }catch (SQLException e1){
                 e1.printStackTrace();
                 this.authors = "";

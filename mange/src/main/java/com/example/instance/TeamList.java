@@ -1,5 +1,6 @@
 package com.example.instance;
 
+import com.example.util.ResultSetWrapper;
 import com.example.util.sqlUtil;
 
 import java.sql.ResultSet;
@@ -20,7 +21,8 @@ public class TeamList {
      * */
     public TeamList(String userId){
         String sql1 = "select teamId from teammember where binary userId=?";
-        try (ResultSet resultSet = sqlUtil.query(sql1, userId)) {
+        try {
+            ResultSetWrapper resultSet = sqlUtil.query(sql1, userId);
             this.teamList=new ArrayList<>();
             while(resultSet.next()){
                 String tid = resultSet.getString("teamId");

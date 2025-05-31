@@ -27,56 +27,50 @@ public class paperUtil {
         }
         keyBuild.insert(0,'%').append('%');
         title = keyBuild.toString();
-        System.out.println(title);
         String sql1 = "select id from syspaper where title like ?";
         ArrayList<String> paperIdList = new ArrayList<>();
-        ResultSet res = sqlUtil.query(sql1,title);
+        ResultSetWrapper res = sqlUtil.query(sql1,title);
         while(res.next()){
             paperIdList.add(res.getString("id"));
         }
-        res.close();
         return paperIdList;
     }
     public static ArrayList<String> searchByTitleMatch(String title) throws SQLException{
         String sql1 = "select id from syspaper where title like ?";
         ArrayList<String> paperIdList = new ArrayList<>();
-        ResultSet res = sqlUtil.query(sql1,title);
+        ResultSetWrapper res = sqlUtil.query(sql1,title);
         while(res.next()){
             paperIdList.add(res.getString("id"));
         }
-        res.close();
         return paperIdList;
     }
     public static ArrayList<String> searchByAuthors(String name) throws SQLException{
         String sql1 = "select paperId as id from authors,users where authors.userId=users.id and users.name like ?";
         ArrayList<String> paperIdList = new ArrayList<>();
-        ResultSet res = sqlUtil.query(sql1,name);
+        ResultSetWrapper res = sqlUtil.query(sql1,name);
         while(res.next()){
             paperIdList.add(res.getString("id"));
         }
-        res.close();
         return paperIdList;
     }
     public static ArrayList<String> searchByJournal(String journal) throws SQLException{
         String sql1 = "select syspaper.id from syspaper,sysjournal " +
                 "where syspaper.jourid = sysjournal.id and sysjournal.name like ? ";
         ArrayList<String> paperIdList = new ArrayList<>();
-        ResultSet res = sqlUtil.query(sql1,journal);
+        ResultSetWrapper res = sqlUtil.query(sql1,journal);
         while(res.next()){
             paperIdList.add(res.getString("id"));
         }
-        res.close();
         return paperIdList;
     }
     public static ArrayList<String> searchByType(String type) throws SQLException{
         String sql1 = "select syspaper.id from syspaper,systype " +
                 "where syspaper.typeid = systype.id and systype.name like ? ";
         ArrayList<String> paperIdList = new ArrayList<>();
-        ResultSet res = sqlUtil.query(sql1,type);
+        ResultSetWrapper res = sqlUtil.query(sql1,type);
         while(res.next()){
             paperIdList.add(res.getString("id"));
         }
-        res.close();
         return paperIdList;
     }
     public static String generateHash(String Name,int length) {

@@ -1,6 +1,7 @@
 package com.example.instance;
 
 import com.example.util.Pair;
+import com.example.util.ResultSetWrapper;
 import com.example.util.paperUtil;
 import com.example.util.sqlUtil;
 
@@ -21,7 +22,8 @@ public class Team {
     public Team(String id){
         String sql1 = "select team.id,team.name,team.leaderId,team.count,users.name as leaderName " +
                 "from users,(select id,name,leaderId,count from team where id=?) as team where team.leaderId=users.id;";
-        try(ResultSet res = sqlUtil.query(sql1,id)){
+        try{
+            ResultSetWrapper res = sqlUtil.query(sql1,id);
             if(!res.isBeforeFirst()){
                 this.id = null;
                 this.name = null;
@@ -48,7 +50,8 @@ public class Team {
             return;
         }
         String sql2 = "select userId,identity from teammember where teamId=?";
-        try(ResultSet res = sqlUtil.query(sql2,id)){
+        try{
+            ResultSetWrapper res = sqlUtil.query(sql2,id);
             while (res.next()){
                 String userId = res.getString("userId");
                 User oneMember = new User(userId);
@@ -66,7 +69,8 @@ public class Team {
 
     public static int checkTeamExist (String name){
         String sql1 = "select id,name from team where name=?";
-        try(ResultSet res = sqlUtil.query(sql1,name)){
+        try{
+            ResultSetWrapper res = sqlUtil.query(sql1,name);
             if(!res.isBeforeFirst()){
                 return 400;
             }
