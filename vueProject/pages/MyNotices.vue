@@ -45,15 +45,13 @@
               </tr>
             </thead>
             <tbody>
-              <tr
-                v-for="(item, index) in pagedItems"
-                :key="index"
-                :class="rowClass(item)"
-              >
+              <tr v-for="(item, index) in pagedItems" :key="index">
                 <template v-if="activeSidebar === '待处理的通知'">
                   <td class="message-col">{{ item.message }}</td>
                   <td class="time-col">{{ formatDate(item.time) }}</td>
-                  <td class="status-col">{{ item.status }}</td>
+                  <td class="status-col">
+                    <span :class="statusClass(item.status)">{{ item.status }}</span>
+                  </td>
                   <td class="action-col">
                     <el-button size="small" type="success" plain>通过</el-button>
                     <el-button size="small" type="danger" plain>拒绝</el-button>
@@ -62,7 +60,9 @@
                 <template v-else>
                   <td class="message-col">{{ item.message }}</td>
                   <td class="time-col">{{ formatDate(item.time) }}</td>
-                  <td class="status-col">{{ item.result }}</td>
+                  <td class="status-col">
+                    <span :class="resultClass(item.result)">{{ item.result }}</span>
+                  </td>
                 </template>
               </tr>
             </tbody>
@@ -98,6 +98,7 @@ const setActive = (val) => {
   currentPage.value = 1
 }
 
+// 模拟数据
 const noticeList = [
   { message: '《AI研究进展》申请加入您的团队“AI研究小组”', time: '2025-06-01 10:30', status: '未处理' },
   { message: '《图神经网络》申请加入您的团队“图智能”', time: '2025-06-02 11:00', status: '已通过' },
@@ -113,19 +114,29 @@ const receivedList = [
   { message: '您的请求被拒绝。', time: '2025-06-04 15:00', result: '拒绝' },
 ]
 
+// 分页逻辑
 const pagedItems = computed(() => {
   const list = activeSidebar.value === '待处理的通知' ? noticeList : receivedList
   const start = (currentPage.value - 1) * pageSize.value
   return list.slice(start, start + pageSize.value)
 })
 
-const formatDate = (datetime) => datetime.split(' ')[0]
+// 格式化时间为 YYYY-MM-DD
+const formatDate = (datetime) => {
+  return datetime.split(' ')[0]
+}
 
-const rowClass = (item) => {
-  const status = activeSidebar.value === '待处理的通知' ? item.status : item.result
-  if (status === '未处理') return 'row-gray'
-  if (status === '已通过' || status === '通过') return 'row-green'
-  if (status === '已拒绝' || status === '拒绝') return 'row-red'
+// 状态样式绑定
+const statusClass = (status) => {
+  if (status === '未处理') return 'status-gray'
+  if (status === '已通过') return 'status-green'
+  if (status === '已拒绝') return 'status-red'
+  return ''
+}
+
+const resultClass = (result) => {
+  if (result === '通过') return 'status-green'
+  if (result === '拒绝') return 'status-red'
   return ''
 }
 
@@ -241,16 +252,16 @@ const handleSizeChange = (size) => {
   align-self: flex-end;
 }
 
-/* 行变色样式 */
-.row-gray {
-  background-color: #f2f2f2;
+/* 状态颜色样式 */
+.status-gray {
+  color: #888;
 }
 
-.row-green {
-  background-color: #e1f3d8;
+.status-green {
+  color: #67c23a;
 }
 
-.row-red {
-  background-color: #fce4e4;
+.status-red {
+  color: #f56c6c;
 }
 </style>

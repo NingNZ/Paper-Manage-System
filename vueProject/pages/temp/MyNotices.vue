@@ -48,12 +48,16 @@
               <tr
                 v-for="(item, index) in pagedItems"
                 :key="index"
-                :class="rowClass(item)"
               >
                 <template v-if="activeSidebar === '待处理的通知'">
                   <td class="message-col">{{ item.message }}</td>
                   <td class="time-col">{{ formatDate(item.time) }}</td>
-                  <td class="status-col">{{ item.status }}</td>
+                  <td
+                    class="status-col"
+                    :class="statusTextClass(item)"
+                  >
+                    {{ item.status }}
+                  </td>
                   <td class="action-col">
                     <el-button size="small" type="success" plain>通过</el-button>
                     <el-button size="small" type="danger" plain>拒绝</el-button>
@@ -62,7 +66,12 @@
                 <template v-else>
                   <td class="message-col">{{ item.message }}</td>
                   <td class="time-col">{{ formatDate(item.time) }}</td>
-                  <td class="status-col">{{ item.result }}</td>
+                  <td
+                    class="status-col"
+                    :class="statusTextClass(item)"
+                  >
+                    {{ item.result }}
+                  </td>
                 </template>
               </tr>
             </tbody>
@@ -134,18 +143,18 @@ const pagedItems = computed(() => {
 
 const formatDate = (datetime) => datetime.split(' ')[0]
 
-// 支持 statusCode/resultCode 数值判断
-const rowClass = (item) => {
+// 只给状态文字加颜色类名
+const statusTextClass = (item) => {
   const code = activeSidebar.value === '待处理的通知' ? item.statusCode : item.resultCode
-  if (code === 0) return 'row-gray'
-  if (code === 1) return 'row-green'
-  if (code === 2) return 'row-red'
+  if (code === 0) return 'text-gray'
+  if (code === 1) return 'text-green'
+  if (code === 2) return 'text-red'
 
   // fallback：字符串判断（兼容旧数据）
   const text = activeSidebar.value === '待处理的通知' ? item.status : item.result
-  if (text === '未处理') return 'row-gray'
-  if (text === '已通过' || text === '通过') return 'row-green'
-  if (text === '已拒绝' || text === '拒绝') return 'row-red'
+  if (text === '未处理') return 'text-gray'
+  if (text === '已通过' || text === '通过') return 'text-green'
+  if (text === '已拒绝' || text === '拒绝') return 'text-red'
   return ''
 }
 
@@ -261,16 +270,16 @@ const handleSizeChange = (size) => {
   align-self: flex-end;
 }
 
-/* 行变色样式 */
-.row-gray {
-  background-color: #f2f2f2;
+/* 只给状态文字加颜色 */
+.text-gray {
+  color: #999999;
 }
 
-.row-green {
-  background-color: #e1f3d8;
+.text-green {
+  color: #52c41a;
 }
 
-.row-red {
-  background-color: #fce4e4;
+.text-red {
+  color: #f5222d;
 }
 </style>
