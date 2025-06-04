@@ -16,7 +16,7 @@
           v-for="option in categoryOptions"
           :key="option.value"
           :label="option.label"
-          :value="option.value"
+          :value="option"
         />
       </el-select>
     </div>
@@ -42,21 +42,21 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'close', 'confirm'])
 
 const internalVisible = ref(props.modelValue)
-const selectedCategory = ref('')
+const selectedCategory = ref(null)
 
 watch(() => props.modelValue, (val) => {
   internalVisible.value = val
 })
 watch(internalVisible, (val) => {
   if(val){
-    selectedCategory.value=''
+    selectedCategory.value=null
   }
   emit('update:modelValue', val)
 })
 
 // 确认保存
 const confirmEdit = () => {
-  emit('confirm', selectedCategory.value)
+  emit('confirm', selectedCategory.value.value,selectedCategory.value.label)
   internalVisible.value = false
 }
 </script>

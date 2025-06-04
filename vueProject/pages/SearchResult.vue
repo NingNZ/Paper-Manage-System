@@ -7,10 +7,9 @@ import JournalManagerDialog from "../components/SearchResult/JournalManagerDialo
 import CategoryManagerDialog from "../components/SearchResult/CategoryManagerDialog.vue";
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from "vue-router";
-import { ElMessage } from "element-plus";
+import { ElMessage,ElLoading } from "element-plus";
 import axios from 'axios'
 import utils from "../scripts/utils";
-
 
 const allData = ref([]);
 const searchWord = ref("")
@@ -18,6 +17,7 @@ const selectedType = ref('0')
 const route = useRoute()
 var code = 0
 var msg = ""
+
 // 弹窗控制
 const showUploadDialog = ref(false)
 const showEditDialog = ref(false)
@@ -83,6 +83,11 @@ onMounted(()=>{
   if(localStorage.getItem('typeSave')){
     selectedType.value = localStorage.getItem('typeSave')
     searchWord.value = localStorage.getItem('keySave')
+    const loadingInstance = ElLoading.service({
+      lock: true,
+      text: '加载中...',
+      background: 'rgba(0, 0, 0, 0.2)'
+    })
     sendAndGet()
     .then(({code,msg})=>{
       if(code==200){
@@ -92,6 +97,10 @@ onMounted(()=>{
       }
     }).catch(({code,msg})=>{
       ElMessage.error(msg)
+    }).finally(()=>{
+      setTimeout(()=>{
+        loadingInstance.close()
+      },500)
     })
   }else{
     selectedType.value='0'
@@ -104,6 +113,11 @@ const search = ()=>{
     }else{
       localStorage.setItem('typeSave',selectedType.value)
       localStorage.setItem('keySave',searchWord.value)
+      const loadingInstance = ElLoading.service({
+        lock: true,
+        text: '加载中...',
+        background: 'rgba(0, 0, 0, 0.2)'
+      })
       sendAndGet()
       .then(({code,msg})=>{
         if(code==200){
@@ -113,7 +127,7 @@ const search = ()=>{
         }})
       .catch(({code,msg})=>{
           ElMessage.error(msg)
-        })
+        }).finally(()=>setTimeout(()=>loadingInstance.close(),500))
     }
 }
 localStorage.setItem('isSearch',true)
@@ -157,12 +171,16 @@ const handleDownload = (item) =>{
 
 }
 
-const updateCategory = (newCategory) => {
+const updateCategory = (newCategory,newTypeName) => {
   utils.updateSysPaper(currentEditItem.value.id,newCategory)
   .then(({code,data,msg})=>{
     if(code==200){
       ElMessage.success("更新成功");
-      sendAndGet();
+      // sendAndGet(); 不从数据库更新数据，只是局部更改所改变的行
+      const idx = allData.value.findIndex(row=>row.id===currentEditItem.value.id)
+      if(idx!==-1){
+        allData.value[idx].type=newTypeName;
+      }
     }else{
       ElMessage.error(msg)
     }

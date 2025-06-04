@@ -2,7 +2,7 @@ import axios from "axios"
 import { ElMessage } from "element-plus";
 
 const utils = {
-    url:"http://10.68.200.226:5123",
+    url:"http://10.68.109.200:5123",
     /**
     * @param {string} isSystem 
     * @param {string} teamId
