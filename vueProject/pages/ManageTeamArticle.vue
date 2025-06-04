@@ -2,28 +2,35 @@
   <div class="container">
     <!-- 顶部导航栏 -->
     <bar></bar>
+    <div class="breadcrumb">
+      <a href="/">首页</a> &gt; <a href="/myteam">我的团队</a> &gt; <a href="/other">团队xxx</a>
+    </div>
 
     <!-- 页面主体 -->
     <main class="main-wrapper">
       <!-- 左侧表格 -->
       <aside class="left-table">
         <h3>团队成员</h3>
-        <table class="member-table">
-          <thead>
-            <tr>
-              <th>用户ID</th>
-              <th>用户名</th>
-              <th>成员角色</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(member, index) in members" :key="index">
-              <td>{{ member.id }}</td>
-              <td>{{ member.name }}</td>
-              <td>{{ member.role }}</td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="member-table-container">
+          <table class="member-table">
+            <thead>
+              <tr>
+                <th>用户ID</th>
+                <th>用户名</th>
+                <th>成员角色</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(member, index) in members" :key="index"
+                  :class="index % 2 === 0 ? 'even-row' : 'odd-row'">
+                <td>{{ member.id }}</td>
+                <td>{{ member.name }}</td>
+                <td>{{ member.role }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
         <div class="buttons">
           <el-button type="primary" size="small" @click="openInviteDialog">邀请成员</el-button>
           <el-button type="info" size="small" @click="showCategoryManager = true">管理分类</el-button>
@@ -32,8 +39,6 @@
 
       <!-- 右侧内容 -->
       <section class="content">
-        <div class="breadcrumb"><a href="/">首页</a> &gt; <a href="/myteam">我的团队</a> &gt; <a href="/other">团队xxx</a></div>
-
         <div class="table-wrapper">
           <table class="custom-table">
             <thead>
@@ -46,7 +51,8 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(paper, index) in pagedPapers" :key="index">
+              <tr v-for="(paper, index) in pagedPapers" :key="index"
+                  :class="index % 2 === 0 ? 'even-row' : 'odd-row'">
                 <td>#{{ (currentPage - 1) * pageSize + index + 1 }}</td>
                 <td><em>{{ paper.title }}</em></td>
                 <td>{{ paper.category }}</td>
@@ -66,7 +72,7 @@
           layout="prev, pager, next, sizes, jumper"
           :total="papers.length"
           :page-size="pageSize"
-          :page-sizes="[5, 10, 20]"
+          :page-sizes="[10, 20, 50]"
           :current-page="currentPage"
           @current-change="handlePageChange"
           @size-change="handleSizeChange"
@@ -110,7 +116,10 @@ const members = [
   { id: 'uid03', name: 'Lily', role: '组员' },
   { id: 'uid04', name: 'Lily', role: '组员' },
   { id: 'uid05', name: 'Lily', role: '组员' },
-  { id: 'uid06', name: 'Lily', role: '组员' }
+  { id: 'uid06', name: 'Lily', role: '组员' },
+  { id: 'uid06', name: 'Lily', role: '组员' },
+  { id: 'uid07', name: 'Lily', role: '组员' },
+  { id: 'uid08', name: 'Lily', role: '组员' }
 ]
 
 const papers = Array.from({ length: 20 }, (_, i) => ({
@@ -120,7 +129,7 @@ const papers = Array.from({ length: 20 }, (_, i) => ({
 }))
 
 const currentPage = ref(1)
-const pageSize = ref(5)
+const pageSize = ref(10)
 const showCategoryManager = ref(false)
 const inviteDialogRef = ref(null)
 
@@ -144,6 +153,13 @@ function openInviteDialog() {
 </script>
 
 <style scoped>
+.even-row {
+  background-color: #ffffff;
+}
+.odd-row {
+  background-color: #f5f5f5;
+}
+
 .container {
   min-height: 100vh;
   background-color: #f4f4f4;
@@ -163,21 +179,40 @@ function openInviteDialog() {
   background: white;
   border: 1px solid #ddd;
   padding: 10px;
-  max-height: 400px;
-  overflow-y: auto;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
 }
 
 .member-table {
   width: 100%;
-  border-collapse: collapse;
+  border-spacing: 0;
+  margin: 0;
+}
+
+.member-table thead th {
+  position: sticky;
+  top: 0;
+  background-color: #f0f0f0;
+  z-index: 1;
 }
 
 .member-table th,
 .member-table td {
-  border: 1px solid #ccc;
+  border: 0px solid #ccc;
   padding: 6px;
   font-size: 14px;
   text-align: center;
+}
+
+.member-table-container {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 300px;
+  margin-top: 10px;
+  border: 1px solid #ccc;
+  border-radius: 12px;
 }
 
 .buttons {
@@ -199,20 +234,30 @@ function openInviteDialog() {
 }
 
 .table-wrapper {
-  max-height: 300px;
+  max-height: 500px;
   overflow-y: auto;
   background: white;
   border: 1px solid #ccc;
+  padding: 0;
+  border-radius: 12px;
 }
 
 .custom-table {
   width: 100%;
-  border-collapse: collapse;
+  border-spacing: 0;
+  margin: 0;
+}
+
+.custom-table th {
+  position: sticky;
+  top: 0;
+  background-color: #f0f0f0;
+  z-index: 1;
 }
 
 .custom-table th,
 .custom-table td {
-  border: 1px solid #ccc;
+  border: 0px solid #ccc;
   padding: 10px;
   text-align: center;
 }
