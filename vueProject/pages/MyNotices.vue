@@ -1,12 +1,9 @@
-<!-- 我的消息界面 -->
 <template>
   <div class="container">
-    <!-- 顶部导航栏 -->
-    <bar></bar>
+    <bar />
 
-    <!-- 页面主体 -->
     <main class="main-wrapper">
-      <!-- 左侧菜单 -->
+      <!-- 左侧导航栏 -->
       <aside class="sidebar">
         <div class="menu-group">
           <div
@@ -26,44 +23,56 @@
         </div>
       </aside>
 
-      <!-- 右侧内容 -->
+      <!-- 内容区域 -->
       <section class="content">
-        <div class="breadcrumb" style="padding-bottom: 1%;"><a href="/">首页</a>&gt; <a href="/notice">我的消息</a> &gt; {{ activeSidebar }}</div>
-        <!-- 表格容器，添加滚动条 -->
+        <div class="breadcrumb">
+          <a href="/">首页</a> &gt; <a href="/notice">我的消息</a> &gt; {{ activeSidebar }}
+        </div>
+
         <div class="table-wrapper">
           <table class="custom-table">
             <thead>
-              <tr>
-                <th>论文标题</th>
-                <th>作者</th>
-                <th>团队名</th>
-                <th>刊物</th>
-                <th>时间</th>
-                <th>操作</th>
+              <tr v-if="activeSidebar === '待处理的通知'">
+                <th class="message-col">消息</th>
+                <th class="time-col">时间</th>
+                <th class="status-col">状态</th>
+                <th class="action-col">操作</th>
+              </tr>
+              <tr v-else>
+                <th class="message-col">消息</th>
+                <th class="time-col">时间</th>
+                <th class="status-col">处理结果</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(item, index) in pagedPapers" :key="index">
-                <td>{{ item.title }}</td>
-                <td>{{ item.authors }}</td>
-                <td>{{ item.team }}</td>
-                <td>{{ item.journal }}</td>
-                <td>{{ item.date }}</td>
-                <td class="actions">
-                  <el-button size="small" type="info" plain>下载</el-button>
-                  <el-button size="small" type="success" plain>通过</el-button>
-                  <el-button size="small" type="danger" plain>拒绝</el-button>
-                </td>
+              <tr
+                v-for="(item, index) in pagedItems"
+                :key="index"
+                :class="rowClass(item)"
+              >
+                <template v-if="activeSidebar === '待处理的通知'">
+                  <td class="message-col">{{ item.message }}</td>
+                  <td class="time-col">{{ formatDate(item.time) }}</td>
+                  <td class="status-col">{{ item.status }}</td>
+                  <td class="action-col">
+                    <el-button size="small" type="success" plain>通过</el-button>
+                    <el-button size="small" type="danger" plain>拒绝</el-button>
+                  </td>
+                </template>
+                <template v-else>
+                  <td class="message-col">{{ item.message }}</td>
+                  <td class="time-col">{{ formatDate(item.time) }}</td>
+                  <td class="status-col">{{ item.result }}</td>
+                </template>
               </tr>
             </tbody>
           </table>
         </div>
 
-        <!-- 分页器 -->
         <el-pagination
           background
           layout="prev, pager, next, sizes, jumper"
-          :total="papers.length"
+          :total="activeSidebar === '待处理的通知' ? noticeList.length : receivedList.length"
           :page-size="pageSize"
           :current-page="currentPage"
           @current-change="handlePageChange"
@@ -81,41 +90,44 @@ import { ref, computed } from 'vue'
 import bar from '../components/bar.vue'
 
 const activeSidebar = ref('待处理的通知')
-const setActive = (item) => {
-  activeSidebar.value = item
-}
-
 const currentPage = ref(1)
 const pageSize = ref(5)
 
-const papers = [
-  { title: "Hello's life", authors: "Linda, Jack", team: "AI科研小组", journal: "IEEE", date: "2025-02" },
-  { title: "Moore's raw", authors: "Jason, Alice", team: "CS科研小组", journal: "IEEE", date: "2025-03" },
-  { title: "Graph Theory", authors: "Alice, Jky", team: "Web小队", journal: "IEEE", date: "2025-03" },
-  { title: "Algebra", authors: "Mock, Chicaco", team: "机器学习研究", journal: "IEEE", date: "2025-04" },
-  { title: "Set Theory", authors: "Jack", team: "算法设计", journal: "IEEE", date: "2025-05" },
-  { title: "Extra Paper", authors: "John Doe", team: "New Lab", journal: "Nature", date: "2025-06" },
-  { title: "Another Paper", authors: "Jane Doe", team: "Deep Lab", journal: "Science", date: "2025-07" },
-  { title: "Big Data", authors: "Zhang Wei", team: "数据科学", journal: "IEEE", date: "2025-07" },
-  { title: "Quantum Net", authors: "Li Hua", team: "量子计算", journal: "Nature", date: "2025-08" },
-  { title: "Neural Graph", authors: "Tom, Jerry", team: "AI Lab", journal: "IEEE", date: "2025-08" },
-  { title: "Knowledge Mining", authors: "Emma", team: "语义小组", journal: "ACM", date: "2025-09" },
-  { title: "Multimodal", authors: "Liu Qiang", team: "认知组", journal: "Science", date: "2025-09" },
-  { title: "GAN Vision", authors: "Sam", team: "生成网络", journal: "CVPR", date: "2025-10" },
-  { title: "Text Encoder", authors: "Jin", team: "自然语言", journal: "ACL", date: "2025-10" },
-  { title: "MLP & GNN", authors: "Chen", team: "神经网络", journal: "ICLR", date: "2025-11" },
-  { title: "Hybrid Systems", authors: "Lee", team: "控制组", journal: "CDC", date: "2025-11" },
-  { title: "Vision Transformers", authors: "Kim", team: "视觉小组", journal: "NeurIPS", date: "2025-11" },
-  { title: "Prompt Tuning", authors: "Zhao", team: "大模型组", journal: "EMNLP", date: "2025-12" },
-  { title: "Meta Learning", authors: "Wang", team: "迁移学习", journal: "AAAI", date: "2025-12" },
-  { title: "Low-rank Adaptation", authors: "Zhang", team: "LoRA", journal: "ICML", date: "2025-12" }
+const setActive = (val) => {
+  activeSidebar.value = val
+  currentPage.value = 1
+}
+
+const noticeList = [
+  { message: '《AI研究进展》申请加入您的团队“AI研究小组”', time: '2025-06-01 10:30', status: '未处理' },
+  { message: '《图神经网络》申请加入您的团队“图智能”', time: '2025-06-02 11:00', status: '已通过' },
+  { message: '《Transformer结构优化》协作请求待处理', time: '2025-06-03 14:45', status: '已拒绝' },
+  { message: '《神经网络安全性分析》加入请求', time: '2025-06-04 16:20', status: '未处理' },
+  { message: '《大模型压缩》希望参与您的研究团队', time: '2025-06-05 09:50', status: '已拒绝' },
 ]
 
-const pagedPapers = computed(() => {
+const receivedList = [
+  { message: '您加入“AI研究小组”的请求已通过。', time: '2025-06-01 10:10', result: '通过' },
+  { message: '您的论文《图神经网络》投稿未通过审核。', time: '2025-06-02 12:00', result: '拒绝' },
+  { message: '“AI Lab”团队邀请您加入。', time: '2025-06-03 13:30', result: '通过' },
+  { message: '您的请求被拒绝。', time: '2025-06-04 15:00', result: '拒绝' },
+]
+
+const pagedItems = computed(() => {
+  const list = activeSidebar.value === '待处理的通知' ? noticeList : receivedList
   const start = (currentPage.value - 1) * pageSize.value
-  const end = start + pageSize.value
-  return papers.slice(start, end)
+  return list.slice(start, start + pageSize.value)
 })
+
+const formatDate = (datetime) => datetime.split(' ')[0]
+
+const rowClass = (item) => {
+  const status = activeSidebar.value === '待处理的通知' ? item.status : item.result
+  if (status === '未处理') return 'row-gray'
+  if (status === '已通过' || status === '通过') return 'row-green'
+  if (status === '已拒绝' || status === '拒绝') return 'row-red'
+  return ''
+}
 
 const handlePageChange = (page) => {
   currentPage.value = page
@@ -128,10 +140,9 @@ const handleSizeChange = (size) => {
 </script>
 
 <style scoped>
-/* 通用设置 */
 .container {
+  background: #f5f5f5;
   min-height: 100vh;
-  background-color: #f4f4f4;
   display: flex;
   flex-direction: column;
 }
@@ -153,10 +164,10 @@ const handleSizeChange = (size) => {
 }
 
 .menu-item {
-  padding: 10px 20px;
+  padding: 12px 20px;
   cursor: pointer;
   color: #3398ff;
-  transition: background 0.3s ease, transform 0.2s ease;
+  transition: all 0.3s ease;
 }
 
 .menu-item:hover {
@@ -173,16 +184,20 @@ const handleSizeChange = (size) => {
 .content {
   flex: 1;
   padding: 20px;
-  padding-top: 0;
   display: flex;
   flex-direction: column;
-  position: relative;
 }
+
+.breadcrumb {
+  padding-bottom: 10px;
+  font-size: 14px;
+  color: #666;
+}
+
 .table-wrapper {
-  max-height: 300px;
-  overflow-y: auto;
-  border: 1px solid #ccc;
   background: white;
+  border: 1px solid #ddd;
+  overflow-x: auto;
 }
 
 .custom-table {
@@ -192,25 +207,50 @@ const handleSizeChange = (size) => {
 
 .custom-table th,
 .custom-table td {
-  padding: 10px;
   border: 1px solid #ddd;
+  padding: 10px;
+  white-space: nowrap;
   text-align: center;
+  font-size: 14px;
 }
 
-.actions :deep(.el-button) {
-  margin: 0 2px;
-  transition: all 0.3s ease;
+.message-col {
+  width: 60%;
+  text-align: left;
+  padding-left: 12px;
 }
 
-.actions :deep(.el-button:hover) {
-  transform: scale(1.1);
-  filter: brightness(1.1);
+.time-col {
+  width: 18%;
 }
 
-/* 分页器靠右 */
-:deep(.el-pagination) {
-  align-self: flex-end;
+.status-col {
+  width: 12%;
+}
+
+.action-col {
+  width: 10%;
+}
+
+:deep(.el-button) {
+  margin: 0 4px;
+}
+
+.pagination-right {
   margin-top: 20px;
+  align-self: flex-end;
+}
+
+/* 行变色样式 */
+.row-gray {
+  background-color: #f2f2f2;
+}
+
+.row-green {
+  background-color: #e1f3d8;
+}
+
+.row-red {
+  background-color: #fce4e4;
 }
 </style>
-
