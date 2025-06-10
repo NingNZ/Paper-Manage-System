@@ -107,15 +107,16 @@ function handleLogin() {
     password: password.value,
     access: ' ',
   }
-  axios.post("http://localhost:5213/last/user/login", qs.stringify(data))
+  axios.post("http://localhost:5123/login", qs.stringify(data))
     .then((res) => {
-      if (res.data.code == 200) {
-        sessionStorage.setItem("username", username.value),
-        sessionStorage.setItem("access",res.data.access);
-        router.replace('/about')
-      } else {
-        ElMessage.error(res.data.msg);
-      }
+      console.log(res)
+      // if (res.data.code == 200) {
+      //   sessionStorage.setItem("username", username.value),
+      //   sessionStorage.setItem("access",res.data.access);
+      //   router.replace('/about')
+      // } else {
+      //   ElMessage.error(res.data.msg);
+      // }
     }
     )
 }
@@ -162,8 +163,6 @@ function changePassword(){
 
 </script>
 <template>
-
-
     <div class="loginblock">
       <animated-text></animated-text>
       <el-card  class="card"  style="opacity:0.96;" shadow="always">

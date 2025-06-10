@@ -9,15 +9,13 @@ let index = 0;
 let isAppearing = true;
 
 const animateText = async () => {
-  while (true) {
-    if (isAppearing) {
-      if (index < fullText.length) {
-        displayText.value += fullText[index++];
-        await new Promise(resolve => setTimeout(resolve, 500));
-      } else {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        isAppearing = false;
-      }
+  while (isAppearing) {
+    if (index < fullText.length) {
+      displayText.value += fullText[index++];
+      await new Promise(resolve => setTimeout(resolve, 500));
+    } else {
+      await new Promise(resolve => setTimeout(resolve, 500));
+      isAppearing = false;
     }
   }
 }
