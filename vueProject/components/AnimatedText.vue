@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, withCtx } from 'vue'
 
 const fullText = '欢迎来到论文管理系统！';
 const displayText = ref('');
@@ -9,15 +9,13 @@ let index = 0;
 let isAppearing = true;
 
 const animateText = async () => {
-  while (true) {
-    if (isAppearing) {
-      if (index < fullText.length) {
-        displayText.value += fullText[index++];
-        await new Promise(resolve => setTimeout(resolve, 500));
-      } else {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        isAppearing = false;
-      }
+  while(isAppearing){
+    if (index < fullText.length) {
+      displayText.value += fullText[index++];
+      await new Promise(resolve => setTimeout(resolve, 500));
+    } else {
+      await new Promise(resolve => setTimeout(resolve, 500));
+      isAppearing = false;
     }
   }
 }
