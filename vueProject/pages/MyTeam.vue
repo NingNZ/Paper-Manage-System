@@ -6,7 +6,6 @@ import LeaveConfirmDialog from "../components/MyTeam/LeaveConfirmDialog.vue";
 import { ref, computed } from 'vue';
 import { ElMessage } from 'element-plus';
 
-// 全部团队数据
 const fullTableData = ref([
   { name: 'AI科研小组', number: '#01', leader: 'Linda' },
   { name: 'CS科研小组', number: '#02', leader: 'Jason' },
@@ -81,19 +80,40 @@ function handleCreateTeam(name) {
       <h1 class="title">我的团队</h1>
 
       <div class="table-wrapper">
-        <el-table :data="pagedTableData" style="width: 100%;" max-height="400">
-          <el-table-column prop="name" label="团队名" width="180" />
-          <el-table-column prop="number" label="团队编号" width="180" />
-          <el-table-column prop="leader" label="团队组长" width="180" />
-          <el-table-column label="操作">
-            <template #default="scope">
-              <router-link to="/other">
-                <el-button type="primary" size="small" class="action-btn">进入</el-button>
-              </router-link>
-              <el-button type="danger" size="small" class="action-btn" @click="openLeaveDialog(scope.row)">退出</el-button>
-            </template>
-          </el-table-column>
-        </el-table>
+        <table class="native-table">
+          <thead>
+            <tr>
+              <th>团队名</th>
+              <th>团队编号</th>
+              <th>团队组长</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="(item, index) in pagedTableData"
+              :key="item.number"
+              :class="index % 2 === 0 ? 'even-row' : 'odd-row'"
+            >
+              <td>{{ item.name }}</td>
+              <td>{{ item.number }}</td>
+              <td>{{ item.leader }}</td>
+              <td>
+                <router-link to="/other">
+                  <el-button type="primary" size="small" class="action-btn">进入</el-button>
+                </router-link>
+                <el-button
+                  type="danger"
+                  size="small"
+                  class="action-btn"
+                  @click="openLeaveDialog(item)"
+                >
+                  退出
+                </el-button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       <div class="actions">
@@ -127,7 +147,10 @@ function handleCreateTeam(name) {
 </template>
 
 <style scoped>
-/* 同你原来的样式，未改动 */
+
+thead {
+  background-color: #f0f0f0;
+}
 .container {
   min-height: 100vh;
   background-color: #f4f4f4;
@@ -151,6 +174,42 @@ function handleCreateTeam(name) {
   padding: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
+
+/* 表格样式 */
+.native-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+.native-table th,
+.native-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e0e0e0;
+}
+.even-row {
+  background-color: #ffffff;
+}
+.odd-row {
+  background-color: #f9f9f9;
+}
+
+.native-table thead th {
+  position: sticky;
+  top: 0;
+  background-color: #f0f0f0;
+  z-index: 1;
+}
+
+.table-wrapper {
+  max-height: 500px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ccc;
+  padding: 0;
+  border-radius: 12px;
+}
+
+/* 按钮样式 */
 .action-btn {
   transition: all 0.3s ease;
   margin: 0 5px;
@@ -159,6 +218,7 @@ function handleCreateTeam(name) {
   filter: brightness(1.1);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
+
 .actions {
   margin: 20px 0;
   display: flex;
