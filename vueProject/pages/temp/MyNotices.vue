@@ -45,12 +45,18 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(item, index) in pagedItems" :key="index">
+              <tr
+                v-for="(item, index) in pagedItems"
+                :key="index"
+              >
                 <template v-if="activeSidebar === '待处理的通知'">
                   <td class="message-col">{{ item.message }}</td>
                   <td class="time-col">{{ formatDate(item.time) }}</td>
-                  <td class="status-col">
-                    <span :class="statusClass(item.status)">{{ item.status }}</span>
+                  <td
+                    class="status-col"
+                    :class="statusTextClass(item)"
+                  >
+                    {{ item.status }}
                   </td>
                   <td class="action-col">
                     <el-button size="small" type="success" plain>通过</el-button>
@@ -60,8 +66,11 @@
                 <template v-else>
                   <td class="message-col">{{ item.message }}</td>
                   <td class="time-col">{{ formatDate(item.time) }}</td>
-                  <td class="status-col">
-                    <span :class="resultClass(item.result)">{{ item.result }}</span>
+                  <td
+                    class="status-col"
+                    :class="statusTextClass(item)"
+                  >
+                    {{ item.result }}
                   </td>
                 </template>
               </tr>
@@ -88,6 +97,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import bar from '../components/bar.vue'
+// import axios from 'axios' // 准备调用后端接口时取消注释
 
 const activeSidebar = ref('待处理的通知')
 const currentPage = ref(1)
@@ -98,45 +108,53 @@ const setActive = (val) => {
   currentPage.value = 1
 }
 
-// 模拟数据
+// 本地模拟数据（可替换为后端接口数据）
+// 后端返回数据示例：{ message, time, status, statusCode }
 const noticeList = [
-  { message: '《AI研究进展》申请加入您的团队“AI研究小组”', time: '2025-06-01 10:30', status: '未处理' },
-  { message: '《图神经网络》申请加入您的团队“图智能”', time: '2025-06-02 11:00', status: '已通过' },
-  { message: '《Transformer结构优化》协作请求待处理', time: '2025-06-03 14:45', status: '已拒绝' },
-  { message: '《神经网络安全性分析》加入请求', time: '2025-06-04 16:20', status: '未处理' },
-  { message: '《大模型压缩》希望参与您的研究团队', time: '2025-06-05 09:50', status: '已拒绝' },
+  { message: '《AI研究进展》申请加入您的团队“AI研究小组”', time: '2025-06-01 10:30', status: '未处理', statusCode: 0 },
+  { message: '《图神经网络》申请加入您的团队“图智能”', time: '2025-06-02 11:00', status: '已通过', statusCode: 1 },
+  { message: '《Transformer结构优化》协作请求待处理', time: '2025-06-03 14:45', status: '已拒绝', statusCode: 2 },
+  { message: '《神经网络安全性分析》加入请求', time: '2025-06-04 16:20', status: '未处理', statusCode: 0 },
+  { message: '《大模型压缩》希望参与您的研究团队', time: '2025-06-05 09:50', status: '已拒绝', statusCode: 2 },
 ]
 
 const receivedList = [
-  { message: '您加入“AI研究小组”的请求已通过。', time: '2025-06-01 10:10', result: '通过' },
-  { message: '您的论文《图神经网络》投稿未通过审核。', time: '2025-06-02 12:00', result: '拒绝' },
-  { message: '“AI Lab”团队邀请您加入。', time: '2025-06-03 13:30', result: '通过' },
-  { message: '您的请求被拒绝。', time: '2025-06-04 15:00', result: '拒绝' },
+  { message: '您加入“AI研究小组”的请求已通过。', time: '2025-06-01 10:10', result: '通过', resultCode: 1 },
+  { message: '您的论文《图神经网络》投稿未通过审核。', time: '2025-06-02 12:00', result: '拒绝', resultCode: 2 },
+  { message: '“AI Lab”团队邀请您加入。', time: '2025-06-03 13:30', result: '通过', resultCode: 1 },
+  { message: '您的请求被拒绝。', time: '2025-06-04 15:00', result: '拒绝', resultCode: 2 },
 ]
 
-// 分页逻辑
+// 如果使用接口方式（取消注释下方函数）
+// const fetchNoticeList = async () => {
+//   const res = await axios.get('/api/notifications')
+//   noticeList.value = res.data
+// }
+// const fetchReceivedList = async () => {
+//   const res = await axios.get('/api/received')
+//   receivedList.value = res.data
+// }
+
 const pagedItems = computed(() => {
   const list = activeSidebar.value === '待处理的通知' ? noticeList : receivedList
   const start = (currentPage.value - 1) * pageSize.value
   return list.slice(start, start + pageSize.value)
 })
 
-// 格式化时间为 YYYY-MM-DD
-const formatDate = (datetime) => {
-  return datetime.split(' ')[0]
-}
+const formatDate = (datetime) => datetime.split(' ')[0]
 
-// 状态样式绑定
-const statusClass = (status) => {
-  if (status === '未处理') return 'status-gray'
-  if (status === '已通过') return 'status-green'
-  if (status === '已拒绝') return 'status-red'
-  return ''
-}
+// 只给状态文字加颜色类名
+const statusTextClass = (item) => {
+  const code = activeSidebar.value === '待处理的通知' ? item.statusCode : item.resultCode
+  if (code === 0) return 'text-gray'
+  if (code === 1) return 'text-green'
+  if (code === 2) return 'text-red'
 
-const resultClass = (result) => {
-  if (result === '通过') return 'status-green'
-  if (result === '拒绝') return 'status-red'
+  // fallback：字符串判断（兼容旧数据）
+  const text = activeSidebar.value === '待处理的通知' ? item.status : item.result
+  if (text === '未处理') return 'text-gray'
+  if (text === '已通过' || text === '通过') return 'text-green'
+  if (text === '已拒绝' || text === '拒绝') return 'text-red'
   return ''
 }
 
@@ -252,16 +270,16 @@ const handleSizeChange = (size) => {
   align-self: flex-end;
 }
 
-/* 状态颜色样式 */
-.status-gray {
-  color: #888;
+/* 只给状态文字加颜色 */
+.text-gray {
+  color: #999999;
 }
 
-.status-green {
-  color: #67c23a;
+.text-green {
+  color: #52c41a;
 }
 
-.status-red {
-  color: #f56c6c;
+.text-red {
+  color: #f5222d;
 }
 </style>
