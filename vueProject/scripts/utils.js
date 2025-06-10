@@ -2,7 +2,8 @@ import axios from "axios"
 import { ElMessage } from "element-plus";
 
 const utils = {
-    url:"http://10.68.238.206:5123",
+    urlnoProxy:"https://10.68.238.206:5123",
+    url:"/api",
     /**
     * @param {string} isSystem 
     * @param {string} teamId

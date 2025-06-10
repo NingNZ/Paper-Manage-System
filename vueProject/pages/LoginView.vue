@@ -6,6 +6,8 @@ import {useRouter} from 'vue-router';
 import axios from 'axios'
 import qs from 'querystring'
 import AnimatedText from "../components/AnimatedText.vue";
+import {sessionUtil} from "../scripts/session"
+import utils from "../scripts/utils";
 const particlesInit = async engine =>{
   await loadSlim(engine);
 };
@@ -107,10 +109,16 @@ function handleLogin() {
     password: password.value,
     access: ' ',
   }
-  axios.post("http://localhost:5123/login", qs.stringify(data))
+  axios.post(utils.url +"/login", qs.stringify(data))
     .then((res) => {
       console.log(res)
-      // if (res.data.code == 200) {
+      if (res.data.code == 200) {
+        sessionUtil.getUser().then(data=>{
+          ElMessage.success("Welcome, "+data)
+        }).catch(()=>{
+          ElMessage.error("服务器连接出错")
+        })
+      }
       //   sessionStorage.setItem("username", username.value),
       //   sessionStorage.setItem("access",res.data.access);
       //   router.replace('/about')
