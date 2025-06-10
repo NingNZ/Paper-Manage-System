@@ -5,6 +5,7 @@ import {ref} from 'vue';
 import {useRouter} from 'vue-router';
 import axios from 'axios'
 import qs from 'querystring'
+import AnimatedText from "../components/AnimatedText.vue";
 const particlesInit = async engine =>{
   await loadSlim(engine);
 };
@@ -161,8 +162,10 @@ function changePassword(){
 
 </script>
 <template>
-  <div>
+
+
     <div class="loginblock">
+      <animated-text></animated-text>
       <el-card  class="card"  style="opacity:0.96;" shadow="always">
         <img src="../assets/loginLogo.jpg"  style="width: 30%; margin-inline-start:30% ;border-radius:100%;
           filter: drop-shadow(3px 3px 6px #000000 );" > <br>
@@ -178,9 +181,9 @@ function changePassword(){
         <el-button type="primary" @click="DialogVisible=true;">注册</el-button><a @click="DialogVisible2=true"  style="font-style: italic;font-size: small;text-decoration: underline;">修改密码</a>
       </el-card>
     </div>
+
     <vue-particles id="tsparticles" class="particlebac" :particlesInit="particlesInit"
       :particlesLoaded="particlesLoaded" :options="options" />
-  </div>
   <el-dialog
     v-model="DialogVisible"
     title="用户注册"
@@ -232,11 +235,14 @@ function changePassword(){
   z-index: 1;
 }
 .loginblock{
-  height: 300px;
-  margin-top: 20%;
-  width: 500px;
-  margin-left: 35%;
-  position: relative;
+  display:flex;
+  flex-direction: column;
+  justify-content:center;
+	align-items:center;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   z-index: 999;
 }
 .card{

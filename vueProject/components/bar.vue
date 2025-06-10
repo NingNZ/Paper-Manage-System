@@ -16,7 +16,7 @@
       <div class="user-icon" ref="iconRef">
         <!-- ✅ 点击头像展开浮窗 -->
         <img
-          src="https://img.icons8.com/ios-filled/50/user-male-circle.png"
+          src="../assets/head.svg"
           alt="user"
           @click="toggleUserInfo"
         />
