@@ -7,7 +7,7 @@
       <nav class="menu">
         <a href="/">首页</a>
         <a href="/myteam">我的团队</a>
-        <a href="#">我的论文</a>
+        <a href="/mypaper">我的论文</a>
         <a href="/notice">我的消息</a>
       </nav>
       <div class="user-icon">

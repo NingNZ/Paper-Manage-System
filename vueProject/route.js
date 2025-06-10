@@ -5,6 +5,7 @@ import ManageTeamArticle from "./pages/ManageTeamArticle.vue"
 import SearchResult from "./pages/SearchResult.vue"
 import MyTeam from "./pages/MyTeam.vue"
 import LoginView from "./pages/LoginView.vue"
+import MyPaper from "./pages/MyPaper.vue"
 
 const routes=[
     {path:'/',component:Home},
@@ -12,7 +13,8 @@ const routes=[
     {path:'/search',component:SearchResult},
     {path:'/myteam',component:MyTeam},
     {path:'/other',component:ManageTeamArticle},
-    {path:'/login',component:LoginView}
+    {path:'/login',component:LoginView},
+    {path:'/mypaper',component:MyPaper}
 ]
 const router = createRouter({
     history:createWebHistory(),
