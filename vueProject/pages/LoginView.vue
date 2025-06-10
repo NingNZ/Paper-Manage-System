@@ -113,20 +113,19 @@ function handleLogin() {
     .then((res) => {
       console.log(res)
       if (res.data.code == 200) {
-        sessionUtil.getUser().then(data=>{
+          sessionUtil.getUser().then(data=>{
           ElMessage.success("Welcome, "+data)
         }).catch(()=>{
           ElMessage.error("服务器连接出错")
         })
-      }
-      //   sessionStorage.setItem("username", username.value),
-      //   sessionStorage.setItem("access",res.data.access);
-      //   router.replace('/about')
-      // } else {
-      //   ElMessage.error(res.data.msg);
-      // }
-    }
-    )
+      }else if(res.data.code == 404){
+        ElMessage.error("用户不存在")
+      }else{
+        ElMessage.error("密码错误")
+      }})
+    .catch(()=>{
+      ElMessage.error("服务器连接出错")
+    })
 }
 function handleRegi(){
   let data1={
