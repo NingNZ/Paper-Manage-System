@@ -159,7 +159,7 @@ thead {
   background-color: #ffffff;
 }
 .odd-row {
-  background-color: #f9f9f9;
+  background-color: #f5f5f5;
 }
 
 .container {
