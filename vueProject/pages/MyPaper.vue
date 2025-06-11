@@ -9,15 +9,23 @@
         <a href="/">首页</a> &gt; <a href="/mypaper">我的论文</a>
       </div>
       <div class="top-controls">
-        <el-select v-model="selectedJournal" placeholder="筛选期刊" style="width: 160px" clearable>
+        <el-select v-model="selectedJournalTemp" placeholder="筛选期刊" style="width: 160px" clearable>
           <el-option label="全部期刊" :value="''" />
           <el-option v-for="journal in uniqueJournals" :key="journal" :label="journal" :value="journal" />
         </el-select>
-        <el-button type="primary" @click="handleWorkloadQuery">工作量分数查询</el-button>
+        <el-button type="primary" @click="handleFilter">查询</el-button>
       </div>
     </div>
 
     <main class="main-wrapper">
+      <!-- 左侧工作量分数展示 -->
+      <aside class="left-panel">
+        <div class="score-card">
+          <h3>工作量分数</h3>
+          <div class="score">{{ workloadScore }}</div>
+        </div>
+      </aside>
+
       <!-- 论文列表 -->
       <section class="content">
         <div class="table-wrapper">
@@ -95,19 +103,26 @@ import CategoryManager from '../components/ManageTeamArticle/CategoryManagerDial
 import * as XLSX from 'xlsx'
 import { saveAs } from 'file-saver'
 
-const journalOptions = ['IEEE', 'ACM', 'Springer', 'Elsevier', 'Nature']
+// 期刊和类别定义
+const journalOptions = ['IEEE', 'ACM', 'Springer', 'Elsevier', 'Nature', 'Science']
 const categories = ['AI', '系统设计', '数据挖掘', '人机交互']
 
+// 论文数据生成，分布在不同期刊
 const papers = ref(
-  Array.from({ length: 26 }, (_, i) => ({
+  Array.from({ length: 30 }, (_, i) => ({
     title: `我的论文 ${i + 1}`,
     category: categories[i % categories.length],
-    journal: 'IEEE',
+    journal: journalOptions[i % journalOptions.length],
     uploadDate: `2025-06-${(i % 30 + 1).toString().padStart(2, '0')}`
   }))
 )
 
-const selectedJournal = ref('')
+// 工作量分数直接展示
+const workloadScore = ref(85.5)
+
+// 筛选相关变量
+const selectedJournalTemp = ref('')  // 临时选择值
+const selectedJournal = ref('')      // 实际筛选条件
 const currentPage = ref(1)
 const pageSize = ref(10)
 const showCategoryManager = ref(false)
@@ -136,8 +151,11 @@ function handleSizeChange(val) {
   currentPage.value = 1
 }
 
-function handleWorkloadQuery() {
-  ElMessage.info('此功能待接入后台 API，目前仅为示意按钮')
+// 查询按钮逻辑
+function handleFilter() {
+  selectedJournal.value = selectedJournalTemp.value
+  currentPage.value = 1
+  ElMessage.success('筛选完成')
 }
 
 function handleDownload(paper) {
@@ -179,9 +197,35 @@ function exportToExcel() {
 .main-wrapper {
   display: flex;
   flex: 1;
-  padding: 20px;
+  padding: 20px; 
   gap: 20px;
 }
+
+.left-panel {
+  width: 150px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 15px;
+  height: fit-content;
+}
+
+.score-card {
+  text-align: center;
+}
+
+.score-card h3 {
+  margin-bottom: 8px;
+  font-size: 16px;
+  color: #333;
+}
+
+.score {
+  font-size: 28px;
+  font-weight: bold;
+  color: #409EFF;
+}
+
 
 .content {
   flex: 1;
@@ -206,7 +250,6 @@ function exportToExcel() {
   font-size: 12px;
   color: #555;
 }
-
 
 .table-wrapper {
   max-height: 500px;
@@ -261,4 +304,5 @@ function exportToExcel() {
   margin-top: 10px;
 }
 </style>
+
 
