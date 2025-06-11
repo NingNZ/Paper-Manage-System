@@ -12,7 +12,7 @@ const particlesInit = async engine =>{
   await loadSlim(engine);
 };
 const particlesLoaded = async container => {
-    console.log('Particles container loaded', container)
+    // console.log('Particles container loaded', container)
 }
 const options=ref({
       background: {
@@ -111,10 +111,9 @@ function handleLogin() {
   }
   axios.post(utils.url +"/login", qs.stringify(data))
     .then((res) => {
-      console.log(res)
       if (res.data.code == 200) {
-          sessionUtil.getUser().then(data=>{
-          ElMessage.success("Welcome, "+data)
+        sessionUtil.getUser().then(data=>{
+          ElMessage.success("Welcome, "+data.msg)
         }).catch(()=>{
           ElMessage.error("服务器连接出错")
         })
@@ -122,7 +121,8 @@ function handleLogin() {
         ElMessage.error("用户不存在")
       }else{
         ElMessage.error("密码错误")
-      }})
+      }
+    })
     .catch(()=>{
       ElMessage.error("服务器连接出错")
     })

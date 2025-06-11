@@ -14,5 +14,17 @@ export const sessionUtil={
         }).catch(res=>{
             return null
         })
+    },
+    
+    checkPermiss(){
+        return axios.get(utils.url+'/session/check',{
+            withCredentials:true
+        })
+        .then(res=>{
+            console.log(res)
+            return res.data.code
+        }).catch(res=>{
+            return null;
+        })
     }
 }

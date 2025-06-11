@@ -10,6 +10,7 @@ import { useRoute } from "vue-router";
 import { ElMessage,ElLoading } from "element-plus";
 import axios from 'axios'
 import utils from "../scripts/utils";
+import { sessionUtil } from "../scripts/session";
 
 const allData = ref([]);
 const searchWord = ref("")
@@ -106,6 +107,18 @@ onMounted(()=>{
     selectedType.value='0'
     searchWord.value=[]
   }
+})
+onMounted(()=>{
+  sessionUtil.checkPermiss()
+  .then(data=>{
+    if(data==200){
+      ElMessage.info("你是管理员")
+    }else if(data==300){
+      ElMessage.info("你是用户")
+    }else{
+      ElMessage.info("你是游客")
+    }
+  })
 })
 const search = ()=>{
     if(!searchWord.value.trim()){
