@@ -367,7 +367,7 @@ const handleSearch = () => {
   border-bottom: 1px solid #ddd;
 }
 .even-row {
-  background-color: #ffffff;
+  background-color: #fff;
 }
 .odd-row {
   background-color: #f5f5f5;
@@ -387,7 +387,6 @@ const handleSearch = () => {
 }
 .upload-button-wrapper {
   margin: 6px 0 10px 20px;
-  margin: 6px 0 10px 20px;
 }
 .upload-btn {
   padding: 4px 12px;
@@ -403,13 +402,11 @@ const handleSearch = () => {
   text-align: center;
   padding-top: 10px;
 }
-
 .custom-search-wrapper {
   display: flex;
   align-items: center;
   gap: 8px;
 }
-
 .custom-search-input {
   height: 32px;
   width: 220px;
@@ -417,7 +414,6 @@ const handleSearch = () => {
   padding: 0 10px;
   border: 1px solid #ccc;
 }
-
 .custom-search-btn {
   height: 32px;
   padding: 0 14px;
@@ -427,12 +423,6 @@ const handleSearch = () => {
   border-radius: 6px;
   cursor: pointer;
   font-weight: bold;
-}
-
-.main-content {
-  flex: 1;
-  text-align: center;
-  padding-top: 10px;
 }
 .search-wrapper {
   height: 80px;
@@ -446,13 +436,11 @@ const handleSearch = () => {
   align-items: center;
   gap: 8px;
 }
-
 .search-bar select {
   padding: 6px 12px;
   border: 1px solid black;
   border-radius: 4px;
 }
-
 .search-bar input {
   width: 500px;
   border-radius: 20px 0 0 20px;
@@ -483,63 +471,37 @@ table {
   border-collapse: collapse;
   font-size: 14px;
 }
-
-th {
-  position: sticky;
-  top: 0;
-  background-color: #f0f0f0;
-  z-index: 2; /* 确保不被遮挡 */
-}
-
 th, td {
   height: 40px;
   padding: 0 10px;
   border-bottom: 1px solid #eee;
   text-align: center;
 }
-
-thead {
-  background-color: #f0f0f0;
-}
 th {
   position: sticky;
   top: 0;
   z-index: 1;
   background: #f0f0f0;
 }
-td{
-  max-width: 200px; /* 限制最大宽度 */
+thead {
+  background-color: #f0f0f0;
+}
+td {
+  max-width: 200px;
   padding: 8px;
-  white-space: normal; /* 允许换行 */
-  word-wrap: break-word; /* 强制换行 */
-  overflow-wrap: break-word; /* 兼容性更好 */
-}
-thead {
-  background-color: #f0f0f0;
-}
-th {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  background: #f0f0f0;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 .icon-action {
   height: 1em;
   cursor: pointer;
-  transition: transform 0.2s, filter 0.2s;
   transition: transform 0.2s, filter 0.2s;
 }
 .icon-action:hover {
   transform: scale(1.2);
   filter: brightness(1.2);
 }
-.even-row {
-  background: #fff;
-}
-.odd-row {
-  background: #f5f5f5;
-}
-
 /* 分页器样式 */
 .pagination {
   width: 90%;
