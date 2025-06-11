@@ -230,20 +230,6 @@ const handleSearch = () => {
   graphKeyword.value = keyword.value.trim()
   showGraph.value = true
 }
-
-// 查询功能
-const keyword = ref('')
-const showGraph = ref(false)
-const graphKeyword = ref('')
-
-const handleSearch = () => {
-  if (!keyword.value.trim()) {
-    ElMessage.warning('请输入关键词再查询')
-    return
-  }
-  graphKeyword.value = keyword.value.trim()
-  showGraph.value = true
-}
 </script>
 
 <template>
