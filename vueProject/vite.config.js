@@ -21,8 +21,8 @@ export default defineConfig({
   server:{
     host: '0.0.0.0', 
     https: {
-      key: fs.readFileSync(path.resolve("D:/code/Paper-Manage-System/vueProject/cert", '10.68.36.20-key.pem')),
-      cert: fs.readFileSync(path.resolve("D:/code/Paper-Manage-System/vueProject/cert", '10.68.36.20.pem')),
+      key: fs.readFileSync(path.resolve("D:/code/Paper-Manage-System/vueProject/cert", 'Ning-key.pem')),
+      cert: fs.readFileSync(path.resolve("D:/code/Paper-Manage-System/vueProject/cert", 'Ning.pem')),
     },   
     proxy:{
       '/api': {
