@@ -45,7 +45,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(item, index) in pagedItems" :key="index">
+              <tr v-for="(item, index) in pagedItems" :key="index" :class="index % 2 === 0 ? 'even-row' : 'odd-row'">
                 <template v-if="activeSidebar === '待处理的通知'">
                   <td class="message-col">{{ item.message }}</td>
                   <td class="time-col">{{ formatDate(item.time) }}</td>
@@ -151,6 +151,17 @@ const handleSizeChange = (size) => {
 </script>
 
 <style scoped>
+thead {
+  background-color: #f0f0f0;
+}
+
+.even-row {
+  background-color: #ffffff;
+}
+.odd-row {
+  background-color: #f5f5f5;
+}
+
 .container {
   background: #f5f5f5;
   min-height: 100vh;
@@ -205,6 +216,22 @@ const handleSizeChange = (size) => {
   color: #666;
 }
 
+.custom-table thead th {
+  position: sticky;
+  top: 0;
+  background-color: #f0f0f0;
+  z-index: 1;
+}
+
+.table-wrapper {
+  max-height: 500px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ccc;
+  padding: 0;
+  border-radius: 12px;
+}
+
 .table-wrapper {
   background: white;
   border: 1px solid #ddd;
@@ -218,7 +245,7 @@ const handleSizeChange = (size) => {
 
 .custom-table th,
 .custom-table td {
-  border: 1px solid #ddd;
+  border: 0px solid #ddd;
   padding: 10px;
   white-space: nowrap;
   text-align: center;

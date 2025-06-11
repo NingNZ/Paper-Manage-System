@@ -164,7 +164,10 @@ const handleCreateTeam = (name)=>{
 </template>
 
 <style scoped>
-/* 同你原来的样式，未改动 */
+
+thead {
+  background-color: #f0f0f0;
+}
 .container {
   min-height: 100vh;
   background-color: #f4f4f4;
@@ -188,6 +191,42 @@ const handleCreateTeam = (name)=>{
   padding: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
+
+/* 表格样式 */
+.native-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+.native-table th,
+.native-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e0e0e0;
+}
+.even-row {
+  background-color: #ffffff;
+}
+.odd-row {
+  background-color: #f9f9f9;
+}
+
+.native-table thead th {
+  position: sticky;
+  top: 0;
+  background-color: #f0f0f0;
+  z-index: 1;
+}
+
+.table-wrapper {
+  max-height: 500px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ccc;
+  padding: 0;
+  border-radius: 12px;
+}
+
+/* 按钮样式 */
 .action-btn {
   transition: all 0.3s ease;
   margin: 0 5px;
@@ -196,6 +235,7 @@ const handleCreateTeam = (name)=>{
   filter: brightness(1.1);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
+
 .actions {
   margin: 20px 0;
   display: flex;

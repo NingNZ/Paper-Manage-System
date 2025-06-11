@@ -207,6 +207,7 @@ function exportToExcel() {
   color: #555;
 }
 
+
 .table-wrapper {
   max-height: 500px;
   overflow-y: auto;

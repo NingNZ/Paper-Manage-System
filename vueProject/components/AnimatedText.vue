@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, withCtx } from 'vue'
 
 const fullText = '欢迎来到论文管理系统！';
 const displayText = ref('');
