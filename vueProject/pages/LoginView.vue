@@ -8,6 +8,7 @@ import qs from 'querystring'
 import AnimatedText from "../components/AnimatedText.vue";
 import {sessionUtil} from "../scripts/session"
 import utils from "../scripts/utils";
+import {share} from "../scripts/share"
 const particlesInit = async engine =>{
   await loadSlim(engine);
 };
@@ -114,6 +115,19 @@ function handleLogin() {
       if (res.data.code == 200) {
         sessionUtil.getUser().then(data=>{
           ElMessage.success("Welcome, "+data.msg)
+          sessionUtil.checkPermiss()
+          .then(data=>{
+            if(data==200){
+              share.setPermisson(1)
+              ElMessage.info("你是管理员")
+            }else if(data==300){
+              share.setPermisson(0)
+              ElMessage.info("你是用户")
+            }else{
+              share.setPermisson(-1)
+              ElMessage.info("你是游客")
+            }
+          })
         }).catch(()=>{
           ElMessage.error("服务器连接出错")
         })
