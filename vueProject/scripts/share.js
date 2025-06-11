@@ -1,4 +1,4 @@
-import { readonly } from "vue";
+import { readonly,ref } from "vue";
 
 const _sharedPermission = ref(-1);
 export const share ={
