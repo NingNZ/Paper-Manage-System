@@ -13,14 +13,10 @@ import {share} from "../scripts/share"
 const particlesInit = async engine => {
   await loadSlim(engine);
 };
-const particlesLoaded = async container => {
-    // console.log('Particles container loaded', container)
-}
+const particlesLoaded = async container => {}
 
 const options = ref({
-  background: {
-    color: { value: '#99ccff' }
-  },
+  background: { color: { value: '#99ccff' } },
   fpsLimit: 120,
   interactivity: {
     events: {
@@ -66,6 +62,7 @@ const options = ref({
 
 let username = ref('');
 let password = ref('');
+let accountRegi = ref('');
 let userRegi = ref("");
 let passRegi = ref("");
 let DialogVisible2 = ref(false);
@@ -73,6 +70,11 @@ let DialogVisible = ref(false);
 const router = useRouter();
 
 function handleLogin() {
+  if (!username.value || !password.value) {
+    ElMessage.error("账号和密码不能为空");
+    return;
+  }
+
   let data = {
     username: username.value,
     password: password.value,
@@ -111,6 +113,13 @@ function handleLogin() {
 }
 
 function handleRegi() {
+  // 用户账号校验
+  const accountPattern = /^[A-Za-z0-9]{6,18}$/;
+  if (!accountPattern.test(accountRegi.value)) {
+    ElMessage.error("用户账号格式不正确：应为 6-18 位字母或数字组合");
+    return;
+  }
+
   // 用户名校验
   const usernamePattern = /^([\u4e00-\u9fa5]{1,18}|[a-zA-Z·\s]{1,18})$/;
   if (!usernamePattern.test(userRegi.value)) {
@@ -141,6 +150,7 @@ function handleRegi() {
       }
       userRegi.value = '';
       passRegi.value = '';
+      accountRegi.value = '';
     })
   DialogVisible.value = false;
 }
@@ -171,7 +181,7 @@ function changePassword() {
     <el-card class="card" style="opacity:0.96;" shadow="always">
       <img src="../assets/loginLogo.jpg" style="width: 30%; margin-inline-start:30%; border-radius:100%;
         filter: drop-shadow(3px 3px 6px #000000 );"> <br>
-      <el-input v-model="username" style="width: 240px" placeholder="用户名" /><br><br>
+      <el-input v-model="username" style="width: 240px" placeholder="用户账号" /><br><br>
       <el-input
         v-model="password"
         style="width: 240px"
@@ -194,6 +204,7 @@ function changePassword() {
     width="500"
     align-center
   >
+    <el-input v-model="accountRegi" style="width: 240px; margin-left: 25%" placeholder="用户账号" /><br><br>
     <el-input v-model="userRegi" style="width: 240px; margin-left: 25%" placeholder="用户名" /><br><br>
     <el-input
       v-model="passRegi"
@@ -203,7 +214,7 @@ function changePassword() {
       show-password
     /><br><br>
     <div style="margin-inline-start: 70%;">
-      <el-button @click="DialogVisible = false; userRegi=''; passRegi='';">取消</el-button>
+      <el-button @click="DialogVisible = false; accountRegi=''; userRegi=''; passRegi='';">取消</el-button>
       <el-button type="primary" @click="handleRegi">确定</el-button>
     </div>
   </el-dialog>
