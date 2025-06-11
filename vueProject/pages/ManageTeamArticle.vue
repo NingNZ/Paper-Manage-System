@@ -21,8 +21,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(member, index) in members" :key="index"
-                  :class="index % 2 === 0 ? 'even-row' : 'odd-row'">
+              <tr v-for="(member, index) in members" :key="index" :class="index % 2 === 0 ? 'even-row' : 'odd-row'">
                 <td>{{ member.id }}</td>
                 <td>{{ member.name }}</td>
                 <td>{{ member.role }}</td>
@@ -34,6 +33,7 @@
         <div class="buttons">
           <el-button type="primary" size="small" @click="openInviteDialog">邀请成员</el-button>
           <el-button type="info" size="small" @click="showCategoryManager = true">管理分类</el-button>
+          <el-button type="success" size="small" @click="openUploadDialog">上传论文</el-button>
         </div>
       </aside>
 
@@ -51,16 +51,15 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(paper, index) in pagedPapers" :key="index"
-                  :class="index % 2 === 0 ? 'even-row' : 'odd-row'">
+              <tr v-for="(paper, index) in pagedPapers" :key="index" :class="index % 2 === 0 ? 'even-row' : 'odd-row'">
                 <td>#{{ (currentPage - 1) * pageSize + index + 1 }}</td>
                 <td><em>{{ paper.title }}</em></td>
                 <td>{{ paper.category }}</td>
                 <td>{{ paper.uploader }}</td>
                 <td class="actions">
                   <img src="../assets/download.svg" alt="下载" class="action-icon" />
-                  <img src="../assets/edit.svg" alt="编辑" class="action-icon" />
-                  <img src="../assets/delete.svg" alt="删除" class="action-icon" />
+                  <img src="../assets/edit.svg" alt="编辑" class="action-icon" @click="handleEdit(paper)" />
+                  <img src="../assets/delete.svg" alt="删除" class="action-icon" @click="handleDelete(paper)" />
                 </td>
               </tr>
             </tbody>
@@ -82,13 +81,7 @@
     </main>
 
     <!-- 管理分类弹窗 -->
-    <el-dialog
-      v-model="showCategoryManager"
-      title="管理分类"
-      width="600px"
-      destroy-on-close
-      :close-on-click-modal="false"
-    >
+    <el-dialog v-model="showCategoryManager" title="管理分类" width="600px" destroy-on-close :close-on-click-modal="false">
       <CategoryManager />
       <template #footer>
         <span class="dialog-footer">
@@ -100,15 +93,27 @@
 
     <!-- 邀请成员弹窗 -->
     <InviteMemberDialog ref="inviteDialogRef" />
+
+    <!-- 上传论文弹窗（组件化后） -->
+    <UploadDialog v-model="showUploadDialog" :categories="categories" @upload="handleUpload" />
+
+    <!-- 编辑弹窗 -->
+    <EditDialog v-model="showEditDialog" :item="currentEditItem" @confirm="confirmEdit" @close="showEditDialog = false" />
+
+    <!-- 删除弹窗 -->
+    <DeleteDialog v-model="showDeleteDialog" :item="currentDeleteItem" @confirm="confirmDelete" @close="showDeleteDialog = false" />
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
-import { ElButton, ElPagination, ElDialog } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import bar from '../components/bar.vue'
 import CategoryManager from '../components/ManageTeamArticle/CategoryManagerDialog.vue'
 import InviteMemberDialog from '../components/ManageTeamArticle/InviteMemberDialog.vue'
+import EditDialog from "../components/ManageTeamArticle/EditDialog.vue"
+import DeleteDialog from "../components/ManageTeamArticle/DeleteDialog.vue"
+import UploadDialog from "../components/ManageTeamArticle/UploadDialog.vue"
 
 const members = [
   { id: 'uid01', name: 'Anda', role: '组长' },
@@ -117,25 +122,32 @@ const members = [
   { id: 'uid04', name: 'Lily', role: '组员' },
   { id: 'uid05', name: 'Lily', role: '组员' },
   { id: 'uid06', name: 'Lily', role: '组员' },
-  { id: 'uid06', name: 'Lily', role: '组员' },
   { id: 'uid07', name: 'Lily', role: '组员' },
   { id: 'uid08', name: 'Lily', role: '组员' }
 ]
 
-const papers = Array.from({ length: 20 }, (_, i) => ({
+const categories = ref(['AI', '机器学习', '自然语言处理', '计算机视觉'])
+const papers = ref(Array.from({ length: 20 }, (_, i) => ({
+  id: i + 1,
   title: `Title of paper ${i + 1}`,
   category: 'AI',
   uploader: 'xxx'
-}))
+})))
 
 const currentPage = ref(1)
 const pageSize = ref(10)
 const showCategoryManager = ref(false)
 const inviteDialogRef = ref(null)
+const showUploadDialog = ref(false)
+const showEditDialog = ref(false)
+const showDeleteDialog = ref(false)
+
+const currentEditItem = ref(null)
+const currentDeleteItem = ref(null)
 
 const pagedPapers = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value
-  return papers.slice(start, start + pageSize.value)
+  return papers.value.slice(start, start + pageSize.value)
 })
 
 function handlePageChange(val) {
@@ -150,15 +162,50 @@ function handleSizeChange(val) {
 function openInviteDialog() {
   inviteDialogRef.value.openDialog()
 }
+
+function openUploadDialog() {
+  showUploadDialog.value = true
+}
+
+function handleUpload(newPaper) {
+  papers.value.push({
+    id: papers.value.length + 1,
+    title: newPaper.title,
+    category: newPaper.category,
+    uploader: '当前用户'
+  })
+  ElMessage.success('上传成功！')
+  showUploadDialog.value = false
+}
+
+function handleEdit(item) {
+  currentEditItem.value = { ...item }
+  showEditDialog.value = true
+}
+
+function confirmEdit(newCategory) {
+  const index = papers.value.findIndex(p => p.id === currentEditItem.value.id)
+  if (index !== -1) {
+    papers.value[index].category = newCategory
+  }
+  showEditDialog.value = false
+}
+
+function handleDelete(item) {
+  currentDeleteItem.value = item
+  showDeleteDialog.value = true
+}
+
+function confirmDelete() {
+  papers.value = papers.value.filter(p => p.id !== currentDeleteItem.value.id)
+  showDeleteDialog.value = false
+}
 </script>
 
 <style scoped>
-.even-row {
-  background-color: #ffffff;
-}
-.odd-row {
-  background-color: #f5f5f5;
-}
+/* 样式完全沿用你的，无需改动 */
+.even-row { background-color: #ffffff; }
+.odd-row { background-color: #f5f5f5; }
 
 .container {
   min-height: 100vh;

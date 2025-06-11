@@ -8,6 +8,7 @@ import CategoryManagerDialog from "../components/SearchResult/CategoryManagerDia
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from "vue-router";
 import { ElMessage,ElLoading } from "element-plus";
+import NetworkGraph from "../components/SearchResult/NetworkGraph.vue";
 import axios from 'axios'
 import utils from "../scripts/utils";
 import { sessionUtil } from "../scripts/session";
@@ -215,6 +216,34 @@ const confirmDelete = () => {
   })
   
 }
+
+// 查询功能
+const keyword = ref('')
+const showGraph = ref(false)
+const graphKeyword = ref('')
+
+const handleSearch = () => {
+  if (!keyword.value.trim()) {
+    ElMessage.warning('请输入关键词再查询')
+    return
+  }
+  graphKeyword.value = keyword.value.trim()
+  showGraph.value = true
+}
+
+// 查询功能
+const keyword = ref('')
+const showGraph = ref(false)
+const graphKeyword = ref('')
+
+const handleSearch = () => {
+  if (!keyword.value.trim()) {
+    ElMessage.warning('请输入关键词再查询')
+    return
+  }
+  graphKeyword.value = keyword.value.trim()
+  showGraph.value = true
+}
 </script>
 
 <template>
@@ -223,8 +252,19 @@ const confirmDelete = () => {
 
     <div class="breadcrumb"><a href="/">首页</a> &gt; <a href="/search">查询结果</a></div>
 
+    <!-- 上传按钮隐藏，保留样式位置 -->
     <div class="upload-button-wrapper">
-      <button class="upload-btn" @click="showUploadDialog = true">上传论文</button>
+      <button class="upload-btn" @click="showUploadDialog = true">上传论文</button> 
+
+      <!-- 查询输入框 -->
+      <div class="custom-search-wrapper">
+        <input
+          class="custom-search-input"
+          v-model="keyword"
+          placeholder="请输入关键词"
+        />
+        <button class="custom-search-btn" @click="handleSearch">查询</button>
+      </div>
     </div>
     <main class="main-content">
       <!-- 搜索栏 -->
@@ -282,25 +322,23 @@ const confirmDelete = () => {
         </table>
       </div>
 
-  <div class="pagination">
-    <div class="bottom-left-buttons">
-      <button class="manage-btn" @click="showJournalDialog = true">管理期刊</button>
-      <button class="manage-btn" @click="showCategoryDialog = true">管理分类</button>
-    </div>
-
-    <!--分页器-->
-  <el-pagination
-    background
-    layout="prev, pager, next, sizes, jumper"
-    :total="total"
-    :page-size="pageSize"
-    :current-page="currentPage"
-    :page-sizes="[10, 20, 50]"
-    @current-change="handlePageChange"
-    @size-change="handleSizeChange"
-  />
-</div>
-
+      <!-- 分页器 -->
+      <div class="pagination">
+        <div class="bottom-left-buttons">
+          <button class="manage-btn" @click="showJournalDialog = true">管理期刊</button>
+          <button class="manage-btn" @click="showCategoryDialog = true">管理分类</button>
+        </div>
+        <el-pagination
+          background
+          layout="prev, pager, next, sizes, jumper"
+          :total="total"
+          :page-size="pageSize"
+          :current-page="currentPage"
+          :page-sizes="[10, 20, 50]"
+          @current-change="handlePageChange"
+          @size-change="handleSizeChange"
+        />
+      </div>
     </main>
 
     <!-- 上传弹窗组件 -->
@@ -320,6 +358,20 @@ const confirmDelete = () => {
     />
     <CategoryManagerDialog v-model:visible="showCategoryDialog" />
     <JournalManagerDialog v-model:visible="showJournalDialog" />
+
+    <!-- 网络图弹窗 -->
+  <el-dialog
+  v-model="showGraph"
+  title="关系网络图"
+  width="80%"
+  :close-on-click-modal="false"
+  >
+  <!-- 注意：这个 div 一定要有高度！ -->
+  <div style="height: 500px;">
+    <NetworkGraph :center="graphKeyword" />
+  </div>
+</el-dialog>
+
   </div>
 </template>
 
@@ -365,6 +417,32 @@ const confirmDelete = () => {
   text-align: center;
   padding-top: 10px;
 }
+
+.custom-search-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.custom-search-input {
+  height: 32px;
+  width: 220px;
+  border-radius: 6px;
+  padding: 0 10px;
+  border: 1px solid #ccc;
+}
+
+.custom-search-btn {
+  height: 32px;
+  padding: 0 14px;
+  background-color: #409eff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
 .main-content {
   flex: 1;
   text-align: center;
