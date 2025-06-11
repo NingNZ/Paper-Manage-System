@@ -190,16 +190,17 @@ const handleSearch = () => {
 
     <!-- 网络图弹窗 -->
   <el-dialog
-  v-model="showGraph"
-  title="关系网络图"
-  width="80%"
-  :close-on-click-modal="false"
+    v-model="showGraph"
+    title="关系网络图"
+    width="60%"
+    :close-on-click-modal="false"
   >
-  <!-- 注意：这个 div 一定要有高度！ -->
-  <div style="height: 500px;">
-    <NetworkGraph :center="graphKeyword" />
-  </div>
-</el-dialog>
+    <!-- 注意：这个 div 一定要有高度！ -->
+    <div style="height:700px; width: 100%;">
+      <NetworkGraph :center="graphKeyword" />
+    </div>
+  </el-dialog>
+
 
   </div>
 </template>
