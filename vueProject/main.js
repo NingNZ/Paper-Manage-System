@@ -4,7 +4,6 @@ import ElementPlus from 'element-plus'
 import Particles from "particles.vue3";
 import 'element-plus/dist/index.css'
 import router from './route'
-
 //测试用例
 localStorage.setItem("teamId","#team001")
 localStorage.setItem("userId","a123")
