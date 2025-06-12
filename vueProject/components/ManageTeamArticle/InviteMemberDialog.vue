@@ -32,6 +32,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { Search } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
 
 const visible = ref(false)
 const searchQuery = ref('')
@@ -50,8 +51,11 @@ const filteredMembers = computed(() =>
   )
 )
 
+const emit = defineEmits(['invite-sent'])
+
 function invite(member) {
-  console.log(`邀请：${member.name}`)
+  ElMessage.success('您的邀请已发出')
+  emit('invite-sent', member)
 }
 
 function openDialog() {
