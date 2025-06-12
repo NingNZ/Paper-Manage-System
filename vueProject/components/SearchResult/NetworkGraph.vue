@@ -39,7 +39,7 @@ const getChartOption = (center) => ({
     {
       type: 'graph',
       layout: 'force',
-      roam: true,
+      roam: 'move',
       focusNodeAdjacency: true, // 鼠标悬停高亮节点和邻接边
       label: {
         show: true,
@@ -49,8 +49,8 @@ const getChartOption = (center) => ({
         fontWeight: '500'
       },
       force: {
-        repulsion: 6000,
-        edgeLength: [100, 150],
+        repulsion: 4000,
+        edgeLength: [50, 80],
         gravity: 0.1,
         layoutAnimation: true
       },
