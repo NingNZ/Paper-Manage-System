@@ -12,7 +12,7 @@ import NetworkGraph from "../components/SearchResult/NetworkGraph.vue";
 import axios from 'axios'
 import utils from "../scripts/utils";
 import { sessionUtil } from "../scripts/session";
-import { share } from '../scripts/share'
+
 
 const allData = ref([]);
 const searchWord = ref("")
@@ -21,10 +21,16 @@ const route = useRoute()
 var code = 0
 var msg = ""
 
-
-
-
-const permission = computed(() => share.getPermission().value)
+var permission = -1;
+onMounted(()=>{
+  sessionUtil.checkPermiss()
+  .then(res=>{
+    permission = res
+  }).catch(()=>{
+    permission = -1
+    ElMessage.error("服务器未连接")
+  });
+});
 
 
 // 弹窗控制
