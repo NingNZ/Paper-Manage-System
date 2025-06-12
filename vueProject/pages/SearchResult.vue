@@ -12,6 +12,7 @@ import NetworkGraph from "../components/SearchResult/NetworkGraph.vue";
 import axios from 'axios'
 import utils from "../scripts/utils";
 import { sessionUtil } from "../scripts/session";
+import { share } from '../scripts/share'
 
 const allData = ref([]);
 const searchWord = ref("")
@@ -19,6 +20,12 @@ const selectedType = ref('0')
 const route = useRoute()
 var code = 0
 var msg = ""
+
+
+
+
+const permission = computed(() => share.getPermission().value)
+
 
 // 弹窗控制
 const showUploadDialog = ref(false)
@@ -153,6 +160,7 @@ const paginatedData = computed(() => {
 })
 
 const handleEdit = (item) => {
+  
   currentEditItem.value = { ...item }
   utils.getSysType("true",'')
   .then(({code,data,msg})=>{
@@ -297,12 +305,26 @@ const handleSearch = () => {
               <td><b>{{ item.journal }}</b></td>
               <td><b>{{ item.type }}</b></td>
               <td>
-                <img src="../assets/download.svg" alt="下载" class="icon-action" @click="handleDownload(item)" />
-                &nbsp;
-                <img src="../assets/edit.svg" alt="编辑" class="icon-action" @click="handleEdit(item)" />
-                &nbsp;
-                <img src="../assets/delete.svg" alt="删除" class="icon-action" @click="handleDelete(item)" />
+              <!-- 下载任何人都能看 -->
+                <img src="../assets/download.svg"
+                  alt="下载"
+                  class="icon-action"
+                  @click="handleDownload(item)" />
+
+              <!-- 只有管理员能看 -->
+                <img v-if="permission === 1"
+                  src="../assets/edit.svg"
+                  alt="编辑"
+                  class="icon-action"
+                  @click="handleEdit(item)" />
+
+                <img v-if="permission === 1"
+                  src="../assets/delete.svg"
+                  alt="删除"
+                  class="icon-action"
+                  @click="handleDelete(item)" />
               </td>
+
             </tr>
           </tbody>
         </table>
@@ -310,10 +332,11 @@ const handleSearch = () => {
 
       <!-- 分页器 -->
       <div class="pagination">
-        <div class="bottom-left-buttons">
+        <div class="bottom-left-buttons" v-if="permission === 1">
           <button class="manage-btn" @click="showJournalDialog = true">管理期刊</button>
           <button class="manage-btn" @click="showCategoryDialog = true">管理分类</button>
         </div>
+        <div class="bottom-left-buttons" v-if="permission !== 1"></div>
         <el-pagination
           background
           layout="prev, pager, next, sizes, jumper"

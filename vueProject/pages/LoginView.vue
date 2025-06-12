@@ -89,6 +89,7 @@ function handleLogin() {
           .then(data=>{
             if(data==200){
               share.setPermisson(1)
+              console.log(share.getPermission().value)
               ElMessage.info("你是管理员")
             }else if(data==300){
               share.setPermisson(0)
@@ -97,6 +98,7 @@ function handleLogin() {
               share.setPermisson(-1)
               ElMessage.info("你是游客")
             }
+            router.push('/')
           })
         }).catch(()=>{
           ElMessage.error("服务器连接出错")

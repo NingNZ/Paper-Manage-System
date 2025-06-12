@@ -2,7 +2,7 @@ import axios from "axios"
 import { ElMessage } from "element-plus";
 
 const utils = {
-    urlnoProxy:"https://10.68.36.20:5123",
+    urlnoProxy:"https://10.68.203.190:5123",
     url:"/api",
     /**
     * @param {string} isSystem 
