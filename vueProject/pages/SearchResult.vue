@@ -316,14 +316,14 @@ const handleSearch = () => {
                   alt="下载"
                   class="icon-action"
                   @click="handleDownload(item)" />
-
+                &nbsp;
               <!-- 只有管理员能看 -->
                 <img v-if="permission === 1"
                   src="../assets/edit.svg"
                   alt="编辑"
                   class="icon-action"
                   @click="handleEdit(item)" />
-
+                &nbsp;
                 <img v-if="permission === 1"
                   src="../assets/delete.svg"
                   alt="删除"
