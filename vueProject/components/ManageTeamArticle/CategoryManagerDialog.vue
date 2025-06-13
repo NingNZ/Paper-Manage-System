@@ -13,7 +13,7 @@
           <span>{{ data.label }}</span>
           <span class="tree-actions">
             <!-- 分类节点只允许新建 -->
-            <template v-if="data.isRoot">
+            <template v-if="data.isDefault">
               <img class="action-icon" src="../../assets/new.svg" alt="新建" @click.stop="handleAdd(data)" />
             </template>
             <!-- 其他节点正常有 新建/编辑/删除 -->
@@ -39,21 +39,40 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { onMounted, ref } from 'vue'
+import { ElMessage, ElMessageBox,ElLoading } from 'element-plus'
+import { teamInfoUtils } from '../../scripts/teamInfo'
 
+ const sendAndSet = ()=>{
+    const loadingInstance = ElLoading.service({
+      lock: true,
+      text: '加载中...',
+      background: 'white',
+      target:'.category-container'
+    })
+  const teamId = localStorage.getItem("teamId");
+  teamInfoUtils.getTeamCategory(teamId)
+  .then(({code,data,msg})=>{
+    if(code==200){
+      console.log(data)
+      treeData.value = data
+      ElMessage.success({message:"刷新团队论文分类",duration: 2000})
+    }else{
+      ElMessage.error(msg)
+    }
+  }).catch(({code,data,msg})=>{
+    ElMessage.error(msg)
+  }).finally(()=>{
+    setTimeout(() => {
+      loadingInstance.close()
+    }, 500);
+  })
+ }
+onMounted(()=>{
+  sendAndSet()
+})
 // 树数据：外层套一层 "分类"
-const treeData = ref([
-  {
-    id: 0,
-    label: '分类',
-    isRoot: true,
-    children: [
-      { id: 1, label: 'Part1', children: [{ id: 2, label: 'AI', children: [{ id: 3, label: '体系结构' }] }] },
-      { id: 4, label: 'Part2' }
-    ]
-  }
-])
+const treeData = ref([])
 
 const defaultProps = { children: 'children', label: 'label' }
 

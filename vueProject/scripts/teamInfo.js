@@ -22,7 +22,7 @@ export const teamInfoUtils = {
             // 处理错误
             return Promise.reject({
                 code: 404,
-                msg: "服务不可用"
+                msg: "服务器未连接"
             })
         })
     },
@@ -45,7 +45,7 @@ export const teamInfoUtils = {
             // 处理错误
             return Promise.reject({
                 code: 404,
-                msg: "服务不可用"
+                msg: "服务器未连接"
             })
         })
     },
@@ -68,7 +68,7 @@ export const teamInfoUtils = {
             // 处理错误
             return Promise.reject({
                 code: 404,
-                msg: "服务不可用"
+                msg: "服务器未连接"
             })
         })
     },
@@ -88,33 +88,38 @@ export const teamInfoUtils = {
             return Promise.reject({
                 code: 404,
                 data: [],
-                msg: "服务不可用"
+                msg: "服务器未连接"
             });
         });
     },
 
     // 获取团队分类信息
-    getTeamCatagory(teamId) {
-        return axios.get(utils.url + '/teamInfo/Catagory', {
+    getTeamCategory(teamId) {
+        return axios.get(utils.url + '/teamInfo/Category', {
             withCredentials: true,
-            params: { teamId }
+            params: { teamId },
+            timeout: 3000
         }).then((response) => {
-            return response.data;
+            return {
+                code: response.data[0].code,
+                msg: response.data[0].msg,
+                data: response.data.slice(1)
+            }
         }).catch(error => {
             return Promise.reject({
                 code: 404,
                 data: [],
-                msg: "服务不可用"
+                msg: "服务器未连接"
             });
         });
     },
 
     // 新增分类
-    CatagoryAdd(teamId, parentlable, lable) {
-        return axios.post(utils.url + '/teamInfo/CatagoryAdd', {
-            teamId,
-            parentlable,
-            lable
+    CategoryAdd(teamId,fid,label) {
+        return axios.get(utils.url + '/teamInfo/CategoryAdd', {
+            teamId:teamId,
+            fid:fid,
+            label:label
         }, {
             withCredentials: true
         }).then((response) => {
@@ -123,14 +128,14 @@ export const teamInfoUtils = {
             return Promise.reject({
                 code: 404,
                 data: [],
-                msg: "服务不可用"
+                msg: "服务器未连接"
             });
         });
     },
 
     // 编辑分类
-    CatagoryEdit(teamId, catagorylable, lable) {
-        return axios.post(utils.url + '/teamInfo/CatagoryEdit', {
+    CategoryEdit(teamId, catagorylable, lable) {
+        return axios.post(utils.url + '/teamInfo/CategoryEdit', {
             teamId,
             catagorylable,
             lable
@@ -142,14 +147,14 @@ export const teamInfoUtils = {
             return Promise.reject({
                 code: 404,
                 data: [],
-                msg: "服务不可用"
+                msg: "服务器未连接"
             });
         });
     },
 
     // 删除分类
-    CatagoryDelete(teamId, catagorylable) {
-        return axios.post(utils.url + '/teamInfo/CatagoryDelete', {
+    CategoryDelete(teamId, catagorylable) {
+        return axios.post(utils.url + '/teamInfo/CategoryDelete', {
             teamId,
             catagorylable
         }, {
@@ -160,7 +165,7 @@ export const teamInfoUtils = {
             return Promise.reject({
                 code: 404,
                 data: [],
-                msg: "服务不可用"
+                msg: "服务器未连接"
             });
         });
     }
