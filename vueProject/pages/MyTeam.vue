@@ -4,7 +4,7 @@ import CreateTeamDialog from "../components/MyTeam/CreateTeamDialog.vue";
 import JoinTeamDialog from "../components/MyTeam/JoinTeamDialog.vue";
 import LeaveConfirmDialog from "../components/MyTeam/LeaveConfirmDialog.vue";
 import { ref, computed, onMounted, useId, watch } from 'vue';
-import { ElMessage } from 'element-plus';
+import { ElMessage,ElLoading} from 'element-plus';
 import teamUtils from "../scripts/team";
 
 const setAllData = (data)=>{
@@ -16,6 +16,11 @@ const setAllData = (data)=>{
   fullTableData.value=[...fullTableData.value]
 }
 const sendAndSet = (userId)=>{
+    const loadingInstance = ElLoading.service({
+      lock: true,
+      text: '加载中...',
+      background: 'rgba(0, 0, 0, 0.2)'
+    })
   teamUtils.getMyTeamList(userId)
   .then(({code,data,msg})=>{
     if(code==200){
@@ -32,7 +37,11 @@ const sendAndSet = (userId)=>{
   .catch(({code,data,msg})=>{
     ElMessage.error(msg)
     setAllData(data)
-  }) 
+  }).finally(()=>{
+    setTimeout(()=>{
+      loadingInstance.close()
+    },500)
+  })
 }
 onMounted(()=>{
   const userId = localStorage.getItem("userId")

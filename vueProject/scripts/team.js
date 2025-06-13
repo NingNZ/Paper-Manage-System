@@ -9,9 +9,7 @@ const teamUtils = {
      */
     getMyTeamList (userId){
      return axios.get(utils.url+'/myTeam/get', {
-            params: {
-                userId:userId
-            },
+            withCredentials:true,
             timeout:3000
         }).then((response) => {
         // 处理返回数据
