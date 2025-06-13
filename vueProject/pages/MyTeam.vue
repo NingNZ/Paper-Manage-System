@@ -21,7 +21,7 @@ const sendAndSet = (userId)=>{
       text: '加载中...',
       background: 'rgba(0, 0, 0, 0.2)'
     })
-  teamUtils.getMyTeamList(userId)
+  teamUtils.getMyTeamList()
   .then(({code,data,msg})=>{
     if(code==200){
       if(data.length==0){

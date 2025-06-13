@@ -4,10 +4,9 @@ import { ElMessage } from "element-plus"
 const teamUtils = {
     /**
      * 
-     * @param {String} userId 
      * @returns 
      */
-    getMyTeamList (userId){
+    getMyTeamList (){
      return axios.get(utils.url+'/myTeam/get', {
             withCredentials:true,
             timeout:3000
