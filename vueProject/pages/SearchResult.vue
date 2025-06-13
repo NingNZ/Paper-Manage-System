@@ -258,6 +258,16 @@ const handleSearch = () => {
   })
 
 }
+
+
+//刷新关系网络
+const isRotating = ref(false)
+const refreshGraph = () => {
+  isRotating.value = true;
+    setTimeout(() => {
+    isRotating.value = false
+  }, 400)
+}
 </script>
 
 <template>
@@ -395,7 +405,16 @@ const handleSearch = () => {
     :close-on-click-modal="false"
     @close="keyword=''"
   >
-  <h1>论文关系网络</h1>
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+      <h1 style="margin: 0;">论文关系网络</h1>
+      <img
+        src="../assets/fresh.svg"
+        alt="刷新"
+        class="refresh-icon"
+        :class="{ 'refresh-rotate': isRotating }"
+        @click="refreshGraph"
+      />
+    </div>
     <!-- 注意：这个 div 一定要有高度！ -->
     <div style="height:500px; width: 100%;">
       <NetworkGraph :center="graphKeyword" />
@@ -569,5 +588,15 @@ td {
   border-radius: 6px;
   font-size: 13px;
   cursor: pointer;
+}
+
+.refresh-icon {
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  transition: transform 0.4s cubic-bezier(.4,2,.6,1);
+}
+.refresh-rotate {
+  transform: rotate(180deg) scale(1.15);
 }
 </style>
