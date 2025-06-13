@@ -4,26 +4,60 @@
 
 <script setup>
 import * as echarts from 'echarts'
-import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
+import { ref, onMounted, onBeforeUnmount, watch,computed } from 'vue'
 
 const props = defineProps({
-  center: String
+  center: String,
 })
+const centerName = '中心节点'
+
+/**
+ * @type {Array<{name:string,lable:string,symbolSize:int,itemStyle:Object,draggable:bool}>}
+ */
+const nodes = ref([
+  { name: '节点1', displayName:'hello',symbolSize: 40, itemStyle: { color: '#83bff6' }, draggable: true },
+])
+
+/**
+ * @type {Array<{source:string,target:string,lineStyle:Object}>}
+ */
+const edges = ref([
+  { source: centerName, target: '节点1', lineStyle: { color: '#a0c4ff', width: 2 } },
+])
+
+const graphData = computed(() => [
+  {
+    name: centerName,
+    symbolSize: 60,
+    itemStyle: {
+      color: '#ff7f50',
+      shadowBlur: 15,
+      shadowColor: 'rgba(255, 127, 80, 0.8)'
+    },
+    label: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      color: '#ff5722'
+    },
+    draggable: true
+  },
+  ...nodes.value.filter(n => n.name !== centerName)
+])
+
 
 const chartRef = ref(null)
 let chartInstance = null
-
-const getChartOption = (center) => ({
+const getChartOption = () => ({
   backgroundColor: '#f9f9f9',
-  title: {
-    text: '关键词关系图',
-    left: 'center',
-    textStyle: {
-      color: '#333',
-      fontSize: 22,
-      fontWeight: 'bold'
-    }
-  },
+  // title: {
+  //   text: '论文关系网络',
+  //   left: 'center',
+  //   textStyle: {
+  //     color: '#333',
+  //     fontSize: 22,
+  //     fontWeight: 'bold'
+  //   }
+  // },
   tooltip: {
     show: true,
     formatter: function (params) {
@@ -39,14 +73,18 @@ const getChartOption = (center) => ({
     {
       type: 'graph',
       layout: 'force',
-      roam: 'move',
+      roam: false,
       focusNodeAdjacency: true, // 鼠标悬停高亮节点和邻接边
       label: {
         show: true,
         position: 'bottom',
         fontSize: 14,
         color: '#555',
-        fontWeight: '500'
+        fontWeight: '500',
+        formatter: function(params) {
+          // 优先显示 displayName，没有则显示 name
+          return params.data.displayName || params.data.name;
+        }
       },
       force: {
         repulsion: 4000,
@@ -59,33 +97,8 @@ const getChartOption = (center) => ({
       edgeLabel: {
         show: false
       },
-      data: [
-        {
-          name: center,
-          symbolSize: 60,
-          itemStyle: {
-            color: '#ff7f50',
-            shadowBlur: 15,
-            shadowColor: 'rgba(255, 127, 80, 0.8)'
-          },
-          label: {
-            fontSize: 18,
-            fontWeight: 'bold',
-            color: '#ff5722'
-          },
-          draggable: true
-        },
-        { name: '节点1', symbolSize: 40, itemStyle: { color: '#83bff6' }, draggable: true },
-        { name: '节点2', symbolSize: 40, itemStyle: { color: '#83bff6' }, draggable: true },
-        { name: '节点3', symbolSize: 40, itemStyle: { color: '#83bff6' }, draggable: true },
-        { name: '节点4', symbolSize: 40, itemStyle: { color: '#83bff6' }, draggable: true }
-      ],
-      links: [
-        { source: center, target: '节点1', lineStyle: { color: '#a0c4ff', width: 2 } },
-        { source: center, target: '节点2', lineStyle: { color: '#a0c4ff', width: 2 } },
-        { source: center, target: '节点3', lineStyle: { color: '#a0c4ff', width: 2 } },
-        { source: center, target: '节点4', lineStyle: { color: '#a0c4ff', width: 2 } }
-      ],
+      data: graphData.value,
+      links: edges.value,
       emphasis: {
         focus: 'adjacency',
         label: {
@@ -110,7 +123,7 @@ const getChartOption = (center) => ({
 const initChart = () => {
   if (chartRef.value) {
     chartInstance = echarts.init(chartRef.value)
-    chartInstance.setOption(getChartOption(props.center))
+    chartInstance.setOption(getChartOption())
     window.addEventListener('resize', resizeChart)
   }
 }
@@ -130,7 +143,7 @@ onBeforeUnmount(() => {
 
 watch(() => props.center, (newCenter) => {
   if (chartInstance) {
-    chartInstance.setOption(getChartOption(newCenter))
+    chartInstance.setOption(getChartOption(),{ resetLayout: true })
   }
 })
 </script>

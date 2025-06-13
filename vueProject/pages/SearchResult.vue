@@ -391,10 +391,11 @@ const handleSearch = () => {
     <!-- 网络图弹窗 -->
   <el-dialog
     v-model="showGraph"
-    title="关系网络图"
-    width="40%"
+    width="60%"
     :close-on-click-modal="false"
+    @close="keyword=''"
   >
+  <h1>论文关系网络</h1>
     <!-- 注意：这个 div 一定要有高度！ -->
     <div style="height:500px; width: 100%;">
       <NetworkGraph :center="graphKeyword" />
