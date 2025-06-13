@@ -12,6 +12,7 @@ import NetworkGraph from "../components/SearchResult/NetworkGraph.vue";
 import axios from 'axios'
 import utils from "../scripts/utils";
 import { sessionUtil } from "../scripts/session";
+import { userNetUtils } from "../scripts/userNet";
 
 
 const allData = ref([]);
@@ -238,11 +239,24 @@ const graphKeyword = ref('')
 
 const handleSearch = () => {
   if (!keyword.value.trim()) {
-    ElMessage.warning('请输入关键词再查询')
+    ElMessage.warning('请输入用户账号再查询')
     return
   }
-  graphKeyword.value = keyword.value.trim()
-  showGraph.value = true
+  const userId = keyword.value.trim()
+  userNetUtils.checkUserIdExist(userId)
+  .then((data)=>{
+      if(data.code==200){
+        ElMessage.success(data.msg)
+        graphKeyword.value = userId
+        showGraph.value = true
+      }else{
+        ElMessage.info(data.msg)
+      }
+  })
+  .catch((error)=>{
+    ElMessage.error(error.msg)
+  })
+
 }
 </script>
 
@@ -261,7 +275,7 @@ const handleSearch = () => {
         <input
           class="custom-search-input"
           v-model="keyword"
-          placeholder="请输入关键词"
+          placeholder="请输入用户账号"
         />
         <button class="custom-search-btn" @click="handleSearch">查询</button>
       </div>
