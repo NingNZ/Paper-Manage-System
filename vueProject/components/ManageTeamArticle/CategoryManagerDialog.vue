@@ -105,35 +105,66 @@ function handleDelete(node) {
   ElMessageBox.confirm(`确定要删除 "${node.label}" 吗？`, '删除确认', {
     type: 'warning'
   }).then(() => {
-    deleteNode(treeData.value, node.id)
-    ElMessage.success('删除成功')
+    deleteNode(node.id)
   }).catch(() => {})
 }
 
 // 确认弹窗提交
 function confirmDialog() {
-  if (isEditing.value) {
-    currentNode.label = inputValue.value
-  } else {
-    const newChild = { id: maxId++, label: inputValue.value }
-    if (!parentNode.children) parentNode.children = []
-    parentNode.children.push(newChild)
+  if(inputValue.value.trim()==''){
+    ElMessage.info("输入不能为空");
+    return ;
   }
-  dialogVisible.value = false
+  const inlabel = inputValue.value.trim()
+  const teamId = localStorage.getItem("teamId");
+  if (isEditing.value) {
+    teamInfoUtils.CategoryEdit(teamId,currentNode.id,inlabel)
+    .then(({code,msg})=>{
+      if(code==200){
+        ElMessage.success("修改成功")
+        currentNode.label = inlabel
+      }else{
+        ElMessage.error(msg);
+      }
+    }).catch(({code,msg})=>{
+      ElMessage.error(msg);
+    }).finally(()=>{
+      dialogVisible.value = false
+    })
+    
+  } else {
+    teamInfoUtils.CategoryAdd(teamId,parentNode.id,inlabel)
+    .then(({code,data,msg})=>{
+      if(code==200){
+        ElMessage.success("添加成功")
+        treeData.value = data
+      }else{
+        ElMessage.error(msg);
+      }
+    }).catch(({code,msg})=>{
+      ElMessage.error(msg);
+    }).finally(()=>{
+      dialogVisible.value = false
+    })
+  }
+  
 }
 
-// 递归删除函数
-function deleteNode(arr, id) {
-  for (let i = 0; i < arr.length; i++) {
-    if (arr[i].id === id) {
-      arr.splice(i, 1)
-      return true
-    } else if (arr[i].children) {
-      const found = deleteNode(arr[i].children, id)
-      if (found) return true
-    }
-  }
-  return false
+// 删除函数
+function deleteNode(id) {
+  const teamId = localStorage.getItem("teamId")
+  teamInfoUtils.CategoryDelete(teamId,id)
+  .then(({code,msg,data})=>{
+      if(code==200){
+        ElMessage.success("删除成功")
+        sendAndSet()
+      }else{
+        ElMessage.error(msg)
+      }
+  })
+  .catch(({code,data,msg})=>{
+    ElMessage.error(msg)
+  })
 }
 </script>
 

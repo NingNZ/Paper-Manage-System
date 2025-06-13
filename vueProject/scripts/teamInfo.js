@@ -117,50 +117,63 @@ export const teamInfoUtils = {
     // 新增分类
     CategoryAdd(teamId,fid,label) {
         return axios.get(utils.url + '/teamInfo/CategoryAdd', {
-            teamId:teamId,
-            fid:fid,
-            label:label
-        }, {
+            params:{
+                teamId:teamId,
+                fid:fid,
+                label:label
+            },
             withCredentials: true
         }).then((response) => {
-            return response.data;
+            return {
+                code:response.data[0].code,
+                data:response.data.slice(1),
+                msg:response.data[0].msg
+            }
         }).catch(error => {
             return Promise.reject({
                 code: 404,
-                data: [],
+                data:[],
                 msg: "服务器未连接"
             });
         });
     },
 
     // 编辑分类
-    CategoryEdit(teamId, catagorylable, lable) {
-        return axios.post(utils.url + '/teamInfo/CategoryEdit', {
-            teamId,
-            catagorylable,
-            lable
-        }, {
+    CategoryEdit(teamId,id,label) {
+        return axios.get(utils.url + '/teamInfo/CategoryEdit', {
+            params:{
+                teamId:teamId,
+                id:id,
+                label:label
+            },
             withCredentials: true
         }).then((response) => {
-            return response.data;
+            return {
+                code:response.data.code,
+                msg:response.data.msg
+            }
         }).catch(error => {
             return Promise.reject({
                 code: 404,
-                data: [],
                 msg: "服务器未连接"
             });
         });
     },
 
     // 删除分类
-    CategoryDelete(teamId, catagorylable) {
-        return axios.post(utils.url + '/teamInfo/CategoryDelete', {
-            teamId,
-            catagorylable
-        }, {
+    CategoryDelete(teamId, id) {
+        return axios.get(utils.url + '/teamInfo/CategoryDelete', {
+            params:{
+                teamId:teamId,
+                id:id
+            },
             withCredentials: true
         }).then((response) => {
-            return response.data;
+            return{
+                code:response.data[0].code,
+                msg:response.data[0].msg,
+                data:response.data.slice(1)
+            }
         }).catch(error => {
             return Promise.reject({
                 code: 404,
