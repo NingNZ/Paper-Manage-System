@@ -99,14 +99,16 @@ const openLeaveDialog = (team) => {
   teamToLeave.value = team;
   leaveDialogVisible.value = true;
 };
+const enterTeam = (row)=>{
+  localStorage.setItem("teamId",row.id);
+}
 
 const handleCreateTeam = (name)=>{
   console.log(name)
-  const leaderId = localStorage.getItem("userId")
-  teamUtils.createTeam(name,leaderId)
+  teamUtils.createTeam(name)
   .then(({code,msg})=>{
     if(code==200){
-      sendAndSet(leaderId)
+      sendAndSet()
       ElMessage.success(`团队"${name}"创建成功`)
     }else{
       ElMessage.error(msg)
@@ -134,7 +136,7 @@ const handleCreateTeam = (name)=>{
           <el-table-column label="操作">
             <template #default="scope">
               <router-link to="/other">
-                <el-button type="primary" size="small" class="action-btn">进入</el-button>
+                <el-button type="primary" size="small" class="action-btn" @click="enterTeam(scope.row)">进入</el-button>
               </router-link>
               <el-button type="danger" size="small" class="action-btn" @click="openLeaveDialog(scope.row)">退出</el-button>
             </template>

@@ -50,12 +50,12 @@ const teamUtils = {
             })
         })      
     },
-    createTeam(name,leaderId){
+    createTeam(name){
        return axios.get(utils.url+'/myTeam/new', {
             params: {
                 name:name,
-                leaderId:leaderId
             },
+            withCredentials:true,
             timeout:3000
         }).then((response) => {
         // 处理返回数据

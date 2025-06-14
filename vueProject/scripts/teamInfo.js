@@ -1,5 +1,6 @@
 import axios from "axios"
 import utils from "./utils";
+import qs from 'querystring'
 
 export const teamInfoUtils = {
     /**
@@ -100,6 +101,7 @@ export const teamInfoUtils = {
             params: { teamId },
             timeout: 3000
         }).then((response) => {
+            console.log(response.data.slice(1))
             return {
                 code: response.data[0].code,
                 msg: response.data[0].msg,
@@ -115,24 +117,23 @@ export const teamInfoUtils = {
     },
 
     // 新增分类
-    CategoryAdd(teamId,fid,label) {
-        return axios.get(utils.url + '/teamInfo/CategoryAdd', {
-            params:{
-                teamId:teamId,
-                fid:fid,
-                label:label
-            },
-            withCredentials: true
-        }).then((response) => {
+    CategoryAdd(teamId, fid, label) {
+        return axios.post(
+            utils.url + '/teamInfo/CategoryAdd',
+            qs.stringify({ teamId, fid, label }),
+            {
+                withCredentials: true
+            }
+        ).then((response) => {
             return {
-                code:response.data[0].code,
-                data:response.data.slice(1),
-                msg:response.data[0].msg
+                code: response.data[0].code,
+                data: response.data.slice(1),
+                msg: response.data[0].msg
             }
         }).catch(error => {
             return Promise.reject({
                 code: 404,
-                data:[],
+                data: [],
                 msg: "服务器未连接"
             });
         });

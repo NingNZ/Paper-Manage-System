@@ -81,7 +81,7 @@
     </main>
 
     <!-- 管理分类弹窗 -->
-    <el-dialog v-model="showCategoryManager" title="管理分类" width="600px" destroy-on-close :close-on-click-modal="false">
+    <el-dialog v-model="showCategoryManager" width="600px" destroy-on-close :close-on-click-modal="false">
       <CategoryManager />
       <template #footer>
         <span class="dialog-footer">
