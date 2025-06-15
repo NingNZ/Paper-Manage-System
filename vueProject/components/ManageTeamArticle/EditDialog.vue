@@ -7,18 +7,14 @@
   >
     <div>
       <p>论文标题：{{ item.title }}</p>
-      <el-select
+      <el-tree-select
         v-model="selectedCategory"
+        :data="categoryTree"
+        :props="{ label: 'label', value: 'id', children: 'children' }"
         placeholder="请选择分类"
         style="width: 100%; margin-top: 10px;"
-      >
-        <el-option
-          v-for="option in categoryOptions"
-          :key="option"
-          :label="option"
-          :value="option"
-        />
-      </el-select>
+        check-strictly
+      />
     </div>
     <template #footer>
       <el-button @click="$emit('close')">取消</el-button>
@@ -33,9 +29,9 @@ import { ref, watch } from 'vue'
 const props = defineProps({
   modelValue: Boolean,
   item: Object,
-  categoryOptions: {
+  categoryTree: {
     type: Array,
-    default: () => ['默认分类', '科技类', '综述类', '其他']  // 可选
+    default: () => []
   }
 })
 
@@ -51,9 +47,13 @@ watch(internalVisible, (val) => {
   emit('update:modelValue', val)
 })
 
+
 // 确认保存
 const confirmEdit = () => {
-  emit('confirm', selectedCategory.value)
+  emit('confirm', {
+    categoryId: selectedCategory.value,
+    title: props.item.title
+  })
   internalVisible.value = false
 }
 </script>
