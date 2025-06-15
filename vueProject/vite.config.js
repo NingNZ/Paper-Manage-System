@@ -18,7 +18,12 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
-  server:{  
+  server:{
+    host: '0.0.0.0', 
+    https: {
+      key: fs.readFileSync(path.resolve("D:/code/Paper-Manage-System/vueProject/cert", 'localhost-key.pem')),
+      cert: fs.readFileSync(path.resolve("D:/code/Paper-Manage-System/vueProject/cert", 'localhost.pem')),
+    },   
     proxy:{
       '/api': {
         target: utils.urlnoProxy, // 你的 Spring Boot 后端地址
