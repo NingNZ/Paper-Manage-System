@@ -104,6 +104,7 @@ const openLeaveDialog = (team) => {
 };
 const enterTeam = (row)=>{
   const teamId = row.id;
+  const teamName = row.name;
   localStorage.setItem("teamId",row.id);
   teamInfoUtils.CheckTeamRole(teamId)
     .then(( temp ) => {
@@ -121,6 +122,7 @@ const enterTeam = (row)=>{
       router.push({ 
         name: 'other',  // 路由的名称
         query: { 
+          teamName: teamName, // 传递团队名称
           teamId: teamId,
           role: role  // 传递组长/组员角色
         }

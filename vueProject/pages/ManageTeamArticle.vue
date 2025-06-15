@@ -3,7 +3,7 @@
     <!-- 顶部导航栏 -->
     <bar></bar>
     <div class="breadcrumb">
-      <a href="/">首页</a> &gt; <a href="/myteam">我的团队</a> &gt; <a href="/other">团队xxx</a>
+      <a href="/">首页</a> &gt; <a href="/myteam">我的团队</a> &gt; <a>团队 "{{ teamName }}"</a>
     </div>
 
     <!-- 页面主体 -->
@@ -143,6 +143,7 @@ const members = ref([])
 // 获取查询参数
 const teamId = route.query.teamId
 const role = route.query.role
+const teamName = route.query.teamName
 
 onMounted(()=>{
   const teamId = localStorage.getItem("teamId")
