@@ -21,7 +21,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(member, index) in members" :key="index" :class="index % 2 === 0 ? 'even-row' : 'odd-row'">
+              <tr v-for="(member, index) in members" :key="index" :class="index % 2 === 0 ? 'even-row' : 'team-odd-row'">
                 <td>{{ member.id }}</td>
                 <td>{{ member.name }}</td>
                 <td>{{ member.role }}</td>
@@ -32,7 +32,7 @@
 
         <div class="buttons">
           <el-button type="primary" size="small" @click="openInviteDialog">邀请成员</el-button>
-          <el-button type="info" size="small" @click="showCategoryManager = true">管理分类</el-button>
+          <el-button type="warning" size="small" @click="showCategoryManager = true">管理分类</el-button>
           <el-button type="success" size="small" @click="showContributeDialog = true">论文投稿</el-button>
         </div>
       </aside>
@@ -286,6 +286,7 @@ const emit = defineEmits(['refresh-category'])
 <style scoped>
 /* 样式完全沿用你的，无需改动 */
 .even-row { background-color: #ffffff; }
+.team-odd-row{ background-color: #e6f2f9; }
 .odd-row { background-color: #f5f5f5; }
 
 .container {
@@ -322,7 +323,8 @@ const emit = defineEmits(['refresh-category'])
 .member-table thead th {
   position: sticky;
   top: 0;
-  background-color: #f0f0f0;
+  background-color: #3398ff;
+  color: white;
   z-index: 1;
 }
 

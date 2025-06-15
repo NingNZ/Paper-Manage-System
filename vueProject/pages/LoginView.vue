@@ -83,21 +83,9 @@ function handleLogin() {
     .then((res) => {
       if (res.data.code == 200) {
         sessionUtil.getUser().then(data=>{
-          ElMessage.success("Welcome, "+data.msg)
-                sessionUtil.checkPermiss()
-                .then(data=>{
-                  if(data==1){
-                    ElMessage.info("你是管理员")
-                  }else if(data==0){
-                    ElMessage.info("你是用户")
-                  }else{
-                    ElMessage.info("你是游客")
-                  }
-                  router.push('/')
-                })
-              }).catch(()=>{
-                ElMessage.error("服务器连接出错")
-              })
+          ElMessage.success("登录成功");
+          router.push('/')
+        })
       }else if(res.data.code == 404){
         ElMessage.error("用户不存在")
       }else{

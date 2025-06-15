@@ -99,6 +99,38 @@ const teamUtils = {
         })      
     },
     /**
+     * 搜索团队成员
+     * @param {String} teamId 团队ID
+     * @param {String} memberId 成员ID
+     * @returns {Promise<{code: number, data: object, msg: string}>}
+     * code: 200 成员存在且未加入团队
+     * code: 300 成员已在团队中
+     * code: 400 未找到成员
+     */
+    searchMember(teamId, memberId) {
+        return axios.get(utils.url + '/myTeam/searchMember', {
+            params: {
+                teamId: teamId,
+                memberId: memberId
+            },
+            timeout: 3000
+        }).then((response) => {
+            // 假设后端返回格式为 { code, data, msg }
+            return {
+                code: response.data.code,
+                data: response.data.data,
+                msg: response.data.msg
+            }
+        }).catch(error => {
+            // 处理错误
+            return Promise.reject({
+                code: 404,
+                data: null,
+                msg: "服务不可用"
+            })
+        })
+    },
+    /**
      * 
      * @param {String} teamId 
      * @returns 
@@ -151,7 +183,5 @@ const teamUtils = {
             })
         })      
     },
-
-
 }
 export default teamUtils
