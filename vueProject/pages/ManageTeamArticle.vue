@@ -106,7 +106,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import bar from '../components/bar.vue'
 import CategoryManager from '../components/ManageTeamArticle/CategoryManagerDialog.vue'
@@ -114,17 +114,19 @@ import InviteMemberDialog from '../components/ManageTeamArticle/InviteMemberDial
 import EditDialog from "../components/ManageTeamArticle/EditDialog.vue"
 import DeleteDialog from "../components/ManageTeamArticle/DeleteDialog.vue"
 import UploadDialog from "../components/ManageTeamArticle/UploadDialog.vue"
+import { teamInfoUtils } from '../scripts/teamInfo'
+import teamUtils from '../scripts/team'
 
-const members = [
-  { id: 'uid01', name: 'Anda', role: '组长' },
-  { id: 'uid02', name: 'Lily', role: '组员' },
-  { id: 'uid03', name: 'Lily', role: '组员' },
-  { id: 'uid04', name: 'Lily', role: '组员' },
-  { id: 'uid05', name: 'Lily', role: '组员' },
-  { id: 'uid06', name: 'Lily', role: '组员' },
-  { id: 'uid07', name: 'Lily', role: '组员' },
-  { id: 'uid08', name: 'Lily', role: '组员' }
-]
+const members = ref([])
+onMounted(()=>{
+  const teamId = localStorage.getItem("teamId")
+  teamUtils.getMemberList(teamId)
+  .then(({code,msg,data})=>{
+    if(code==200){
+      members.value=data
+    }
+  })
+})
 
 const categories = ref(['AI', '机器学习', '自然语言处理', '计算机视觉'])
 const papers = ref(Array.from({ length: 20 }, (_, i) => ({

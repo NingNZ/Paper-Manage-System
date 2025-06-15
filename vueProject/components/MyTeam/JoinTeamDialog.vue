@@ -84,8 +84,7 @@ const search = ()=>{
 
 function joinTeam(team) {
   // ElMessage.success(`已申请加入 ${team.name}`);
-  const uid = localStorage.getItem("userId");
-  teamUtils.addMember(team.id,uid)
+  teamUtils.addMember(team.id)
   .then(({code,msg})=>{
     if(code==200){
       ElMessage.success(msg)
