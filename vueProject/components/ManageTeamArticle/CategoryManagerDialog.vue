@@ -96,7 +96,6 @@ const isEditing = ref(false)
 const inputValue = ref('')
 let currentNode = null
 let parentNode = null
-let maxId = 5  // 简单自增ID模拟
 
 // 添加节点
 function handleAdd(node) {

@@ -23,6 +23,7 @@ export const teamInfoUtils = {
             // 处理错误
             return Promise.reject({
                 code: 404,
+                data:[],
                 msg: "服务器未连接"
             })
         })
@@ -111,7 +112,6 @@ export const teamInfoUtils = {
             params: { teamId },
             timeout: 3000
         }).then((response) => {
-            console.log(response.data.slice(1))
             return {
                 code: response.data[0].code,
                 msg: response.data[0].msg,
