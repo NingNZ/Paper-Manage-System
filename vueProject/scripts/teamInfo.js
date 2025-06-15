@@ -3,9 +3,8 @@ import utils from "./utils";
 import qs from 'querystring'
 
 export const teamInfoUtils = {
-    /**
-     
-     */
+    /** 论文管理 */
+    /************************************************ */
     getRefPapersList(teamId) {
         return axios.get(utils.url + '/teamInfo/papers', {
             params: {
@@ -75,6 +74,9 @@ export const teamInfoUtils = {
         })
     },
 
+
+    //成员管理
+    /************************************************ */
     // 获取团队成员列表
         /**
      * 
@@ -105,6 +107,10 @@ export const teamInfoUtils = {
         })
     },
 
+
+
+    /** 分类管理 */
+    /************************************************ */
     // 获取团队分类信息
     getTeamCategory(teamId) {
         return axios.get(utils.url + '/teamInfo/Category', {

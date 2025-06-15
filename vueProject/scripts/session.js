@@ -25,7 +25,6 @@ export const sessionUtil={
             withCredentials:true
         })
         .then(res=>{
-            console.log(res)
             if(res.data.code==200){
                 return 1;
             }else if(res.data.code==300){

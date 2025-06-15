@@ -43,6 +43,8 @@
 <script setup>
 import { ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
+import axios from 'axios'
+import utils from '../../scripts/utils'
 
 const props = defineProps({
   modelValue: Boolean,
@@ -52,7 +54,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue','fresh'])
 
 const visible = ref(props.modelValue)
 const newPaper = ref({ title: '', category: '', file: null })
@@ -82,18 +84,45 @@ function handleFileChange(file, fileList_) {
 }
 
 function submit() {
-  if (!newPaper.value.title || !newPaper.value.category || !newPaper.value.file) {
+  if (!newPaper.value.title || newPaper.value.title.trim()=='' || !newPaper.value.category || !newPaper.value.file) {
     ElMessage.error('请完整填写所有信息')
     return
   }
-  
+  handleUpload()
+  visible.value = false
 }
 
-// 新增的打印逻辑
+// 论文上传逻辑
 function handleUpload() {
   console.log('论文标题:', newPaper.value.title)
   console.log('论文分类:', newPaper.value.category)
   console.log('上传文件:', newPaper.value.file)
-  console.log(newPaper.value)
+  
+  const formData = new FormData();
+  formData.append('title', newPaper.value.title.trim().replaceAll(" ","_"));
+  formData.append('typeId', newPaper.value.category);
+  formData.append('file', newPaper.value.file); // 文件
+  //测试代码
+  const teamId = localStorage.getItem("teamId");
+  formData.append('teamId',teamId);
+  //
+  axios.post(utils.url+"/teamInfo/newPapers",formData,{
+    headers:{
+      'Content-Type':'multipart/form-data'
+    },
+    withCredentials:true
+  })
+  .then(response =>{
+    if(response.data.code==200){
+      ElMessage.success("上传成功")
+      emit('fresh',teamId)
+    }else{
+      ElMessage.error(response.data.msg)
+    }
+  })
+  .catch(error=>{
+    console.log("submit fail",error)
+    ElMessage.error("上传失败")
+  })
 }
 </script>
