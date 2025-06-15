@@ -33,7 +33,7 @@
         <div class="buttons">
           <el-button type="primary" size="small" @click="openInviteDialog">邀请成员</el-button>
           <el-button type="info" size="small" @click="showCategoryManager = true">管理分类</el-button>
-          <el-button type="success" size="small" @click="openUploadDialog">上传论文</el-button>
+          <el-button type="success" size="small">论文投稿</el-button>
         </div>
       </aside>
 
@@ -57,7 +57,7 @@
                 <td>{{ paper.category }}</td>
                 <td>{{ paper.uploader }}</td>
                 <td class="actions">
-                  <img src="../assets/download.svg" alt="下载" class="action-icon" />
+                  <img src="../assets/download.svg" alt="下载" class="action-icon" @click="handleDownload(paper)" />
                   <img src="../assets/edit.svg" alt="编辑" class="action-icon" @click="handleEdit(paper)" />
                   <img src="../assets/delete.svg" alt="删除" class="action-icon" @click="handleDelete(paper)" />
                 </td>
@@ -65,24 +65,30 @@
             </tbody>
           </table>
         </div>
-
-        <el-pagination
-          background
-          layout="prev, pager, next, sizes, jumper"
-          :total="papers.length"
-          :page-size="pageSize"
-          :page-sizes="[10, 20, 50]"
-          :current-page="currentPage"
-          @current-change="handlePageChange"
-          @size-change="handleSizeChange"
-          class="pagination-right"
-        />
+        <div style="display: flex; align-items: center;">
+          <el-button type="success" size="small" @click="openUploadDialog">上传参考论文</el-button>
+          <div style="flex: 1;"></div>
+          <el-pagination
+            background
+            layout="prev, pager, next, sizes, jumper"
+            :total="papers.length"
+            :page-size="pageSize"
+            :page-sizes="[10, 20, 50]"
+            :current-page="currentPage"
+            @current-change="handlePageChange"
+            @size-change="handleSizeChange"
+            class="pagination-right"
+          />
+        </div>
       </section>
     </main>
 
     <!-- 管理分类弹窗 -->
     <el-dialog v-model="showCategoryManager" width="600px" destroy-on-close :close-on-click-modal="false">
-      <CategoryManager />
+      <CategoryManagerDialog
+        :category-tree="categoryTree"
+        @refresh-category="fetchCategoryTree"
+      />
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="showCategoryManager = false">取消</el-button>
@@ -95,10 +101,20 @@
     <InviteMemberDialog ref="inviteDialogRef" />
 
     <!-- 上传论文弹窗（组件化后） -->
-    <UploadDialog v-model="showUploadDialog" :categories="categories" @upload="handleUpload" />
+    <UploadDialog
+      v-model="showUploadDialog"
+      :category-tree="categoryTree"
+      @close="showUploadDialog = false"
+    />
 
     <!-- 编辑弹窗 -->
-    <EditDialog v-model="showEditDialog" :item="currentEditItem" @confirm="confirmEdit" @close="showEditDialog = false" />
+    <EditDialog
+      v-model="showEditDialog"
+      :item="currentEditItem"
+      :category-tree="categoryTree"
+      @confirm="handleEditConfirm"
+      @close="showEditDialog = false"
+    />
 
     <!-- 删除弹窗 -->
     <DeleteDialog v-model="showDeleteDialog" :item="currentDeleteItem" @confirm="confirmDelete" @close="showDeleteDialog = false" />
@@ -109,7 +125,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import bar from '../components/bar.vue'
-import CategoryManager from '../components/ManageTeamArticle/CategoryManagerDialog.vue'
+import CategoryManagerDialog from '../components/ManageTeamArticle/CategoryManagerDialog.vue'
 import InviteMemberDialog from '../components/ManageTeamArticle/InviteMemberDialog.vue'
 import EditDialog from "../components/ManageTeamArticle/EditDialog.vue"
 import DeleteDialog from "../components/ManageTeamArticle/DeleteDialog.vue"
@@ -147,6 +163,24 @@ const showDeleteDialog = ref(false)
 const currentEditItem = ref(null)
 const currentDeleteItem = ref(null)
 
+const categoryTree = ref([])
+
+function fetchCategoryTree() {
+  const teamId = localStorage.getItem("teamId")
+  teamInfoUtils.getTeamCategory(teamId).then(({ code, data }) => {
+    if (code === 200 && Array.isArray(data)) {
+      categoryTree.value = data
+    } else {
+      categoryTree.value = []
+    }
+  })
+}
+
+onMounted(() => {
+  fetchCategoryTree()
+})
+
+// 传递给 CategoryManagerDialog 和 EditDialog
 const pagedPapers = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value
   return papers.value.slice(start, start + pageSize.value)
@@ -165,7 +199,8 @@ function openInviteDialog() {
   inviteDialogRef.value.openDialog()
 }
 
-function openUploadDialog() {
+async function openUploadDialog() {
+  await fetchCategoryTree() // 先获取最新分类树
   showUploadDialog.value = true
 }
 
@@ -180,28 +215,43 @@ function handleUpload(newPaper) {
   showUploadDialog.value = false
 }
 
-function handleEdit(item) {
-  currentEditItem.value = { ...item }
+async function handleEdit(item) {
+  await fetchCategoryTree() // 先获取最新分类数据
+  currentEditItem.value = item
   showEditDialog.value = true
 }
 
-function confirmEdit(newCategory) {
-  const index = papers.value.findIndex(p => p.id === currentEditItem.value.id)
-  if (index !== -1) {
-    papers.value[index].category = newCategory
-  }
-  showEditDialog.value = false
+function handleEditConfirm({ categoryId, title }) {
+  console.log('被选择的分类节点id:', categoryId)
+  console.log('对应论文标题:', title)
+  // 后续可在这里同步到后端
 }
 
 function handleDelete(item) {
   currentDeleteItem.value = item
   showDeleteDialog.value = true
+  console.log('删除论文标题:', item.title)
 }
 
 function confirmDelete() {
   papers.value = papers.value.filter(p => p.id !== currentDeleteItem.value.id)
   showDeleteDialog.value = false
 }
+
+function handleDownload(item) {
+  console.log('下载论文标题:', item.title)
+  // 这里写下载逻辑
+}
+
+const props = defineProps({
+  categoryTree: Array
+})
+const emit = defineEmits(['refresh-category'])
+function handleCategoryChangeSuccess() {
+  // 分类操作成功后
+  emit('refresh-category')
+}
+
 </script>
 
 <style scoped>

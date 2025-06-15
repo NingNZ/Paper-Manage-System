@@ -5,9 +5,14 @@
         <el-input v-model="newPaper.title" placeholder="请输入论文标题" />
       </el-form-item>
       <el-form-item label="论文类别">
-        <el-select v-model="newPaper.category" placeholder="请选择类别">
-          <el-option v-for="(cat, index) in categories" :key="index" :label="cat" :value="cat" />
-        </el-select>
+        <el-tree-select
+          v-model="newPaper.category"
+          :data="props.categoryTree"
+          :props="{ label: 'label', value: 'id', children: 'children' }"
+          placeholder="请选择分类"
+          style="width: 100%; margin-top: 10px;"
+          check-strictly
+        />
       </el-form-item>
       <el-form-item label="上传PDF">
         <el-upload
@@ -41,7 +46,10 @@ import { ElMessage } from 'element-plus'
 
 const props = defineProps({
   modelValue: Boolean,
-  categories: Array
+  categoryTree: {
+    type: Array,
+    default: () => []
+  }
 })
 
 const emit = defineEmits(['update:modelValue', 'upload'])
@@ -49,6 +57,7 @@ const emit = defineEmits(['update:modelValue', 'upload'])
 const visible = ref(props.modelValue)
 const newPaper = ref({ title: '', category: '', file: null })
 const fileList = ref([])
+const selectedCategory = ref(null)
 
 watch(() => props.modelValue, (val) => {
   visible.value = val
@@ -64,6 +73,7 @@ watch(visible, (val) => {
 function resetForm() {
   newPaper.value = { title: '', category: '', file: null }
   fileList.value = []
+  selectedCategory.value = null
 }
 
 function handleFileChange(file, fileList_) {
@@ -77,5 +87,13 @@ function submit() {
     return
   }
   emit('upload', newPaper.value)
+}
+
+// 新增的打印逻辑
+function handleUpload() {
+  console.log('论文标题:', newPaper.value.title)
+  console.log('论文分类:', newPaper.value.category)
+  console.log('上传文件:', newPaper.value.file)
+  console.log(newPaper.value)
 }
 </script>
