@@ -7,82 +7,52 @@
           <span style="height: 32px; padding: 0;">Paper</span><br />Manage
         </div>
       </div>
-<nav class="menu">
-  <a href="/">首页</a>
-  
-  <a
-    v-if="permission === 1"
-    href="javascript:void(0)"
-    class="disabled-link"
-  >
-    我的团队
-  </a>
-
-  <a
-    v-else
-    href="javascript:void(0)"
-    @click="handleNavClick('/myteam')"
-  >
-    我的团队
-  </a>
-
-  <a
-    v-if="permission === 1"
-    href="javascript:void(0)"
-    class="disabled-link"
-  >
-    我的论文
-  </a>
-  <a
-    v-else
-    href="javascript:void(0)"
-    @click="handleNavClick('/mypaper')"
-  >
-    我的论文
-  </a>
-
-  <a
-    href="javascript:void(0)"
-    @click="handleNavClick('/notice')"
-  >
-    我的消息
-  </a>
-</nav>
+      <nav class="menu">
+        <a href="/">首页</a>
+        <a v-if="permission === 1" href="javascript:void(0)" class="disabled-link">我的团队</a>
+        <a v-else href="javascript:void(0)" @click="handleNavClick('/myteam')">我的团队</a>
+        <a v-if="permission === 1" href="javascript:void(0)" class="disabled-link">我的论文</a>
+        <a v-else href="javascript:void(0)" @click="handleNavClick('/mypaper')">我的论文</a>
+        <a href="javascript:void(0)" @click="handleNavClick('/notice')">我的消息</a>
+      </nav>
 
       <div class="user-icon" ref="iconRef">
-        <!-- ✅ 点击头像展开浮窗 -->
-        <img
-          src="../assets/head.svg"
-          alt="user"
-          @click="toggleUserInfo"
-        />
+        <img src="../assets/head.svg" alt="user" @click="toggleUserInfo" />
+        <div class="user-info-card" v-if="showUserInfo" ref="cardRef" @click.stop>
+          <template v-if="permission === 0">
+            <div class="info-item">
+              <label>ID：</label>
+              <span>{{ userId }}</span>
+            </div>
+            <div class="info-item">
+              <label>用户名：</label>
+              <span v-if="!isEditing">{{ username }}</span>
+              <input v-else v-model="username" />
+            </div>
+            <div class="info-item">
+              <label>邮箱：</label>
+              <span v-if="!isEditing">{{ email }}</span>
+              <input v-else v-model="email" />
+            </div>
+            <div class="button-area">
+              <button @click.stop="toggleEdit">{{ isEditing ? '保存' : '编辑' }}</button>
+            </div>
+          </template>
 
-        <!-- ✅ 浮窗部分，阻止冒泡 -->
-        <div
-          class="user-info-card"
-          v-if="showUserInfo"
-          ref="cardRef"
-          @click.stop
-        >
-          <div class="info-item">
-            <label>ID：</label>
-            <span>{{ userId }}</span>
-          </div>
-          <div class="info-item">
-            <label>用户名：</label>
-            <span v-if="!isEditing">{{ username }}</span>
-            <input v-else v-model="username" />
-          </div>
-          <div class="info-item">
-            <label>邮箱：</label>
-            <span v-if="!isEditing">{{ email }}</span>
-            <input v-else v-model="email" />
-          </div>
-          <div class="button-area">
-            <button @click.stop="toggleEdit">
-              {{ isEditing ? '保存' : '编辑' }}
-            </button>
-          </div>
+          <template v-else-if="permission === 1">
+            <div class="info-item">
+              <span>hello，管理员</span>
+            </div>
+          </template>
+
+          <template v-else>
+            <div class="info-item">
+              <span>未登录</span>
+            </div>
+            <div class="button-area" style="justify-content: flex-end; margin-top: 1rem;">
+              <button @click="goLogin">登录</button>
+            </div>
+          </template>
         </div>
       </div>
     </header>
@@ -95,24 +65,22 @@ import { sessionUtil } from "../scripts/session";
 import { useRouter } from 'vue-router'
 import { ElMessageBox, ElMessage } from 'element-plus'
 
-
 const router = useRouter()
 
-const permission = ref(-1); // 将 permission 定义为响应式变量
+const permission = ref(-1)
 onMounted(() => {
   sessionUtil.checkPermiss()
     .then(res => {
-      permission.value = res; // 修改为 .value 赋值
+      permission.value = res
     })
     .catch(() => {
-      permission.value = -1;
-      ElMessage.error("服务器未连接");
-    });
-});
+      permission.value = -1
+      ElMessage.error("服务器未连接")
+    })
+})
 
 function handleNavClick(targetPath) {
   if (permission.value === -1) {
-    // 游客提示
     ElMessageBox.confirm(
       '您还未登录，是否前往登录？',
       '提示',
@@ -123,43 +91,37 @@ function handleNavClick(targetPath) {
       }
     ).then(() => {
       router.push('/login')
-    }).catch(() => {
-      // 取消不做处理
-    })
+    }).catch(() => {})
   } else {
-    // permission === 0 正常跳转
     router.push(targetPath)
   }
 }
 
-// 控制浮窗显示
 const showUserInfo = ref(false)
-// 控制编辑状态
 const isEditing = ref(false)
 
-// 用户信息
 const username = ref('张三')
 const userId = 'U123456'
 const email = ref('zhangsan@example.com')
 
-// 显示/隐藏浮窗
 function toggleUserInfo() {
   showUserInfo.value = !showUserInfo.value
 }
 
-// 编辑/保存切换
 function toggleEdit() {
   if (isEditing.value) {
-    // 保存时关闭浮窗
     showUserInfo.value = false
   }
   isEditing.value = !isEditing.value
 }
 
+function goLogin() {
+  router.push('/login')
+}
+
 const iconRef = ref(null)
 const cardRef = ref(null)
 
-// 处理点击外部
 function handleClickOutside(event) {
   const isInsideCard = cardRef.value?.contains(event.target)
   const isInsideIcon = iconRef.value?.contains(event.target)
@@ -180,6 +142,8 @@ onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside)
 })
 </script>
+
+
 
 <style>
 .navbar {
