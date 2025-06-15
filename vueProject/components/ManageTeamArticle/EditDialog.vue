@@ -25,6 +25,8 @@
 
 <script setup>
 import { ref, watch } from 'vue'
+import { teamInfoUtils } from '../../scripts/teamInfo'
+import { ElMessage } from 'element-plus'
 
 const props = defineProps({
   modelValue: Boolean,
@@ -35,13 +37,14 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['update:modelValue', 'close', 'confirm'])
+const emit = defineEmits(['update:modelValue', 'close', 'confirm','fresh'])
 
 const internalVisible = ref(props.modelValue)
 const selectedCategory = ref('')
 
 watch(() => props.modelValue, (val) => {
   internalVisible.value = val
+  selectedCategory.value = props.item.typeId
 })
 watch(internalVisible, (val) => {
   emit('update:modelValue', val)
@@ -50,10 +53,22 @@ watch(internalVisible, (val) => {
 
 // 确认保存
 const confirmEdit = () => {
-  emit('confirm', {
-    categoryId: selectedCategory.value,
-    title: props.item.title
-  })
+  console.log(selectedCategory),
+  console.log(props.item.id)
   internalVisible.value = false
+  const teamId = localStorage.getItem('teamId')
+  teamInfoUtils.editRefPaper(teamId,props.item.id,selectedCategory.value)
+  .then(({code,msg})=>{
+    if(code==200){
+      ElMessage.success("修改成功")
+    }else{
+      ElMessage.error(msg)
+    }
+  }).catch(({code,msg})=>{
+    ElMessage.error(msg)
+  }).finally(()=>{
+    emit('fresh',teamId)
+    internalVisible.value = false
+  })
 }
 </script>

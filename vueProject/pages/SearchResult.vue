@@ -184,7 +184,9 @@ const handleEdit = (item) => {
 }
 const handleDownload = (item) =>{
   utils.downloadSysPaper(item.id)
-
+  .then(()=>{
+    ElMessage.success({message:"下载成功",duration:2000})
+  })
 }
 
 const updateCategory = (newCategory,newTypeName) => {

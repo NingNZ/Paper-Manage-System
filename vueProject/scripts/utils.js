@@ -83,7 +83,7 @@ const utils = {
      */
     downloadSysPaper(paperId){
         // 1. 发送 GET 请求（关键：responseType: 'blob'）
-        axios({
+        return axios({
             method: 'get',
             url: this.url+'/sysPaper/download',
             params:{
@@ -114,10 +114,11 @@ const utils = {
             // 5. 清理资源
             document.body.removeChild(link); // 移除 <a> 标签
             URL.revokeObjectURL(objectUrl); // 释放内存（避免内存泄漏）
-        }).catch ((error)=> {
+        }).catch (async err => {
             console.log("download fail");
-            ElMessage.error("下载失败")
-            console.error('Download error:', error); // 错误处理
+            const blob = err.response.data;
+            const text = await blob.text();
+            alert(text);  // 错误处理
         })         
     },
     /**

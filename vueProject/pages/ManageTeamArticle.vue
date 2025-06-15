@@ -100,7 +100,7 @@
     <!-- 上传论文弹窗（组件化后） -->
     <UploadDialog
       v-model="showUploadDialog"
-      :category-tree="categoryTree"
+      :category-tree="filteredCategoryTree"
       @close="showUploadDialog = false"
       @fresh="freshPaperList"
     />
@@ -115,13 +115,18 @@
     <EditDialog
       v-model="showEditDialog"
       :item="currentEditItem"
-      :category-tree="categoryTree"
-      @confirm="handleEditConfirm"
+      :category-tree="filteredCategoryTree"
+      @fresh="freshPaperList"
       @close="showEditDialog = false"
     />
 
     <!-- 删除弹窗 -->
-    <DeleteDialog v-model="showDeleteDialog" :item="currentDeleteItem" @confirm="confirmDelete" @close="showDeleteDialog = false" />
+    <DeleteDialog 
+    v-model="showDeleteDialog" 
+    :item="currentDeleteItem" 
+    @close="showDeleteDialog = false"
+    @fresh="freshPaperList" 
+    />
   </div>
 </template>
 
@@ -136,7 +141,8 @@ import DeleteDialog from "../components/ManageTeamArticle/DeleteDialog.vue"
 import UploadDialog from "../components/ManageTeamArticle/UploadDialog.vue"
 import ContributeDialog from "../components/ManageTeamArticle/ContributeDialog.vue";
 import { teamInfoUtils } from '../scripts/teamInfo'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import { sessionUtil } from '../scripts/session'
 
 const route = useRoute()
 const members = ref([])
@@ -145,11 +151,18 @@ const members = ref([])
 const teamId = route.query.teamId
 const role = route.query.role
 const teamName = route.query.teamName
-
-onMounted(()=>{
+const router = useRouter()
+onMounted(async ()=>{
+  const state = await sessionUtil.checkPermiss()
   const teamId = localStorage.getItem("teamId")
-  freshMemberList(teamId)
-  freshPaperList(teamId)
+  console.log("state:",state)
+  if(state==-1){
+    router.push('/')
+    ElMessage.error("未登录")
+  }else{
+    freshMemberList(teamId)
+    freshPaperList(teamId)
+  }
 })
 const freshPaperList=(teamId)=>{
   const loadingInstance = ElLoading.service({
@@ -200,10 +213,12 @@ const showEditDialog = ref(false)
 const showDeleteDialog = ref(false)
 
 const currentEditItem = ref(null)
+const currentEditIndex = ref(-1)
 const currentDeleteItem = ref(null)
 
 const categoryTree = ref([])
 
+const filteredCategoryTree = computed(() => categoryTree.value.slice(1))
 function fetchCategoryTree() {
   const teamId = localStorage.getItem("teamId")
   teamInfoUtils.getTeamCategory(teamId)
@@ -250,28 +265,23 @@ async function openUploadDialog() {
 async function handleEdit(item) {
   await fetchCategoryTree() // 先获取最新分类数据
   currentEditItem.value = item
+  currentEditIndex.value = papers.value.findIndex(p=>p.id===item.id)
   showEditDialog.value = true
 }
 
-function handleEditConfirm({ categoryId, title }) {
-  console.log('被选择的分类节点id:', categoryId)
-  console.log('对应论文标题:', title)
-  // 后续可在这里同步到后端
-}
 
 function handleDelete(item) {
   currentDeleteItem.value = item
   showDeleteDialog.value = true
-  console.log('删除论文标题:', item.title)
-}
-
-function confirmDelete() {
-  papers.value = papers.value.filter(p => p.id !== currentDeleteItem.value.id)
-  showDeleteDialog.value = false
 }
 
 function handleDownload(item) {
-  console.log('下载论文标题:', item.id)
+  const teamId = localStorage.getItem("teamId")
+  console.log(item.id)
+  teamInfoUtils.downloadRefPaper(item.id,teamId)
+  .then(()=>{
+    ElMessage.success({message:"下载成功",duration:2000})
+  })
   // 这里写下载逻辑
 }
 
