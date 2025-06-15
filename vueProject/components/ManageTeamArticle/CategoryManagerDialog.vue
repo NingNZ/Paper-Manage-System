@@ -1,9 +1,24 @@
 <template>
+  <div style="display: flex; align-items: center; justify-content: space-between;">
+      <span style="font-size: 20px; font-weight: bold;">管理分类</span>
+      <el-button
+        class="buttons"
+        size="small"
+        type="primary"
+        @click="handleAdd({id:'&_#$H~~H$#_&'})"
+      >
+        添加分类
+      </el-button>
+  </div>
   <div class="category-container">
     <el-tree
       :data="treeData"
       :props="defaultProps"
       node-key="id"
+      :draggable="true"
+      @node-drop="handleNodeDrop"
+      :allow-drag="(node)=>!node.data.isDefault"
+      :allow-drop="allowDrop"
       default-expand-all
       ref="treeRef"
     >
@@ -13,8 +28,7 @@
           <span>{{ data.label }}</span>
           <span class="tree-actions">
             <!-- 分类节点只允许新建 -->
-            <template v-if="data.isDefault">
-              <img class="action-icon" src="../../assets/new.svg" alt="新建" @click.stop="handleAdd(data)" />
+            <template v-if="data.isDefault || data.isBan">
             </template>
             <!-- 其他节点正常有 新建/编辑/删除 -->
             <template v-else>
@@ -42,6 +56,8 @@
 import { onMounted, ref } from 'vue'
 import { ElMessage, ElMessageBox,ElLoading } from 'element-plus'
 import { teamInfoUtils } from '../../scripts/teamInfo'
+import axios from 'axios'
+import utils from '../../scripts/utils'
 
  const sendAndSet = ()=>{
     const loadingInstance = ElLoading.service({
@@ -54,7 +70,6 @@ import { teamInfoUtils } from '../../scripts/teamInfo'
   teamInfoUtils.getTeamCategory(teamId)
   .then(({code,data,msg})=>{
     if(code==200){
-      console.log(data)
       treeData.value = data
       ElMessage.success({message:"刷新团队论文分类",duration: 2000})
     }else{
@@ -133,7 +148,8 @@ function confirmDialog() {
     })
     
   } else {
-    teamInfoUtils.CategoryAdd(teamId,parentNode.id,inlabel)
+    const fid = parentNode.id
+    teamInfoUtils.CategoryAdd(teamId,fid,inlabel)
     .then(({code,data,msg})=>{
       if(code==200){
         ElMessage.success("添加成功")
@@ -166,6 +182,44 @@ function deleteNode(id) {
     ElMessage.error(msg)
   })
 }
+//拖动
+const handleNodeDrop = (draggingNode, dropNode, dropType, event) => {
+  // draggingNode.data 是被拖动的节点
+  // dropNode.data 是目标节点
+  // dropType: 'prev' | 'inner' | 'after'
+  // event 是原生事件
+  console.log('拖动节点:', draggingNode.data.id)
+  console.log('目标节点:', dropNode.data.id)
+  console.log('拖动类型:', dropType)
+  const teamId = localStorage.getItem("teamId")
+  axios.get(utils.url+"/teamInfo/CategoryDrag",{
+    params:{
+      fromId:draggingNode.data.id,
+      toId:dropNode.data.id,
+      type:dropType,
+      teamId:teamId
+    },
+    withCredentials:true
+  }).then((response)=>{
+    if(response.data.code==200){
+      ElMessage.success("success");
+      sendAndSet()
+    }else{
+      ElMessage.error(response.data.msg)
+      sendAndSet()
+    }
+  }).catch(()=>{
+    ElMessage.error("服务不可用")
+  })
+}
+const allowDrop = (draggingNode, dropNode, type) => {
+  if (type === 'prev' && dropNode.data.isDefault) {
+    return false
+  }else if(type === 'inner' && dropNode.data.isDefault){
+    return false
+  }else;
+  return true
+}
 </script>
 
 <style scoped>
@@ -192,5 +246,10 @@ function deleteNode(id) {
   width: 16px;
   height: 16px;
   cursor: pointer;
+}
+.buttons {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 10px;
 }
 </style>
