@@ -6,7 +6,7 @@ export const sessionUtil={
      * @returns string
      */
     getUser(){
-        return axios.get(utils.url+'/session/userName',{
+        return axios.get(utils.url+'/session/userInfo',{
             withCredentials: true
         })
         .then(res => {
@@ -21,7 +21,6 @@ export const sessionUtil={
             withCredentials:true
         })
         .then(res=>{
-            console.log(res)
             if(res.data.code==200){
                 return 1;
             }else if(res.data.code==300){

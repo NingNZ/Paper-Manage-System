@@ -102,6 +102,7 @@
       v-model="showUploadDialog"
       :category-tree="categoryTree"
       @close="showUploadDialog = false"
+      @fresh="freshPaperList"
     />
 
     <!-- 论文投稿弹窗 -->
@@ -159,8 +160,6 @@ const freshPaperList=(teamId)=>{
         category:data[i].typeName,
         uploader:data[i].userName
       }))
-      console.log(papers.value)
-
     }else{
       ElMessage.error(msg)
     }
@@ -199,12 +198,16 @@ const categoryTree = ref([])
 
 function fetchCategoryTree() {
   const teamId = localStorage.getItem("teamId")
-  teamInfoUtils.getTeamCategory(teamId).then(({ code, data }) => {
+  teamInfoUtils.getTeamCategory(teamId)
+  .then(({ code,msg,data }) => {
     if (code === 200 && Array.isArray(data)) {
       categoryTree.value = data
     } else {
+      ElMessage.error(msg)
       categoryTree.value = []
     }
+  }).catch(({code,data,msg})=>{
+    ElMessage.error(msg)
   })
 }
 
