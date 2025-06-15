@@ -31,11 +31,8 @@
         </div>
 
         <div class="buttons">
-          <el-button type="primary" size="small" @click="openInviteDialog">邀请成员</el-button>
-          <el-button type="warning" size="small" @click="showCategoryManager = true">管理分类</el-button>
-          <el-button type="success" size="small" @click="showContributeDialog = true">论文投稿</el-button>
           <el-button v-if="role === 'leader'" type="primary" size="small" @click="openInviteDialog">邀请成员</el-button>
-          <el-button v-if="role === 'leader'" type="info" size="small" @click="showCategoryManager = true">管理分类</el-button>
+          <el-button v-if="role === 'leader'" type="warning" size="small" @click="showCategoryManager = true">管理分类</el-button>
           <el-button v-if="role === 'leader'" type="success" size="small" @click="showContributeDialog = true">论文投稿</el-button>
         </div>
       </aside>
