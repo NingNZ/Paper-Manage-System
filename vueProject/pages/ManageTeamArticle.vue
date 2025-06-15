@@ -3,7 +3,7 @@
     <!-- 顶部导航栏 -->
     <bar></bar>
     <div class="breadcrumb">
-      <a href="/">首页</a> &gt; <a href="/myteam">我的团队</a> &gt; <a href="/other">团队xxx</a>
+      <a href="/">首页</a> &gt; <a href="/myteam">我的团队</a> &gt; <a>团队 "{{ teamName }}"</a>
     </div>
 
     <!-- 页面主体 -->
@@ -31,9 +31,15 @@
         </div>
 
         <div class="buttons">
+<<<<<<< HEAD
           <el-button type="primary" size="small" @click="openInviteDialog">邀请成员</el-button>
           <el-button type="warning" size="small" @click="showCategoryManager = true">管理分类</el-button>
           <el-button type="success" size="small" @click="showContributeDialog = true">论文投稿</el-button>
+=======
+          <el-button v-if="role === 'leader'" type="primary" size="small" @click="openInviteDialog">邀请成员</el-button>
+          <el-button v-if="role === 'leader'" type="info" size="small" @click="showCategoryManager = true">管理分类</el-button>
+          <el-button v-if="role === 'leader'" type="success" size="small" @click="showContributeDialog = true">论文投稿</el-button>
+>>>>>>> 5649d204269ade5a3f2c3c7f4d2d676116b7a94a
         </div>
       </aside>
 
@@ -58,8 +64,8 @@
                 <td>{{ paper.uploader }}</td>
                 <td class="actions">
                   <img src="../assets/download.svg" alt="下载" class="action-icon" @click="handleDownload(paper)" />
-                  <img src="../assets/edit.svg" alt="编辑" class="action-icon" @click="handleEdit(paper)" />
-                  <img src="../assets/delete.svg" alt="删除" class="action-icon" @click="handleDelete(paper)" />
+                  <img v-if="role === 'leader'" src="../assets/edit.svg" alt="编辑" class="action-icon" @click="handleEdit(paper)" />
+                  <img v-if="role === 'leader'" src="../assets/delete.svg" alt="删除" class="action-icon" @click="handleDelete(paper)" />
                 </td>
               </tr>
             </tbody>
@@ -135,8 +141,16 @@ import DeleteDialog from "../components/ManageTeamArticle/DeleteDialog.vue"
 import UploadDialog from "../components/ManageTeamArticle/UploadDialog.vue"
 import ContributeDialog from "../components/ManageTeamArticle/ContributeDialog.vue";
 import { teamInfoUtils } from '../scripts/teamInfo'
+import { useRoute } from 'vue-router'
 
+const route = useRoute()
 const members = ref([])
+
+// 获取查询参数
+const teamId = route.query.teamId
+const role = route.query.role
+const teamName = route.query.teamName
+
 onMounted(()=>{
   const teamId = localStorage.getItem("teamId")
   freshMemberList(teamId)

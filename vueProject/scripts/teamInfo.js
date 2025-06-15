@@ -192,5 +192,27 @@ export const teamInfoUtils = {
                 msg: "服务器未连接"
             });
         });
+    },
+
+    //进入团队时判断是否是组长
+    CheckTeamRole(teamId) {
+        return axios.get(utils.url + '/teamInfo/CheckRole', {
+            params: { teamId },
+            withCredentials: true
+        }).then((response) => {
+            console.log(response.data);
+            if( response.data.code === 200) {
+                return 1;
+            }
+            else if (response.data.code === 400) {
+                return 0;
+            }
+        }).catch(error => {
+            return Promise.reject({
+                code: 404,
+                data: [],
+                msg: "服务器未连接"
+            });
+        });
     }
 };
