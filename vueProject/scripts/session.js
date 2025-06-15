@@ -5,12 +5,16 @@ export const sessionUtil={
      * 
      * @returns string
      */
-    getUser(){
-        return axios.get(utils.url+'/session/userName',{
+    getUserInfo(){
+        return axios.get(utils.url+'/session/userInfo',{
             withCredentials: true
         })
         .then(res => {
-            return res.data 
+            if(res.data[0].code==200){ // 是普通用户 
+                return {code: res.data[0].code , data: res.data[1]};
+            }else if(res.data[0].code==300){ // 是管理员
+                return {code: res.data[0].code , data: null};
+            }
         }).catch(res=>{
             return null
         })

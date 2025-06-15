@@ -82,19 +82,18 @@ function handleLogin() {
   axios.post(utils.url +"/login", qs.stringify(data))
     .then((res) => {
       if (res.data.code == 200) {
-        sessionUtil.getUser().then(data=>{
-          ElMessage.success("Welcome, "+data.msg)
-                sessionUtil.checkPermiss()
-                .then(data=>{
-                  if(data==1){
-                    ElMessage.info("你是管理员")
-                  }else if(data==0){
-                    ElMessage.info("你是用户")
-                  }else{
-                    ElMessage.info("你是游客")
-                  }
+        sessionUtil.getUserInfo()
+        .then(({code,data})=>{
+          if(code == 200){
+                localStorage.setItem("userId",data.id)
+                localStorage.setItem("username",data.name)
+                localStorage.setItem("email",data.email)
+                ElMessage.success("Welcome, "+ data.name)
+                router.push('/')
+              }else if(code == 300){
+                  ElMessage.success("Welcome, 管理员")
                   router.push('/')
-                })
+              }
               }).catch(()=>{
                 ElMessage.error("服务器连接出错")
               })

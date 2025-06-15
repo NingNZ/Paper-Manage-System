@@ -68,10 +68,32 @@ import { ElMessageBox, ElMessage } from 'element-plus'
 const router = useRouter()
 
 const permission = ref(-1)
+
+const username = ref('')
+const userId = ref('')
+const email = ref('')
+
 onMounted(() => {
   sessionUtil.checkPermiss()
     .then(res => {
       permission.value = res
+      // 若是普通用户，再请求用户信息
+      if (res === 0) {
+        sessionUtil.getUserInfo().then(result => {
+          if (result && result.code === 200 && result.data) {
+            username.value = result.data.name
+            userId.value = result.data.id
+            if(result.data.email == null){
+              email.value = "未设置邮箱"
+            }
+            else{
+              email.value = result.data.email
+            }
+          }
+        }).catch(() => {
+          ElMessage.error("获取用户信息失败")
+        })
+      }
     })
     .catch(() => {
       permission.value = -1
@@ -100,9 +122,6 @@ function handleNavClick(targetPath) {
 const showUserInfo = ref(false)
 const isEditing = ref(false)
 
-const username = ref('张三')
-const userId = 'U123456'
-const email = ref('zhangsan@example.com')
 
 function toggleUserInfo() {
   showUserInfo.value = !showUserInfo.value
