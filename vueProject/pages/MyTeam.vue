@@ -6,6 +6,9 @@ import LeaveConfirmDialog from "../components/MyTeam/LeaveConfirmDialog.vue";
 import { ref, computed, onMounted, useId, watch } from 'vue';
 import { ElMessage,ElLoading} from 'element-plus';
 import teamUtils from "../scripts/team";
+import { teamInfoUtils } from "../scripts/teamInfo"
+import { useRouter } from 'vue-router'
+const router = useRouter()
 
 const setAllData = (data)=>{
   fullTableData.value = Array.from({length:data.length},(_,i)=>({
@@ -100,7 +103,32 @@ const openLeaveDialog = (team) => {
   leaveDialogVisible.value = true;
 };
 const enterTeam = (row)=>{
+  const teamId = row.id;
   localStorage.setItem("teamId",row.id);
+  teamInfoUtils.CheckTeamRole(teamId)
+    .then(( temp ) => {
+      let role = ''; // 默认角色为空
+
+      if (temp === 1) {
+        // 是组长
+        role = 'leader';
+      } else if (temp === 0) {
+        // 是组员
+        role = 'member';
+      }
+
+      // 跳转到新页面，并将身份信息 (role) 传递为查询参数
+      router.push({ 
+        name: 'other',  // 路由的名称
+        query: { 
+          teamId: teamId,
+          role: role  // 传递组长/组员角色
+        }
+      });
+    })
+    .catch(({ msg }) => {
+      ElMessage.error(msg || "无法连接服务器");
+    });
 }
 
 const handleCreateTeam = (name)=>{
@@ -135,9 +163,7 @@ const handleCreateTeam = (name)=>{
           <el-table-column prop="leader" label="团队组长" width="180" />
           <el-table-column label="操作">
             <template #default="scope">
-              <router-link to="/other">
-                <el-button type="primary" size="small" class="action-btn" @click="enterTeam(scope.row)">进入</el-button>
-              </router-link>
+              <el-button type="primary" size="small" class="action-btn" @click="enterTeam(scope.row)">进入</el-button>
               <el-button type="danger" size="small" class="action-btn" @click="openLeaveDialog(scope.row)">退出</el-button>
             </template>
           </el-table-column>

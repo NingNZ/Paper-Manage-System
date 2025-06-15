@@ -14,7 +14,7 @@ const routes=[
     {path:'/notice',component:MyNotices,meta: { minPermission: 0 }},
     {path:'/search',component:SearchResult},
     {path:'/myteam',component:MyTeam,meta: { exactPermission: 0 }},
-    {path:'/other',component:ManageTeamArticle},
+    {path:'/other',name: 'other',component:ManageTeamArticle},
     {path:'/login',component:LoginView},
     {path:'/mypaper',component:MyPaper,meta: { exactPermission: 0 }}
 ]
