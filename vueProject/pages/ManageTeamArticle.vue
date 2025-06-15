@@ -115,12 +115,11 @@ import EditDialog from "../components/ManageTeamArticle/EditDialog.vue"
 import DeleteDialog from "../components/ManageTeamArticle/DeleteDialog.vue"
 import UploadDialog from "../components/ManageTeamArticle/UploadDialog.vue"
 import { teamInfoUtils } from '../scripts/teamInfo'
-import teamUtils from '../scripts/team'
 
 const members = ref([])
 onMounted(()=>{
   const teamId = localStorage.getItem("teamId")
-  teamUtils.getMemberList(teamId)
+  teamInfoUtils.getMemberList(teamId)
   .then(({code,msg,data})=>{
     if(code==200){
       members.value=data
