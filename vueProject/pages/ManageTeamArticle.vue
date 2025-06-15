@@ -33,7 +33,7 @@
         <div class="buttons">
           <el-button type="primary" size="small" @click="openInviteDialog">邀请成员</el-button>
           <el-button type="info" size="small" @click="showCategoryManager = true">管理分类</el-button>
-          <el-button type="success" size="small">论文投稿</el-button>
+          <el-button type="success" size="small" @click="showContributeDialog = true">论文投稿</el-button>
         </div>
       </aside>
 
@@ -107,6 +107,12 @@
       @close="showUploadDialog = false"
     />
 
+    <!-- 论文投稿弹窗 -->
+    <ContributeDialog
+      :visible="showContributeDialog"
+      @update:visible="showContributeDialog = $event"
+    />
+    
     <!-- 编辑弹窗 -->
     <EditDialog
       v-model="showEditDialog"
@@ -130,6 +136,7 @@ import InviteMemberDialog from '../components/ManageTeamArticle/InviteMemberDial
 import EditDialog from "../components/ManageTeamArticle/EditDialog.vue"
 import DeleteDialog from "../components/ManageTeamArticle/DeleteDialog.vue"
 import UploadDialog from "../components/ManageTeamArticle/UploadDialog.vue"
+import ContributeDialog from "../components/ManageTeamArticle/ContributeDialog.vue";
 import { teamInfoUtils } from '../scripts/teamInfo'
 import teamUtils from '../scripts/team'
 
@@ -157,6 +164,7 @@ const pageSize = ref(10)
 const showCategoryManager = ref(false)
 const inviteDialogRef = ref(null)
 const showUploadDialog = ref(false)
+const showContributeDialog = ref(false) // 论文投稿弹窗
 const showEditDialog = ref(false)
 const showDeleteDialog = ref(false)
 

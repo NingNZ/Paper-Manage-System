@@ -278,7 +278,6 @@ const refreshGraph = () => {
 
     <!-- 上传按钮隐藏，保留样式位置 -->
     <div class="upload-button-wrapper">
-      <button class="upload-btn" @click="showUploadDialog = true">上传论文</button> 
 
       <!-- 查询输入框 -->
       <div class="custom-search-wrapper">
