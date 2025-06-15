@@ -85,10 +85,7 @@
 
     <!-- 管理分类弹窗 -->
     <el-dialog v-model="showCategoryManager" width="600px" destroy-on-close :close-on-click-modal="false">
-      <CategoryManagerDialog
-        :category-tree="categoryTree"
-        @refresh-category="fetchCategoryTree"
-      />
+      <CategoryManagerDialog/>
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="showCategoryManager = false">取消</el-button>
@@ -129,7 +126,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage,ElLoading} from 'element-plus'
 import bar from '../components/bar.vue'
 import CategoryManagerDialog from '../components/ManageTeamArticle/CategoryManagerDialog.vue'
 import InviteMemberDialog from '../components/ManageTeamArticle/InviteMemberDialog.vue'
@@ -138,26 +135,53 @@ import DeleteDialog from "../components/ManageTeamArticle/DeleteDialog.vue"
 import UploadDialog from "../components/ManageTeamArticle/UploadDialog.vue"
 import ContributeDialog from "../components/ManageTeamArticle/ContributeDialog.vue";
 import { teamInfoUtils } from '../scripts/teamInfo'
-import teamUtils from '../scripts/team'
 
 const members = ref([])
 onMounted(()=>{
   const teamId = localStorage.getItem("teamId")
-  teamUtils.getMemberList(teamId)
+  freshMemberList(teamId)
+  freshPaperList(teamId)
+})
+const freshPaperList=(teamId)=>{
+  const loadingInstance = ElLoading.service({
+      lock: true,
+      text: '加载中...',
+      background: 'rgba(0, 0, 0, 0.2)'
+    })
+  teamInfoUtils.getRefPapersList(teamId)
+  .then(({code,msg,data})=>{
+    if(code==200){
+      ElMessage.success("刷新团队详细信息")
+      papers.value = Array.from({length:data.length},(_,i)=>({
+        id:data[i].id,
+        title:data[i].title,
+        typeId:data[i].typeId,
+        category:data[i].typeName,
+        uploader:data[i].userName
+      }))
+      console.log(papers.value)
+
+    }else{
+      ElMessage.error(msg)
+    }
+  }).catch(({code,msg,data})=>{
+    ElMessage.error(msg);
+  }).finally(()=>{
+    setTimeout(()=>{
+      loadingInstance.close()
+    },500)
+  })
+}
+const freshMemberList=(teamId)=>{
+  teamInfoUtils.getMemberList(teamId)
   .then(({code,msg,data})=>{
     if(code==200){
       members.value=data
     }
   })
-})
+}
 
-const categories = ref(['AI', '机器学习', '自然语言处理', '计算机视觉'])
-const papers = ref(Array.from({ length: 20 }, (_, i) => ({
-  id: i + 1,
-  title: `Title of paper ${i + 1}`,
-  category: 'AI',
-  uploader: 'xxx'
-})))
+const papers = ref([])
 
 const currentPage = ref(1)
 const pageSize = ref(10)
@@ -174,6 +198,7 @@ const currentDeleteItem = ref(null)
 const categoryTree = ref([])
 
 function fetchCategoryTree() {
+  console.log("执行")
   const teamId = localStorage.getItem("teamId")
   teamInfoUtils.getTeamCategory(teamId).then(({ code, data }) => {
     if (code === 200 && Array.isArray(data)) {
@@ -247,7 +272,7 @@ function confirmDelete() {
 }
 
 function handleDownload(item) {
-  console.log('下载论文标题:', item.title)
+  console.log('下载论文标题:', item.id)
   // 这里写下载逻辑
 }
 
@@ -255,10 +280,6 @@ const props = defineProps({
   categoryTree: Array
 })
 const emit = defineEmits(['refresh-category'])
-function handleCategoryChangeSuccess() {
-  // 分类操作成功后
-  emit('refresh-category')
-}
 
 </script>
 

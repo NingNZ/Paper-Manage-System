@@ -23,6 +23,7 @@ export const teamInfoUtils = {
             // 处理错误
             return Promise.reject({
                 code: 404,
+                data:[],
                 msg: "服务器未连接"
             })
         })
@@ -75,23 +76,33 @@ export const teamInfoUtils = {
     },
 
     // 获取团队成员列表
-    getTeamMemberList(teamId) {
-        return axios.get(utils.url + '/teamInfo/Member', {
-            withCredentials: true,
-            params: { teamId }
+        /**
+     * 
+     * @param {String} teamId 
+     * @returns 
+     */
+    getMemberList (teamId){
+     return axios.get(utils.url+'/teamMember', {
+            params:{
+                teamId:teamId
+            },
+            withCredentials:true,
+            timeout:3000
         }).then((response) => {
+        // 处理返回数据
             return {
                 code: response.data[0].code,
                 data: response.data.slice(1),
                 msg: response.data[0].msg
-            };
+            }
         }).catch(error => {
+        // 处理错误
             return Promise.reject({
-                code: 404,
-                data: [],
-                msg: "服务器未连接"
-            });
-        });
+                code:404,
+                data:[],
+                msg:"服务不可用"
+            })
+        })
     },
 
     // 获取团队分类信息
@@ -101,7 +112,6 @@ export const teamInfoUtils = {
             params: { teamId },
             timeout: 3000
         }).then((response) => {
-            console.log(response.data.slice(1))
             return {
                 code: response.data[0].code,
                 msg: response.data[0].msg,

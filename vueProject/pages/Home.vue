@@ -23,12 +23,6 @@
       localStorage.setItem('keySave',searchWord.value)
     }
   }
-onMounted(()=>{
-  sessionUtil.checkPermiss()
-  .then(res=>{
-    console.log(res);
-  })
-})
 </script>
 
 <template>
