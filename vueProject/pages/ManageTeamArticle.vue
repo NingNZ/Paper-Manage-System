@@ -33,7 +33,7 @@
         <div class="buttons">
           <el-button type="primary" size="small" @click="openInviteDialog">邀请成员</el-button>
           <el-button type="info" size="small" @click="showCategoryManager = true">管理分类</el-button>
-          <el-button type="success" size="small">论文投稿</el-button>
+          <el-button type="success" size="small" @click="showContributeDialog = true">论文投稿</el-button>
         </div>
       </aside>
 
@@ -104,6 +104,12 @@
       @close="showUploadDialog = false"
     />
 
+    <!-- 论文投稿弹窗 -->
+    <ContributeDialog
+      :visible="showContributeDialog"
+      @update:visible="showContributeDialog = $event"
+    />
+    
     <!-- 编辑弹窗 -->
     <EditDialog
       v-model="showEditDialog"
@@ -127,6 +133,7 @@ import InviteMemberDialog from '../components/ManageTeamArticle/InviteMemberDial
 import EditDialog from "../components/ManageTeamArticle/EditDialog.vue"
 import DeleteDialog from "../components/ManageTeamArticle/DeleteDialog.vue"
 import UploadDialog from "../components/ManageTeamArticle/UploadDialog.vue"
+import ContributeDialog from "../components/ManageTeamArticle/ContributeDialog.vue";
 import { teamInfoUtils } from '../scripts/teamInfo'
 
 const members = ref([])
@@ -181,6 +188,7 @@ const pageSize = ref(10)
 const showCategoryManager = ref(false)
 const inviteDialogRef = ref(null)
 const showUploadDialog = ref(false)
+const showContributeDialog = ref(false) // 论文投稿弹窗
 const showEditDialog = ref(false)
 const showDeleteDialog = ref(false)
 
@@ -190,7 +198,6 @@ const currentDeleteItem = ref(null)
 const categoryTree = ref([])
 
 function fetchCategoryTree() {
-  console.log("执行")
   const teamId = localStorage.getItem("teamId")
   teamInfoUtils.getTeamCategory(teamId).then(({ code, data }) => {
     if (code === 200 && Array.isArray(data)) {
@@ -227,17 +234,6 @@ function openInviteDialog() {
 async function openUploadDialog() {
   await fetchCategoryTree() // 先获取最新分类树
   showUploadDialog.value = true
-}
-
-function handleUpload(newPaper) {
-  papers.value.push({
-    id: papers.value.length + 1,
-    title: newPaper.title,
-    category: newPaper.category,
-    uploader: '当前用户'
-  })
-  ElMessage.success('上传成功！')
-  showUploadDialog.value = false
 }
 
 async function handleEdit(item) {

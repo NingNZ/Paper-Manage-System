@@ -1,6 +1,5 @@
 <script setup>
 import bar from "../components/bar.vue";
-import UploadDialog from "../components/UploadTest/UploadTestDialog.vue";
 import EditDialog from "../components/SearchResult/EditDialog.vue";
 import DeleteDialog from "../components/SearchResult/DeleteDialog.vue";
 import JournalManagerDialog from "../components/SearchResult/JournalManagerDialog.vue";
@@ -278,7 +277,6 @@ const refreshGraph = () => {
 
     <!-- 上传按钮隐藏，保留样式位置 -->
     <div class="upload-button-wrapper">
-      <button class="upload-btn" @click="showUploadDialog = true">上传论文</button> 
 
       <!-- 查询输入框 -->
       <div class="custom-search-wrapper">
@@ -380,8 +378,6 @@ const refreshGraph = () => {
       </div>
     </main>
 
-    <!-- 上传弹窗组件 -->
-    <UploadDialog v-model:visible="showUploadDialog" />
     <EditDialog
       v-model="showEditDialog"
       :item="currentEditItem"
