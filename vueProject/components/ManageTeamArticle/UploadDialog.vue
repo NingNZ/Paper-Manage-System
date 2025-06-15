@@ -52,7 +52,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['update:modelValue', 'upload'])
+const emit = defineEmits(['update:modelValue'])
 
 const visible = ref(props.modelValue)
 const newPaper = ref({ title: '', category: '', file: null })
@@ -86,7 +86,7 @@ function submit() {
     ElMessage.error('请完整填写所有信息')
     return
   }
-  emit('upload', newPaper.value)
+  
 }
 
 // 新增的打印逻辑

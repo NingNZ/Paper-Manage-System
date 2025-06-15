@@ -198,7 +198,6 @@ const currentDeleteItem = ref(null)
 const categoryTree = ref([])
 
 function fetchCategoryTree() {
-  console.log("执行")
   const teamId = localStorage.getItem("teamId")
   teamInfoUtils.getTeamCategory(teamId).then(({ code, data }) => {
     if (code === 200 && Array.isArray(data)) {
@@ -235,17 +234,6 @@ function openInviteDialog() {
 async function openUploadDialog() {
   await fetchCategoryTree() // 先获取最新分类树
   showUploadDialog.value = true
-}
-
-function handleUpload(newPaper) {
-  papers.value.push({
-    id: papers.value.length + 1,
-    title: newPaper.title,
-    category: newPaper.category,
-    uploader: '当前用户'
-  })
-  ElMessage.success('上传成功！')
-  showUploadDialog.value = false
 }
 
 async function handleEdit(item) {
