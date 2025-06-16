@@ -113,19 +113,20 @@ const teamUtils = {
                 teamId: teamId,
                 memberId: memberId
             },
+            withCredentials:true,
             timeout: 3000
         }).then((response) => {
             // 假设后端返回格式为 { code, data, msg }
             return {
-                code: response.data.code,
-                data: response.data.data,
-                msg: response.data.msg
+                code: response.data[0].code,
+                data: response.data.slice(1),
+                msg: response.data[0].msg
             }
         }).catch(error => {
             // 处理错误
             return Promise.reject({
                 code: 404,
-                data: null,
+                data: [],
                 msg: "服务不可用"
             })
         })
