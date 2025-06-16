@@ -1,130 +1,172 @@
 <template>
-  <div ref="chartRef" class="chart-container"></div>
+  <div ref="chartRef" style="width: 1000px; height: 500px" class="chart-container"></div>
 </template>
 
 <script setup>
 import * as echarts from 'echarts'
-import { ref, onMounted, onBeforeUnmount, watch,computed } from 'vue'
+import { ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
+import { userNetUtils } from '../../scripts/userNet'
 
+// 父组件传入 userId
 const props = defineProps({
-  center: String,
-})
-const centerName = '中心节点'
-
-/**
- * @type {Array<{name:string,lable:string,symbolSize:int,itemStyle:Object,draggable:bool}>}
- */
-const nodes = ref([
-  { name: '节点1', displayName:'hello',symbolSize: 40, itemStyle: { color: '#83bff6' }, draggable: true },
-])
-
-/**
- * @type {Array<{source:string,target:string,lineStyle:Object}>}
- */
-const edges = ref([
-  { source: centerName, target: '节点1', lineStyle: { color: '#a0c4ff', width: 2 } },
-])
-
-const graphData = computed(() => [
-  {
-    name: centerName,
-    symbolSize: 60,
-    itemStyle: {
-      color: '#ff7f50',
-      shadowBlur: 15,
-      shadowColor: 'rgba(255, 127, 80, 0.8)'
-    },
-    label: {
-      fontSize: 18,
-      fontWeight: 'bold',
-      color: '#ff5722'
-    },
-    draggable: true
+  userId: {
+    type: String,
+    required: true
   },
-  ...nodes.value.filter(n => n.name !== centerName)
-])
+  coAuthors: {
+    type: Array,
+    default: () => []
+  }
+})
 
-
+// 所有数据准备好以后再渲染
 const chartRef = ref(null)
 let chartInstance = null
-const getChartOption = () => ({
-  backgroundColor: '#f9f9f9',
-  // title: {
-  //   text: '论文关系网络',
-  //   left: 'center',
-  //   textStyle: {
-  //     color: '#333',
-  //     fontSize: 22,
-  //     fontWeight: 'bold'
-  //   }
-  // },
-  tooltip: {
-    show: true,
-    formatter: function (params) {
-      if (params.dataType === 'node') {
-        return `<strong>${params.data.name}</strong>`
-      } else if (params.dataType === 'edge') {
-        return `${params.data.source} → ${params.data.target}`
-      }
-      return ''
-    }
-  },
-  series: [
+
+// 数据源
+const centerNode = ref(null)
+const nodes = ref([])
+const edges = ref([])
+const showGraph = ref(false)
+
+// 初始化图表
+const initChart = () => {
+  if (!chartRef.value) return
+  chartInstance = echarts.init(chartRef.value)
+  window.addEventListener('resize', resizeChart)
+}
+
+// 渲染图表（完整清空重绘）
+const renderChart = () => {
+  if (!chartInstance) return
+
+  const data = [
     {
-      type: 'graph',
-      layout: 'force',
-      roam: false,
-      focusNodeAdjacency: true, // 鼠标悬停高亮节点和邻接边
+      name: centerNode.value.name,
+      displayName: centerNode.value.displayName,
+      symbolSize: 60,
+      itemStyle: {
+        color: '#ff7f50',
+        shadowBlur: 15,
+        shadowColor: 'rgba(255, 127, 80, 0.8)'
+      },
       label: {
-        show: true,
-        position: 'bottom',
-        fontSize: 14,
-        color: '#555',
-        fontWeight: '500',
-        formatter: function(params) {
-          // 优先显示 displayName，没有则显示 name
-          return params.data.displayName || params.data.name;
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#ff5722'
+      },
+      draggable: true
+    },
+    ...nodes.value
+  ]
+
+  const option = {
+    backgroundColor: '#f9f9f9',
+    tooltip: {
+      show: true,
+      formatter: function (params) {
+        if (params.dataType === 'node') {
+          return `<strong>${params.data.displayName || params.data.name}</strong>`
+        } else if (params.dataType === 'edge') {
+          const papers = params.data.papers
+          if (papers?.length > 0) {
+            return `共同发表论文：<br/>${papers.join('<br/>')}`
+          }
+          return '无共同论文'
         }
-      },
-      force: {
-        repulsion: 4000,
-        edgeLength: [50, 80],
-        gravity: 0.1,
-        layoutAnimation: true
-      },
-      edgeSymbol: ['none', 'arrow'],
-      edgeSymbolSize: 8,
-      edgeLabel: {
-        show: false
-      },
-      data: graphData.value,
-      links: edges.value,
-      emphasis: {
-        focus: 'adjacency',
+        return ''
+      }
+    },
+    series: [
+      {
+        type: 'graph',
+        layout: 'force',
+        roam: true,  // 开启缩放与拖拽，体验更好
+        focusNodeAdjacency: true,
         label: {
           show: true,
-          fontSize: 16,
-          fontWeight: 'bold',
-          color: '#000'
+          position: 'bottom',
+          fontSize: 14,
+          color: '#555',
+          fontWeight: '500',
+          formatter: function (params) {
+            return params.data.displayName || params.data.name
+          }
         },
-        itemStyle: {
-          shadowBlur: 20,
-          shadowColor: 'rgba(0, 0, 0, 0.3)'
+        force: {
+          repulsion: 4000,
+          edgeLength: [50, 80],
+          gravity: 0.1,
+          layoutAnimation: true
         },
-        lineStyle: {
-          width: 3,
-          color: '#ff7f50'
+        edgeSymbol: ['none', 'arrow'],
+        edgeSymbolSize: 8,
+        edgeLabel: { show: false },
+        data: data,
+        links: edges.value,
+        emphasis: {
+          focus: 'adjacency',
+          label: {
+            show: true,
+            fontSize: 16,
+            fontWeight: 'bold',
+            color: '#000'
+          },
+          itemStyle: {
+            shadowBlur: 20,
+            shadowColor: 'rgba(0, 0, 0, 0.3)'
+          },
+          lineStyle: {
+            width: 3,
+            color: '#ff7f50'
+          }
         }
       }
-    }
-  ]
-})
+    ]
+  }
 
-const initChart = () => {
-  if (chartRef.value) {
-    chartInstance = echarts.init(chartRef.value)
-    chartInstance.setOption(getChartOption())
-    window.addEventListener('resize', resizeChart)
+  chartInstance.clear()
+  chartInstance.setOption(option)
+}
+
+// 获取数据
+const fetchCoAuthor = async () => {
+  console.log("传入的 userId：[" + props.userId + "]");
+  try {
+    const res = await userNetUtils.getCoAuthor(props.userId)
+    if (res.code === 200) {
+      const data = res.data
+
+      centerNode.value = {
+        name: data[0].name,
+        displayName: data[0].displayName
+      }
+
+      nodes.value = data.slice(1).map(item => ({
+        name: item.name,
+        displayName: item.displayName,
+        symbolSize: 40,
+        itemStyle: { color: '#83bff6' },
+        draggable: true
+      }))
+
+      edges.value = data.slice(1).map(item => ({
+        source: centerNode.value.name,
+        target: item.name,
+        papers: item.papers || [],
+        lineStyle: { color: '#a0c4ff', width: 2 }
+      }))
+
+      showGraph.value = false
+      nextTick(() => {
+        showGraph.value = true
+      })
+      renderChart()
+    } else {
+      console.error('数据返回错误：', res.msg)
+    }
+  } catch (err) {
+    console.error('请求失败：', err)
   }
 }
 
@@ -133,7 +175,8 @@ const resizeChart = () => {
 }
 
 onMounted(() => {
-  setTimeout(initChart, 100) // 确保dialog渲染完毕后初始化
+  initChart()
+  fetchCoAuthor()
 })
 
 onBeforeUnmount(() => {
@@ -141,11 +184,28 @@ onBeforeUnmount(() => {
   chartInstance?.dispose()
 })
 
-watch(() => props.center, (newCenter) => {
-  if (chartInstance) {
-    chartInstance.setOption(getChartOption(),{ resetLayout: true })
-  }
-})
+watch(
+  () => props.userId,
+  (newUserId) => {
+    if (newUserId) {
+      fetchCoAuthor()
+    }
+  },
+  { immediate: true }
+)
+
+watch(
+  () => props.coAuthors,
+  (newCoAuthors) => {
+    console.log('watch coAuthors:', newCoAuthors)
+    nodes.value = newCoAuthors.map(user => ({
+      name: user.userName,
+      displayName: user.displayName || user.userName,
+      ...user
+    }))
+  },
+  { immediate: true }
+)
 </script>
 
 <style scoped>
