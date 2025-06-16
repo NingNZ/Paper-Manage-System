@@ -23,6 +23,7 @@ export const userNetUtils = {
                 userId: userId
             },
         }).then((response) => {
+            console.log(response.data[1])
             return {
                 code: response.data[0].code,
                 msg: response.data[0].msg,

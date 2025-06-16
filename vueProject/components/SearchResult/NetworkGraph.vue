@@ -6,6 +6,7 @@
 import * as echarts from 'echarts'
 import { ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import { userNetUtils } from '../../scripts/userNet'
+import { ElMessage,ElLoading } from 'element-plus'
 
 // 父组件传入 userId
 const props = defineProps({
@@ -13,6 +14,10 @@ const props = defineProps({
     type: String,
     required: true
   },
+  fresh:{
+    type:Boolean,
+    required:true
+  }
 })
 
 // 所有数据准备好以后再渲染
@@ -24,6 +29,7 @@ const centerNode = ref(null)
 const nodes = ref([])
 const edges = ref([])
 const showGraph = ref(false)
+const emit = defineEmits(['update:fresh']) 
 
 // 初始化图表
 const initChart = () => {
@@ -62,22 +68,25 @@ const renderChart = () => {
       show: true,
       formatter: function (params) {
         if (params.dataType === 'node') {
-          return `<strong>${params.data.displayName || params.data.name}</strong>`
+          return `<strong>id</strong>: <i>${params.data.name|| params.data.displayName}</i>`
         } else if (params.dataType === 'edge') {
           const papers = params.data.papers
           if (papers?.length > 0) {
-            return `共同发表论文：<br/>${papers.join('<br/>')}`
+            return `共同发表论文：<br/><h4>${
+              papers.map((p, i) => `${i + 1}. ${p}`).join('<br/>')
+            }</h4>`
           }
           return '无共同论文'
         }
         return ''
-      }
+      },
+      extraCssText: 'user-select: text; pointer-events: auto;',
+      renderMode: 'html'
     },
     series: [
       {
         type: 'graph',
         layout: 'force',
-        roam: true,  // 开启缩放与拖拽，体验更好
         focusNodeAdjacency: true,
         label: {
           show: true,
@@ -125,9 +134,47 @@ const renderChart = () => {
 }
 
 // 获取数据
-const fetchCoAuthor = async () => {
-  try {
-    const res = await userNetUtils.getCoAuthor(props.userId)
+// const fetchCoAuthor = async () => {
+//   try {
+//     const res = await userNetUtils.getCoAuthor(props.userId)
+//     if (res.code === 200) {
+//       const data = res.data
+//       centerNode.value = data.self
+//       nodes.value = data.coAuthors.map(item => ({
+//         name: item.name,
+//         displayName: item.displayName,
+//         symbolSize: 40,
+//         itemStyle: { color: '#83bff6' },
+//         draggable: true
+//       }))
+
+//       edges.value = data.coAuthors.map(item => ({
+//         source: centerNode.value.name,
+//         target: item.name,
+//         papers: item.papers || [],
+//         lineStyle: { color: '#a0c4ff', width: 2 }
+//       }))
+
+//       showGraph.value = false
+//       nextTick(() => {
+//         showGraph.value = true
+//       })
+//       renderChart()
+//     } else {
+//       console.error('数据返回错误：', res.msg)
+//     }
+//   } catch (err) {
+//     console.error('请求失败：', err)
+//   }
+// }
+const fetchCoAuthor =  () => {
+    const loadingInstance = ElLoading.service({
+      lock: true,
+      text: '加载中...',
+      background: 'rgba(0, 0, 0, 0.2)'
+    })
+  userNetUtils.getCoAuthor(props.userId)
+  .then(res=>{
     if (res.code === 200) {
       const data = res.data
       centerNode.value = data.self
@@ -152,11 +199,15 @@ const fetchCoAuthor = async () => {
       })
       renderChart()
     } else {
-      console.error('数据返回错误：', res.msg)
+      ElMessage.error('数据返回错误：', res.msg)
     }
-  } catch (err) {
-    console.error('请求失败：', err)
-  }
+  }).catch ((err)=>{
+    ElMessage.error('请求失败：', err.msg)
+  }).finally(()=>{
+    setTimeout(()=>{
+      loadingInstance.close()
+    },500)
+  })
 }
 
 const resizeChart = () => {
@@ -164,10 +215,19 @@ const resizeChart = () => {
 }
 
 onMounted(()=>{
-  setTimeout(initChart,100);
-  setTimeout(fetchCoAuthor,100);
+  console.log(props.userId)
+  nextTick(() => {
+    initChart()
+    fetchCoAuthor()
+  })
 })
-
+watch(() => props.fresh, (newVal) => {
+  // 当 props.fresh 变化时会执行这里的代码
+  if(newVal){
+    fetchCoAuthor()
+    emit('update:fresh',false)
+  }
+})
 onBeforeUnmount(() => {
   window.removeEventListener('resize', resizeChart)
   chartInstance?.dispose()
