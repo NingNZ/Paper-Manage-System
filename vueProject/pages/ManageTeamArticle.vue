@@ -3,7 +3,7 @@
     <!-- 顶部导航栏 -->
     <bar></bar>
     <div class="breadcrumb">
-      <a href="/">首页</a> &gt; <a href="/myteam">我的团队</a> &gt; <a>团队 "{{ teamName }}"</a>
+      <a href="/">首页</a> &gt; <a href="/myteam">我的团队</a> &gt; <a href="/other">团队 "{{ teamName }}"</a>
     </div>
 
     <!-- 页面主体 -->
@@ -148,7 +148,6 @@ import { sessionUtil } from '../scripts/session'
 const members = ref([])
 const role = ref(''); // 角色状态
 const teamName = ref(''); // 团队名称状态
-const teamId = ref(''); // 团队ID状态
 // // 获取查询参数
 // const teamId = route.query.teamId
 // const role = route.query.role
@@ -166,9 +165,18 @@ onMounted(async ()=>{
     freshMemberList(teamId)
     freshPaperList(teamId)
   }
-  role.value = localStorage.getItem("teamRole") || '';
+  // role.value = localStorage.getItem("teamRole") || '';
   teamName.value = localStorage.getItem("teamName") || '';
-  teamId.value = localStorage.getItem("teamId") || '';
+  teamInfoUtils.CheckTeamRole(teamId)
+  .then((isLeader)=>{
+    if(isLeader){
+      role.value = 'leader'
+    }else{
+      role.value = 'member'
+    }
+  }).catch(({code,msg,data})=>{
+    ElMessage.error(msg);
+  })
 })
 const freshPaperList=(teamId)=>{
   const loadingInstance = ElLoading.service({
