@@ -144,14 +144,17 @@ import { teamInfoUtils } from '../scripts/teamInfo'
 import { useRoute, useRouter } from 'vue-router'
 import { sessionUtil } from '../scripts/session'
 
-const route = useRoute()
+// const route = useRoute()
 const members = ref([])
+const role = ref(''); // 角色状态
+const teamName = ref(''); // 团队名称状态
+const teamId = ref(''); // 团队ID状态
+// // 获取查询参数
+// const teamId = route.query.teamId
+// const role = route.query.role
+// const teamName = route.query.teamName
+// const router = useRouter()
 
-// 获取查询参数
-const teamId = route.query.teamId
-const role = route.query.role
-const teamName = route.query.teamName
-const router = useRouter()
 onMounted(async ()=>{
   const state = await sessionUtil.checkPermiss()
   const teamId = localStorage.getItem("teamId")
@@ -163,6 +166,9 @@ onMounted(async ()=>{
     freshMemberList(teamId)
     freshPaperList(teamId)
   }
+  role.value = localStorage.getItem("teamRole") || '';
+  teamName.value = localStorage.getItem("teamName") || '';
+  teamId.value = localStorage.getItem("teamId") || '';
 })
 const freshPaperList=(teamId)=>{
   const loadingInstance = ElLoading.service({
