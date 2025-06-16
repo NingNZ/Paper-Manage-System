@@ -237,6 +237,7 @@ const confirmDelete = () => {
 const keyword = ref('')
 const showGraph = ref(false)
 const graphKeyword = ref('')
+const coAuthors = ref([])
 
 const handleSearch = () => {
   if (!keyword.value.trim()) {
@@ -245,21 +246,37 @@ const handleSearch = () => {
   }
   const userId = keyword.value.trim()
   userNetUtils.checkUserIdExist(userId)
-  .then((data)=>{
-      if(data.code==200){
+    .then((data) => {
+      console.log('checkUserIdExist 返回：', data)
+      if (data.code == 200) {
         ElMessage.success(data.msg)
-        graphKeyword.value = userId
-        showGraph.value = true
-      }else{
+        // 用户存在，获取共同作者
+        userNetUtils.getCoAuthor(userId)
+          .then(({code,msg,coAuthor}) => {
+            console.log('getCoAuthor 返回：', coAuthor)
+            // if (code === 200) {
+            //   console.log('共同作者数据：', coAuthor)
+            //   coAuthors.value = coAuthor
+            //   graphKeyword.value = userId
+            //   showGraph.value = true
+            // } else {
+            //   ElMessage.info(msg)
+            // }
+          })
+          .catch((error) => {
+            console.error('getCoAuthor catch:', error)
+            ElMessage.error(error.msg || '获取共同作者失败')
+          })
+      } else {
         ElMessage.info(data.msg)
       }
-  })
-  .catch((error)=>{
-    ElMessage.error(error.msg)
-  })
-
+    })
+    .catch((error) => {
+      console.error('checkUserIdExist catch:', error)
+      ElMessage.error(error.msg || '查询失败')
+    })
 }
-
+localStorage.setItem('isSearch',true)
 
 //刷新关系网络
 const isRotating = ref(false)
@@ -399,6 +416,7 @@ const refreshGraph = () => {
     <!-- 网络图弹窗 -->
   <el-dialog
     v-model="showGraph"
+    high="80%"
     width="60%"
     :close-on-click-modal="false"
     @close="keyword=''"
@@ -414,8 +432,12 @@ const refreshGraph = () => {
       />
     </div>
     <!-- 注意：这个 div 一定要有高度！ -->
-    <div style="height:500px; width: 100%;">
-      <NetworkGraph :center="graphKeyword" />
+    <div style="height:100%; width: 100%;">
+      <NetworkGraph
+        v-if="showGraph"
+        :user-id="graphKeyword"
+        :co-authors="coAuthors.value"
+      />
     </div>
   </el-dialog>
 
