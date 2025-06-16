@@ -165,7 +165,6 @@ onMounted(async ()=>{
     freshMemberList(teamId)
     freshPaperList(teamId)
   }
-  // role.value = localStorage.getItem("teamRole") || '';
   teamName.value = localStorage.getItem("teamName") || '';
   teamInfoUtils.CheckTeamRole(teamId)
   .then((isLeader)=>{
