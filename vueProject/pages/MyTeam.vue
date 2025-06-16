@@ -105,7 +105,9 @@ const openLeaveDialog = (team) => {
 const enterTeam = (row)=>{
   const teamId = row.id;
   const teamName = row.name;
-  localStorage.setItem("teamId",row.id);
+    // 先存储团队 ID 和名称
+  localStorage.setItem("teamId", teamId);
+  localStorage.setItem("teamName", teamName);
   teamInfoUtils.CheckTeamRole(teamId)
     .then(( temp ) => {
       let role = ''; // 默认角色为空
@@ -117,16 +119,9 @@ const enterTeam = (row)=>{
         // 是组员
         role = 'member';
       }
-
-      // 跳转到新页面，并将身份信息 (role) 传递为查询参数
-      router.push({ 
-        name: 'other',  // 路由的名称
-        query: { 
-          teamName: teamName, // 传递团队名称
-          teamId: teamId,
-          role: role  // 传递组长/组员角色
-        }
-      });
+      localStorage.setItem("teamRole", role);  // ✅ 存储身份信息
+          // 跳转到团队文章页面
+      router.push("/other");
     })
     .catch(({ msg }) => {
       ElMessage.error(msg || "无法连接服务器");
