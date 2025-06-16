@@ -96,26 +96,20 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { ElButton, ElPagination, ElDialog, ElMessage, ElSelect, ElOption } from 'element-plus'
 import bar from '../components/bar.vue'
 import CategoryManager from '../components/ManageTeamArticle/CategoryManagerDialog.vue'
 import * as XLSX from 'xlsx'
 import { saveAs } from 'file-saver'
+import userPaperUtils from '../scripts/userPaper'
 
 // 期刊和类别定义
 const journalOptions = ['IEEE', 'ACM', 'Springer', 'Elsevier', 'Nature', 'Science']
 const categories = ['AI', '系统设计', '数据挖掘', '人机交互']
 
 // 论文数据生成，分布在不同期刊
-const papers = ref(
-  Array.from({ length: 30 }, (_, i) => ({
-    title: `我的论文 ${i + 1}`,
-    category: categories[i % categories.length],
-    journal: journalOptions[i % journalOptions.length],
-    uploadDate: `2025-06-${(i % 30 + 1).toString().padStart(2, '0')}`
-  }))
-)
+const papers = ref([])
 
 // 工作量分数直接展示
 const workloadScore = ref(85.5)
@@ -159,7 +153,7 @@ function handleFilter() {
 }
 
 function handleDownload(paper) {
-  ElMessage.success(`已开始下载：${paper.title}`)
+  //userPaperUtils.downloadUserPaper(paper.id)
 }
 
 function exportToExcel() {
@@ -177,6 +171,28 @@ function exportToExcel() {
   saveAs(new Blob([wbout], { type: 'application/octet-stream' }), '我的论文列表.xlsx')
   ElMessage.success('Excel 导出成功')
 }
+
+// 获取当前用户ID（假设已存储在localStorage）
+const userId = localStorage.getItem('userId')
+
+// 获取我的论文列表
+const fetchMyPapers = () => {
+  userPaperUtils.getUserPaper(userId)
+    .then(({ code, msg, data }) => {
+      if (code === 200) {
+        papers.value = data
+      } else {
+        ElMessage.error(msg)
+      }
+    })
+    .catch(() => {
+      ElMessage.error('获取论文失败')
+    })
+}
+
+onMounted(() => {
+  fetchMyPapers()
+})
 </script>
 
 <style scoped>

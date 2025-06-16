@@ -245,21 +245,21 @@ const handleSearch = () => {
   }
   const userId = keyword.value.trim()
   userNetUtils.checkUserIdExist(userId)
-  .then((data)=>{
-      if(data.code==200){
+    .then((data) => {
+      if (data.code == 200) {
         ElMessage.success(data.msg)
-        graphKeyword.value = userId
-        showGraph.value = true
-      }else{
+        graphKeyword.value = userId 
+        showGraph.value = true;
+      } else {
         ElMessage.info(data.msg)
       }
-  })
-  .catch((error)=>{
-    ElMessage.error(error.msg)
-  })
-
+    })
+    .catch((error) => {
+      console.error('checkUserIdExist catch:', error)
+      ElMessage.error(error.msg || '查询失败')
+    })
 }
-
+localStorage.setItem('isSearch',true)
 
 //刷新关系网络
 const isRotating = ref(false)
@@ -399,6 +399,7 @@ const refreshGraph = () => {
     <!-- 网络图弹窗 -->
   <el-dialog
     v-model="showGraph"
+    high="80%"
     width="60%"
     :close-on-click-modal="false"
     @close="keyword=''"
@@ -415,7 +416,9 @@ const refreshGraph = () => {
     </div>
     <!-- 注意：这个 div 一定要有高度！ -->
     <div style="height:500px; width: 100%;">
-      <NetworkGraph :center="graphKeyword" />
+      <NetworkGraph
+        :user-id="graphKeyword"
+      />
     </div>
   </el-dialog>
 
