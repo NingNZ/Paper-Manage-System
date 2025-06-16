@@ -82,10 +82,12 @@ function handleSearch() {
       if(code==200||code==300){
         ElMessage.success("查询成功")
         members.value=data
+      }else{
+        ElMessage.error(msg)
       }
       console.log(members.value)
-  }).catch(()=>{
-
+  }).catch(({code,data,msg})=>{
+    ElMessage.error(msg)
   })
 }
 
