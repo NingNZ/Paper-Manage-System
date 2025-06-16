@@ -218,7 +218,11 @@ const currentDeleteItem = ref(null)
 
 const categoryTree = ref([])
 
-const filteredCategoryTree = computed(() => categoryTree.value.slice(1))
+const filteredCategoryTree = computed(() => {
+  const element0 = {...categoryTree.value[0]}
+  element0.children=[]
+  return [element0,...categoryTree.value.slice(1)]
+})
 function fetchCategoryTree() {
   const teamId = localStorage.getItem("teamId")
   teamInfoUtils.getTeamCategory(teamId)
