@@ -263,8 +263,10 @@ localStorage.setItem('isSearch',true)
 
 //刷新关系网络
 const isRotating = ref(false)
+const isFresh = ref(false)
 const refreshGraph = () => {
   isRotating.value = true;
+  isFresh.value = true
     setTimeout(() => {
     isRotating.value = false
   }, 400)
@@ -412,11 +414,14 @@ const refreshGraph = () => {
         class="refresh-icon"
         :class="{ 'refresh-rotate': isRotating }"
         @click="refreshGraph"
+        style="margin-right: 5%;"
       />
     </div>
     <!-- 注意：这个 div 一定要有高度！ -->
     <div style="height:500px; width: 100%;">
       <NetworkGraph
+        v-if="showGraph"
+        v-model:fresh = "isFresh"
         :user-id="graphKeyword"
       />
     </div>
@@ -598,6 +603,6 @@ td {
   transition: transform 0.4s cubic-bezier(.4,2,.6,1);
 }
 .refresh-rotate {
-  transform: rotate(180deg) scale(1.15);
+  transform: rotate(240deg) scale(1.15);
 }
 </style>
