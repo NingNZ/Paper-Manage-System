@@ -134,39 +134,6 @@ const renderChart = () => {
 }
 
 // 获取数据
-// const fetchCoAuthor = async () => {
-//   try {
-//     const res = await userNetUtils.getCoAuthor(props.userId)
-//     if (res.code === 200) {
-//       const data = res.data
-//       centerNode.value = data.self
-//       nodes.value = data.coAuthors.map(item => ({
-//         name: item.name,
-//         displayName: item.displayName,
-//         symbolSize: 40,
-//         itemStyle: { color: '#83bff6' },
-//         draggable: true
-//       }))
-
-//       edges.value = data.coAuthors.map(item => ({
-//         source: centerNode.value.name,
-//         target: item.name,
-//         papers: item.papers || [],
-//         lineStyle: { color: '#a0c4ff', width: 2 }
-//       }))
-
-//       showGraph.value = false
-//       nextTick(() => {
-//         showGraph.value = true
-//       })
-//       renderChart()
-//     } else {
-//       console.error('数据返回错误：', res.msg)
-//     }
-//   } catch (err) {
-//     console.error('请求失败：', err)
-//   }
-// }
 const fetchCoAuthor =  () => {
     const loadingInstance = ElLoading.service({
       lock: true,
