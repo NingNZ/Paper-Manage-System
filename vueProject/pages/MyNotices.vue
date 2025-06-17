@@ -71,8 +71,8 @@
                   <td class="time-col">{{ formatDate(item.time) }}</td>
                   <td class="status-col"><span class="status-gray">{{ item.results }}</span></td>
                   <td class="action-col">
-                    <el-button v-if="!item.state" size="small" type="success" plain @click="handleDecision(index, '通过')">通过</el-button>
-                    <el-button v-if="!item.state" size="small" type="danger" plain @click="handleDecision(index, '拒绝')">拒绝</el-button>
+                    <el-button v-if="!item.state" size="small" type="success" plain @click="handleDecision(index, 1)">通过</el-button>
+                    <el-button v-if="!item.state" size="small" type="danger" plain @click="handleDecision(index, 0)">拒绝</el-button>
                   </td>
                 </template>
 
@@ -121,13 +121,16 @@ import { ref, computed, onMounted ,watch} from 'vue';
 import bar from '../components/bar.vue'
 import { sessionUtil } from "../scripts/session";
 import teamUtils from '../scripts/team';
-import { ElMessage } from 'element-plus';
+import { ElMessage,ElLoading } from 'element-plus';
 import noticeUtils from '../scripts/notice.js';
 
 const permission = ref(-1)
 const teamOptions = ref([])  //得到我作为组长的团队列表
+const selectedType = ref('0#0#0#0')// 默认选中 "关键字"（value 为 0#0#0#0）
 
 onMounted(() => {
+  selectedType.value ='0#0#0#0'
+  localStorage.setItem("selectedType",selectedType.value);
   teamUtils.getMainTeam()
     .then(res => {
       teamOptions.value = res.data.map(item => ({
@@ -155,14 +158,16 @@ onMounted(() => {
 const activeSidebar = ref('待处理的通知')   // 默认选中 "待处理的通知"
 const currentPage = ref(1)
 const pageSize = ref(5)
-const selectedType = ref('0#0#0#0')// 默认选中 "关键字"（value 为 0#0#0#0）
+
 
 watch(selectedType, () => {
   currentPage.value = 1;  // 每次切换重置分页
+  localStorage.setItem("selectedType",selectedType.value);
   loadNotices();
 });
 watch(activeSidebar,()=>{
-  selectedType.value = '0#0#0#0'
+  const localSaveOption = localStorage.getItem("selectedType")
+  selectedType.value = (localSaveOption==null)?'0#0#0#0': localSaveOption
   currentPage.value = 1;  // 每次切换重置分页
   loadNotices();
 })
@@ -179,6 +184,11 @@ const loadNotices = () => {
       // noticeUtils.Sys_getNotices_OP()
     } 
     else{                        // 如果是用户
+      const loadingInstance = ElLoading.service({
+        lock: true,
+        text: '加载中...',
+        background: 'rgba(0, 0, 0, 0.2)'
+      })
         if (activeSidebar.value === '待处理的通知') {
               noticeUtils.getNotices_OP(selectedType.value)
               .then(({code,msg,data})=>{
@@ -186,6 +196,10 @@ const loadNotices = () => {
               })
               .catch(({code,msg,data})=>{
                 ElMessage.error(msg)
+              }).finally(()=>{
+                setTimeout(()=>{
+                  loadingInstance.close();
+                },500)
               })
         } else { // 我收到的消息
                noticeUtils.getNotices_NoOP(selectedType.value)
@@ -194,6 +208,10 @@ const loadNotices = () => {
               })
               .catch(({code,msg,data})=>{
                 ElMessage.error(msg)
+              }).finally(()=>{
+                setTimeout(()=>{
+                  loadingInstance.close();
+                },500)
               })
             
         }
@@ -204,19 +222,19 @@ const setTableData_WithOp = (data)=>{
             // 假设后端返回字段：paperName, teamName, time
   if(selectedType.value === '0#0#0#0'){    //待处理的通知，个人消息
         noticeList.value = data.map(item => ({
-        msgID : item.id, // 假设有一个唯一的消息ID
+        msgId : item.id, // 假设有一个唯一的消息ID
         message: `团队“${item.team}”  (${item.teamId})邀请您加入`,
         time: item.time,
         state:item.state,
-        results: item.state === 0 ? '未处理' : item.result === 1 ? '我已接受' : '我已拒绝'
+        results: item.state === 0 ? '未处理' : item.result === 1 ? '我已同意' : '我已拒绝'
       }))
   } else {   //待处理的通知，团队消息
     noticeList.value = data.map(item => ({
-      msgID : item.id, // 假设有一个唯一的消息ID
+      msgId : item.id, // 假设有一个唯一的消息ID
       message: `${item.userName}(id:${item.userId})申请加入您的团队“${item.team}”`,
       time: item.time,
       state:item.state,
-      results: item.state === 0 ? '未处理' : item.result === 1 ? '我已接受' : '我已拒绝'
+      results: item.state === 0 ? '未处理' : item.result === 1 ? '我已同意' : '我已拒绝'
     }));
   }
 }
@@ -225,24 +243,48 @@ const setTableData_WithoutOp = (data)=>{
    // 假设后端返回字段：paperName, teamName, time, result
     if(selectedType.value === '0#0#0#0'){ // 我收到的消息，个人消息
         noticeList.value = data.map(item => ({
-        msgID : item.id, // 假设有一个唯一的消息ID
+        msgId : item.id, // 假设有一个唯一的消息ID
         message: `我申请加入团队“${item.team}”`,
         time: item.time,
         state:item.state,
         ispass:item.result,
-        results: item.state === 0 ? '未处理' : item.result === 1 ? '已被接受' : '已被拒绝'
+        results: item.state === 0 ? '等待对方处理' : item.result === 1 ? '已被接受' : '已被拒绝'
       }));
     } else { // 我收到的消息，团队消息
         noticeList.value = data.map(item => ({
-        msgID : item.id, // 假设有一个唯一的消息ID
+        msgId : item.id, // 假设有一个唯一的消息ID
         message: `邀请《${item.userName}》加入我的团队“${item.team}”`,
         time: item.time,
         state:item.state,
         ispass:item.result,
-        results: item.state === 0 ? '未处理' : item.result === 1 ? '已被接受' : '已被拒绝'
+        results: item.state === 0 ? '等待对方处理' : item.result === 1 ? '已被接受' : '已被拒绝'
       }));
     }
     console.log(noticeList.value)
+}
+
+const handleDecision = (index,select)=>{
+  if(permission.value === 1){
+
+  }else{
+    console.log(noticeList.value[index].msgId);
+    console.log(select)
+    noticeUtils.userSolveMsg(noticeList.value[index].msgId,select)
+    .then(({code,msg})=>{
+      if(code==200){
+        ElMessage.success("操作成功");
+      }
+      else if(code==300){
+        ElMessage.info(msg)
+      }else{
+        ElMessage.error(msg)
+      }
+    })
+    .catch(({code,msg})=>{
+      ElMessage.error(msg)
+    })
+  }
+
 }
 
 const pagedItems = computed(() => {

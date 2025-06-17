@@ -77,12 +77,12 @@ const teamUtils = {
      * @param {String} uid 
      * @returns 
      */
-    dropMember(teamId,uid){
+    dropMember(teamId){
        return axios.get(utils.url+'/myTeam/dropMember', {
             params: {
                 teamId:teamId,
-                uid:uid
             },
+            withCredentials:true,
             timeout:3000
         }).then((response) => {
         // 处理返回数据
@@ -183,6 +183,29 @@ const teamUtils = {
                 msg:"服务不可用"
             })
         })      
+    },
+
+    memberInvite(teamId,userId){
+       return axios.get(utils.url+'/notice/memberInvite', {
+            params: {
+                teamId:teamId,
+                userId:userId
+            },
+            withCredentials:true,
+            timeout:3000
+        }).then((response) => {
+        // 处理返回数据
+            return {
+                code: response.data.code,
+                msg: response.data.msg
+            }
+        }).catch(error => {
+        // 处理错误
+            return Promise.reject({
+                code:404,
+                msg:"服务不可用"
+            })
+        })  
     },
 
     getMainTeam(){

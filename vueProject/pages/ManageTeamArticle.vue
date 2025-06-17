@@ -148,12 +148,7 @@ import { sessionUtil } from '../scripts/session'
 const members = ref([])
 const role = ref(''); // 角色状态
 const teamName = ref(''); // 团队名称状态
-// // 获取查询参数
-// const teamId = route.query.teamId
-// const role = route.query.role
-// const teamName = route.query.teamName
-// const router = useRouter()
-
+const router = useRouter()
 onMounted(async ()=>{
   const state = await sessionUtil.checkPermiss()
   const teamId = localStorage.getItem("teamId")

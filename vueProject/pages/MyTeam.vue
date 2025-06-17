@@ -18,7 +18,7 @@ const setAllData = (data)=>{
   }));
   fullTableData.value=[...fullTableData.value]
 }
-const sendAndSet = (userId)=>{
+const sendAndSet = ()=>{
     const loadingInstance = ElLoading.service({
       lock: true,
       text: '加载中...',
@@ -79,14 +79,14 @@ const leaveDialogVisible = ref(false);
 const teamToLeave = ref(null);
 
 const confirmLeave = () => {
-  // console.log(teamToLeave.value)
+  console.log(teamToLeave.value)
   const teamId = teamToLeave.value.id
-  const uid = localStorage.getItem("userId");
-  teamUtils.dropMember(teamId,uid)
+  teamUtils.dropMember(teamId)
   .then(({code,msg})=>{
+    console.log(code,msg)
     if(code==200){
-      sendAndSet(uid);
       ElMessage.success("退出成功")
+      sendAndSet();
     }else if(code==390){
       ElMessage.error("组长不可以退出团队")
     }else{

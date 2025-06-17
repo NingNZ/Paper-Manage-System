@@ -51,23 +51,25 @@ const noticeUtils= {
         })
     },
 
-    accept(selectId,msgID){
+    userSolveMsg(msgId,select){
         // 告诉后端该条消息已经通过
-        return axios.get(utils.url + '/notice/accept', {
+        return axios.get(utils.url + '/notice/userSolve', {
             params: {
-                selectId,
-                msgID
+                msgId:msgId,
+                select:select
             },
             withCredentials: true,
             timeout: 3000
         }).then((response) => {
-            // 处理返回数据
+            //处理返回数据
+            console.log(response)
             return {
                 code: response.data.code,
                 msg: response.data.msg
             }
         }).catch(error => {
             // 处理错误
+            console.log(error)
             return Promise.reject({
                 code: 404,
                 msg: "服务不可用"
@@ -75,29 +77,6 @@ const noticeUtils= {
         })
     },
 
-    reject(selectId,msgID){
-        // 告诉后端该条消息已经拒绝
-        return axios.get(utils.url + '/notice/reject', {
-            params: {
-                selectId,
-                msgID
-            },
-            withCredentials: true,
-            timeout: 3000
-        }).then((response) => {
-            // 处理返回数据
-            return {
-                code: response.data.code,
-                msg: response.data.msg
-            }
-        }).catch(error => {
-            // 处理错误
-            return Promise.reject({
-                code: 404,
-                msg: "服务不可用"
-            })
-        })
-    },
 
     Sys_getNotices_OP() {   //获取管理员的通知
         // 获取通知
@@ -121,11 +100,11 @@ const noticeUtils= {
         })
     },
 
-    Sys_accept(msgID){   //管理员通过消息，告诉后端
+    Sys_accept(msgId){   //管理员通过消息，告诉后端
         // 告诉后端该条消息已经通过
         return axios.get(utils.url + '/notice/Sysaccept', {
             params: {
-                msgID
+                msgId
             },
             withCredentials: true,
             timeout: 3000
@@ -144,11 +123,11 @@ const noticeUtils= {
         })
     },
 
-    Sys_reject(msgID){   //管理员拒绝消息，告诉后端
+    Sys_reject(msgId){   //管理员拒绝消息，告诉后端
         // 告诉后端该条消息已经拒绝
         return axios.get(utils.url + '/notice/Sysreject', {
             params: {
-                msgID
+                msgId
             },
             withCredentials: true,
             timeout: 3000
