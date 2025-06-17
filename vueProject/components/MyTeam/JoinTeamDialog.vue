@@ -84,14 +84,14 @@ const search = ()=>{
 
 function joinTeam(team) {
   // ElMessage.success(`已申请加入 ${team.name}`);
-  teamUtils.addMember(team.id)
+  teamUtils.teamApply(team.id)
   .then(({code,msg})=>{
     if(code==200){
-      ElMessage.success(msg)
-    }else if(code==201){
-      ElMessage.info(msg)
+      ElMessage.success("申请成功，等待对方组长审核")
+    }else if(code==400){
+      ElMessage.error(msg)
     }else{
-      ElMessage.error(msg);
+      ElMessage.info(msg);
     }
   })
   .catch(({code,msg})=>{

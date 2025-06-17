@@ -163,8 +163,8 @@ const teamUtils = {
      * @param {String} teamId 
      * @returns 
      */
-    addMember(teamId){
-       return axios.get(utils.url+'/myTeam/addMember', {
+    teamApply(teamId){
+       return axios.get(utils.url+'/notice/teamApply', {
             params: {
                 teamId:teamId,
             },

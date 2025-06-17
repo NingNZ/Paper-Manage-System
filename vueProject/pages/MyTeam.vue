@@ -109,24 +109,6 @@ const enterTeam = (row)=>{
   localStorage.setItem("teamId", teamId);
   localStorage.setItem("teamName", teamName);
   router.push("/other");
-  // teamInfoUtils.CheckTeamRole(teamId)
-  //   .then(( temp ) => {
-  //     let role = ''; // 默认角色为空
-
-  //     if (temp === 1) {
-  //       // 是组长
-  //       role = 'leader';
-  //     } else if (temp === 0) {
-  //       // 是组员
-  //       role = 'member';
-  //     }
-  //     localStorage.setItem("teamRole", role);  // ✅ 存储身份信息
-  //         // 跳转到团队文章页面
-  //     router.push("/other");
-  //   })
-  //   .catch(({ msg }) => {
-  //     ElMessage.error(msg || "无法连接服务器");
-  //   });
 }
 
 const handleCreateTeam = (name)=>{
