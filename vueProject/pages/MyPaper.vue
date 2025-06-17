@@ -47,10 +47,10 @@
                 :class="index % 2 === 0 ? 'even-row' : 'odd-row'"
               >
                 <td>#{{ (currentPage - 1) * pageSize + index + 1 }}</td>
-                <td><em>{{ paper.title }}</em></td>
-                <td>{{ paper.category }}</td>
+                <td><em><span class="paper-title">{{ paper.title }}</span></em></td>
+                <td>{{ paper.type }}</td>
                 <td>{{ paper.journal }}</td>
-                <td>{{ paper.uploadDate }}</td>
+                <td>{{ paper.time }}</td>
                 <td>
                   <img src="../assets/download.svg" alt="下载" class="action-icon" @click="handleDownload(paper)" />
                 </td>
@@ -97,12 +97,14 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { ElButton, ElPagination, ElDialog, ElMessage, ElSelect, ElOption } from 'element-plus'
+import { ElButton, ElPagination, ElDialog, ElMessage, ElSelect, ElOption, ElLoading } from 'element-plus'
 import bar from '../components/bar.vue'
 import CategoryManager from '../components/ManageTeamArticle/CategoryManagerDialog.vue'
 import * as XLSX from 'xlsx'
 import { saveAs } from 'file-saver'
 import userPaperUtils from '../scripts/userPaper'
+import { util } from 'echarts'
+import utils from '../scripts/utils'
 
 // 期刊和类别定义
 const journalOptions = ['IEEE', 'ACM', 'Springer', 'Elsevier', 'Nature', 'Science']
@@ -112,7 +114,7 @@ const categories = ['AI', '系统设计', '数据挖掘', '人机交互']
 const papers = ref([])
 
 // 工作量分数直接展示
-const workloadScore = ref(85.5)
+const workloadScore = ref(0.00)
 
 // 筛选相关变量
 const selectedJournalTemp = ref('')  // 临时选择值
@@ -153,16 +155,20 @@ function handleFilter() {
 }
 
 function handleDownload(paper) {
-  //userPaperUtils.downloadUserPaper(paper.id)
+  console.log(paper.id)
+  utils.downloadSysPaper(paper.id)
+  .catch(()=>{
+    ElMessage.success("下载成功")
+  })
 }
 
 function exportToExcel() {
   const exportData = filteredPapers.value.map((paper, index) => ({
     序号: index + 1,
     论文标题: paper.title,
-    类别: paper.category,
+    类别: paper.type,
     期刊: paper.journal,
-    上传日期: paper.uploadDate
+    上传日期: paper.time
   }))
   const worksheet = XLSX.utils.json_to_sheet(exportData)
   const workbook = XLSX.utils.book_new()
@@ -177,16 +183,27 @@ const userId = localStorage.getItem('userId')
 
 // 获取我的论文列表
 const fetchMyPapers = () => {
+  const loadingInstance = ElLoading.service({
+        lock: true,
+        text: '加载中...',
+        background: 'rgba(0, 0, 0, 0.2)'
+      })
   userPaperUtils.getUserPaper(userId)
     .then(({ code, msg, data }) => {
-      if (code === 200) {
+      if (code == 200) {
         papers.value = data
+        console.log(data)
       } else {
         ElMessage.error(msg)
       }
+      workloadScore.value = papers.value.length?papers.value.reduce((sum, item) => sum + item.score, 0) / papers.value.length:0;
     })
-    .catch(() => {
-      ElMessage.error('获取论文失败')
+    .catch(({code,data,msg}) => {
+      ElMessage.error(msg)
+    }).finally(()=>{
+      setTimeout(()=>{
+        loadingInstance.close()
+      },500)
     })
 }
 
@@ -318,6 +335,17 @@ onMounted(() => {
 
 :deep(.el-pagination) {
   margin-top: 10px;
+}
+.paper-title {
+  max-width: 100%;      /* 设置最大宽度，根据需要调整 */
+  word-break: break-all; /* 长单词或连续字符也会换行 */
+  white-space: normal;   /* 允许自动换行 */
+  display: inline-block; /* 或 block，确保 max-width 生效 */
+}
+td, th {
+  max-width: 300px;        /* 设置最大宽度 */
+  word-break: break-all;   /* 长单词或连续字符也会换行 */
+  white-space: normal;     /* 允许自动换行 */
 }
 </style>
 
