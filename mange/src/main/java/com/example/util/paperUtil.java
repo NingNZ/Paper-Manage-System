@@ -73,18 +73,4 @@ public class paperUtil {
         }
         return paperIdList;
     }
-    public static String generateHash(String Name,int length) {
-        if (Name == null) {
-            return null;
-        }
-        StringBuilder fileNameBuilder = new StringBuilder(Name);
-        while(fileNameBuilder.length()<6){
-            fileNameBuilder.append(new Random().nextInt(40, 123));
-        }
-        Name = fileNameBuilder.toString();
-        byte[] bid = DigestUtils.md5Digest(Name.getBytes());
-        String res = Arrays.toString(bid).substring(2,2+length);
-        res = res.replace(' ','&');
-        return res.replace('.','%');
-    }
 }

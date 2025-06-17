@@ -4,6 +4,7 @@ import com.example.instance.Paper;
 import com.example.util.paperUtil;
 import com.example.util.tool;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
@@ -39,10 +40,10 @@ public class sysPaperControl {
         System.out.println("enter");
         System.out.println(authorsJson);
         ObjectMapper mapper = new ObjectMapper();
-        String[] authors = new String[0];
+        String[] authors;
         try {
             authors = mapper.readValue(authorsJson,String[].class);
-            String id = Paper.insertToSysPaper(title, journalId, authors, typeId, teamId, date);
+            String id = Paper.insertToSysPaper(title, journalId, authors, typeId, date);
             Paper paper = null;
             try {
                 if(id==null) return tool.msgCreate(400,"文件主键重复,上传失败");
@@ -67,16 +68,27 @@ public class sysPaperControl {
         try {
             target = new Paper(paperId);
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            return ResponseEntity
+                    .status(401)
+                    .body(new ByteArrayResource("文件不存在".getBytes(StandardCharsets.UTF_8)));
         }
         // 2. 加载文件资源
         File file = target.getRelateFile();
+        if(file==null||!file.exists()){
+            return ResponseEntity
+                    .status(401)
+                    .body(new ByteArrayResource("文件不存在".getBytes(StandardCharsets.UTF_8)));
+        }
         Path path = Paths.get(file.getAbsolutePath());
         Resource resource = null;
         try {
             resource = new UrlResource(path.toUri());
         } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            return ResponseEntity
+                    .status(401)
+                    .body(new ByteArrayResource("文件资源不存在".getBytes(StandardCharsets.UTF_8)));
         }
         // 3. 设置响应头（支持中文文件名）
         String encodedFileName = URLEncoder.encode(target.getTitle(), StandardCharsets.UTF_8);

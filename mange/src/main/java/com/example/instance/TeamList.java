@@ -33,12 +33,23 @@ public class TeamList {
             this.teamList=null;
         }
     }
-    public List<Map<String,Object>> transfer(){
+    public ArrayList<Map<String,Object>> transfer(){
         if(this.isNull()) return null;
         ArrayList<Map<String,Object>> res = new ArrayList<>();
         for(Team each:this.teamList){
             Map<String,Object> row = each.getInfo();
             if(row!=null) res.add(row);
+        }
+        return res;
+    }
+    public ArrayList<Map<String,Object>> transferOnlyManage(String userId){
+        if(this.isNull()) return null;
+        ArrayList<Map<String,Object>> res = new ArrayList<>();
+        for(Team each:this.teamList){
+            if(each.getLeaderId().equals(userId)){
+                Map<String,Object> row = each.getInfo();
+                if(row!=null) res.add(row);
+            }
         }
         return res;
     }

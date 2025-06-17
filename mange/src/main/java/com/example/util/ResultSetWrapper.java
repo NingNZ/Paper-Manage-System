@@ -46,6 +46,7 @@ public class ResultSetWrapper {
         index++;
         return index<length;
     }
+
     public String getString(String label){
         if(index>=length) return null;
         return dataList.get(index).get(label);

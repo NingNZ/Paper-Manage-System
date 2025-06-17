@@ -33,4 +33,16 @@ public class sqlUtil {
             }
             return res;
         }
+    public static boolean excute (String sql, Object...params) throws SQLException {
+        boolean res = false;
+        try (Connection conn = DriverManager.getConnection(URL, USERNAME, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            // 设置参数
+            for (int i = 0; i < params.length; i++) {
+                stmt.setObject(i + 1, params[i]);
+            }
+            res = stmt.execute();
+        }
+        return res;
+    }
     }
