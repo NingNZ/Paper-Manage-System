@@ -41,7 +41,7 @@
 
           <template v-else-if="permission === 1">
             <div class="info-item">
-              <span>hello，管理员</span>
+              <span>hello,管理员</span>
             </div>
           </template>
 

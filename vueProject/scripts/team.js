@@ -184,5 +184,23 @@ const teamUtils = {
             })
         })      
     },
+
+    getMainTeam(){
+        return axios.get(utils.url+"/myTeam/getManagerTeam",{
+            withCredentials:true
+        })
+        .then((response)=>{
+            return {
+                code: response.data[0].code,
+                msg: response.data[0].msg,
+                data: response.data.slice(1)
+            }
+        }).catch(()=>{
+            return Promise.reject({
+                code:404,
+                msg:"服务不可用"
+            })
+        })
+    }
 }
 export default teamUtils
