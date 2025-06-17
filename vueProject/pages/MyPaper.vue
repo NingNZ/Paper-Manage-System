@@ -8,7 +8,7 @@
       <div class="breadcrumb">
         <a href="/">首页</a> &gt; <a href="/mypaper">我的论文</a>
       </div>
-      <div class="top-controls">
+      <div v-if="false" class="top-controls">
         <el-select v-model="selectedJournalTemp" placeholder="筛选期刊" style="width: 160px" clearable>
           <el-option label="全部期刊" :value="''" />
           <el-option v-for="journal in uniqueJournals" :key="journal" :label="journal" :value="journal" />

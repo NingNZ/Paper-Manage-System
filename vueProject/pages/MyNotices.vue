@@ -67,10 +67,11 @@
               <tr v-for="(item, index) in pagedItems" :key="index" :class="index % 2 === 0 ? 'even-row' : 'odd-row'">
                 <!-- 待处理通知 -->
                 <template v-if="activeSidebar === '待处理的通知'">
-                  <td class="message-col">{{ item.message }}</td>
+                  <td class="message-col"><span v-html="item.message"></span></td>
                   <td class="time-col">{{ formatDate(item.time) }}</td>
                   <td class="status-col"><span class="status-gray">{{ item.results }}</span></td>
                   <td class="action-col">
+                    <el-button v-if="!item.state&&item.isRoot" size="small" type="primary" plain @click="handleDownload(index)">下载</el-button>
                     <el-button v-if="!item.state" size="small" type="success" plain @click="handleDecision(index, 1)">通过</el-button>
                     <el-button v-if="!item.state" size="small" type="danger" plain @click="handleDecision(index, 0)">拒绝</el-button>
                   </td>
@@ -123,6 +124,7 @@ import { sessionUtil } from "../scripts/session";
 import teamUtils from '../scripts/team';
 import { ElMessage,ElLoading } from 'element-plus';
 import noticeUtils from '../scripts/notice.js';
+import { waitPaperUtils } from '../scripts/waitPaper.js';
 
 const permission = ref(-1)
 const teamOptions = ref([])  //得到我作为组长的团队列表
@@ -151,8 +153,10 @@ onMounted(() => {
     .catch(() => {
       permission.value = -1
       ElMessage.error("服务器未连接")
+    }).finally(()=>{
+      loadNotices();  // 初始加载
     })
-    loadNotices();  // 初始加载
+    
 });
 
 const activeSidebar = ref('待处理的通知')   // 默认选中 "待处理的通知"
@@ -180,8 +184,25 @@ const setActive = (val) => {
 const noticeList = ref([])
 
 const loadNotices = () => {
+    console.log(permission.value)
     if(permission.value === 1) { // 如果是管理员
-      // noticeUtils.Sys_getNotices_OP()
+      const loadingInstance = ElLoading.service({
+        lock: true,
+        text: '加载中...',
+        background: 'rgba(0, 0, 0, 0.2)'
+      })
+      noticeUtils.Sys_getNotices_OP()
+      .then(({code,msg,data})=>{
+        setTableData_Sys(data)
+      })
+      .catch(({code,msg,data})=>{
+        ElMessage.error(msg)
+        noticeList.value = []
+      }).finally(()=>{
+        setTimeout(()=>{
+          loadingInstance.close()
+        },500)
+      })
     } 
     else{                        // 如果是用户
       const loadingInstance = ElLoading.service({
@@ -217,6 +238,24 @@ const loadNotices = () => {
         }
     }
 };
+const setTableData_Sys = (data)=>{
+  noticeList.value = data.map(item => ({
+  msgId : item.msgId, // 假设有一个唯一的消息ID
+  message: `<ul class="notice-list">
+              <li><strong>团队</strong> “${item.teamName}” <span style="color:#888;">(${item.teamId})</span> 上传了一篇论文：</li>
+              <li><strong>Title:</strong> <span style="color:#1976d2;">${item.paper.title}</span></li>
+              <li><strong>Journal:</strong> <span style="color:#1976d2;">${item.paper.journal}</span>&nbsp;&nbsp;&nbsp;<strong>Type:</strong> <span style="color:#1976d2;">${item.paper.type}</span></li>
+              <li><strong>Authors:</strong> <span style="color:#1976d2;"><i>${item.paper.authors}</i></span></li>
+              <li><strong>Time:</strong> <span style="color:#1976d2;">${item.paper.time}</span></li>
+            </ul>`,
+  time: item.time,
+  state:item.state,
+  paperId:item.paper.id,
+  isRoot:1,
+  results: item.state === 0 ? '未处理' : item.result === 1 ? '我已通过' : '我已拒绝'
+  }))
+}
+
 
 const setTableData_WithOp = (data)=>{
             // 假设后端返回字段：paperName, teamName, time
@@ -251,24 +290,47 @@ const setTableData_WithoutOp = (data)=>{
         results: item.state === 0 ? '等待对方处理' : item.result === 1 ? '已被接受' : '已被拒绝'
       }));
     } else { // 我收到的消息，团队消息
-        noticeList.value = data.map(item => ({
-        msgId : item.id, // 假设有一个唯一的消息ID
-        message: `邀请《${item.userName}》加入我的团队“${item.team}”`,
+        const inviteData = data[0].invite
+        const submitData = data[0].submit
+        const inviteList = inviteData.map(item => ({
+        msgId: item.id,
+        message: `邀请<${item.userName}(id:${item.userId})>加入我的团队“${item.team}”`,
         time: item.time,
-        state:item.state,
-        ispass:item.result,
+        state: item.state,
+        ispass: item.result,
         results: item.state === 0 ? '等待对方处理' : item.result === 1 ? '已被接受' : '已被拒绝'
-      }));
+        }));
+
+        const submitList = submitData.map(item => ({
+        msgId: item.id,
+        message: `团队提交的论文《${item.paper.title}》`,
+        time: item.time,
+        state: item.state,
+        ispass: item.result,
+        results: item.state === 0 ? '等待管理员审核' : item.result === 1 ? '已被接受' : '已被拒绝'
+        }));
+
+        noticeList.value = [...inviteList, ...submitList];
+        console.log(inviteData)
+        console.log(submitData)
     }
     console.log(noticeList.value)
 }
 
 const handleDecision = (index,select)=>{
   if(permission.value === 1){
-
+    console.log(select);
+    noticeUtils.Sys_Solve(noticeList.value[index].msgId,select)
+    .then(({code,msg})=>{
+      if(code==200){
+        ElMessage.success("操作成功")
+      }else{
+        ElMessage.error(msg)
+      }
+    }).catch(({code,msg})=>{
+      ElMessage.error(msg)
+    })
   }else{
-    console.log(noticeList.value[index].msgId);
-    console.log(select)
     noticeUtils.userSolveMsg(noticeList.value[index].msgId,select)
     .then(({code,msg})=>{
       if(code==200){
@@ -314,6 +376,14 @@ const resultClass = (state,ispass) => {
   else if (state=='1' && ispass =='0') return 'status-red'
   else if (state=='1' && ispass =='1') return 'status-green'
   return 'status-gray'
+}
+
+const handleDownload = (index)=>{
+  console.log(noticeList.value[index].paperId)
+  waitPaperUtils.downloadWaitPaper(noticeList.value[index].paperId)
+  .then(()=>{
+    ElMessage.success("下载成功")
+  })
 }
 </script>
 
@@ -517,5 +587,23 @@ thead {
   outline: none;
   border-color: #3398ff;
   box-shadow: 0 0 0 2px rgba(51, 152, 255, 0.2);
+}
+.notice-list {
+  margin: 0 0 0 10px;
+  padding: 12px 18px;
+  text-align: left ;
+  background: #f4f8fb;
+  border-radius: 8px;
+  list-style-type: disc;
+  color: #333;
+  font-size: 15px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.notice-list li {
+  margin-bottom: 6px;
+  line-height: 1.8;
+}
+.notice-list li:last-child {
+  margin-bottom: 0;
 }
 </style>

@@ -22,16 +22,6 @@ var code = 0
 var msg = ""
 
 var permission = -1;
-onMounted(()=>{
-  sessionUtil.checkPermiss()
-  .then(res=>{
-    permission = res
-  }).catch(()=>{
-    permission = -1
-    ElMessage.error("服务器未连接")
-  });
-});
-
 
 // 弹窗控制
 const showUploadDialog = ref(false)
@@ -95,32 +85,40 @@ const sendAndGet=() =>{
   })
 }
 onMounted(()=>{
-  if(localStorage.getItem('typeSave')){
-    selectedType.value = localStorage.getItem('typeSave')
-    searchWord.value = localStorage.getItem('keySave')
-    const loadingInstance = ElLoading.service({
-      lock: true,
-      text: '加载中...',
-      background: 'rgba(0, 0, 0, 0.2)'
-    })
-    sendAndGet()
-    .then(({code,msg})=>{
-      if(code==200){
-        ElMessage.success(msg)
-      }else{
-        ElMessage.info(msg)
-      }
-    }).catch(({code,msg})=>{
-      ElMessage.error(msg)
-    }).finally(()=>{
-      setTimeout(()=>{
-        loadingInstance.close()
-      },500)
-    })
-  }else{
-    selectedType.value='0'
-    searchWord.value=[]
-  }
+  sessionUtil.checkPermiss()
+  .then(res=>{
+    permission = res
+  }).catch(()=>{
+    permission = -1
+    ElMessage.error("服务器未连接")
+  }).finally(()=>{
+    if(localStorage.getItem('typeSave')){
+      selectedType.value = localStorage.getItem('typeSave')
+      searchWord.value = localStorage.getItem('keySave')
+      const loadingInstance = ElLoading.service({
+        lock: true,
+        text: '加载中...',
+        background: 'rgba(0, 0, 0, 0.2)'
+      })
+      sendAndGet()
+      .then(({code,msg})=>{
+        if(code==200){
+          ElMessage.success(msg)
+        }else{
+          ElMessage.info(msg)
+        }
+      }).catch(({code,msg})=>{
+        ElMessage.error(msg)
+      }).finally(()=>{
+        setTimeout(()=>{
+          loadingInstance.close()
+        },500)
+      })
+    }else{
+      selectedType.value='0'
+      searchWord.value=[]
+    }
+  })
 })
 const search = ()=>{
     if(!searchWord.value.trim()){
