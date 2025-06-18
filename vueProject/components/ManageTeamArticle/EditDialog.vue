@@ -7,18 +7,14 @@
   >
     <div>
       <p>论文标题：{{ item.title }}</p>
-      <el-select
+      <el-tree-select
         v-model="selectedCategory"
+        :data="categoryTree"
+        :props="{ label: 'label', value: 'id', children: 'children' }"
         placeholder="请选择分类"
         style="width: 100%; margin-top: 10px;"
-      >
-        <el-option
-          v-for="option in categoryOptions"
-          :key="option.value"
-          :label="option.label"
-          :value="option"
-        />
-      </el-select>
+        check-strictly
+      />
     </div>
     <template #footer>
       <el-button @click="$emit('close')">取消</el-button>
@@ -29,34 +25,50 @@
 
 <script setup>
 import { ref, watch } from 'vue'
+import { teamInfoUtils } from '../../scripts/teamInfo'
+import { ElMessage } from 'element-plus'
 
 const props = defineProps({
   modelValue: Boolean,
   item: Object,
-  categoryOptions: {
+  categoryTree: {
     type: Array,
-    default: () => [{label:'A',value:'0'}, {label:'B',value:'1'}]  // 可选
+    default: () => []
   }
 })
 
-const emit = defineEmits(['update:modelValue', 'close', 'confirm'])
+const emit = defineEmits(['update:modelValue', 'close', 'confirm','fresh'])
 
 const internalVisible = ref(props.modelValue)
-const selectedCategory = ref(null)
+const selectedCategory = ref('')
 
 watch(() => props.modelValue, (val) => {
   internalVisible.value = val
+  selectedCategory.value = props.item.typeId
 })
 watch(internalVisible, (val) => {
-  if(val){
-    selectedCategory.value=null
-  }
   emit('update:modelValue', val)
 })
 
+
 // 确认保存
 const confirmEdit = () => {
-  emit('confirm', selectedCategory.value.value,selectedCategory.value.label)
+  console.log(selectedCategory),
+  console.log(props.item.id)
   internalVisible.value = false
+  const teamId = localStorage.getItem('teamId')
+  teamInfoUtils.editRefPaper(teamId,props.item.id,selectedCategory.value)
+  .then(({code,msg})=>{
+    if(code==200){
+      ElMessage.success("修改成功")
+    }else{
+      ElMessage.error(msg)
+    }
+  }).catch(({code,msg})=>{
+    ElMessage.error(msg)
+  }).finally(()=>{
+    emit('fresh',teamId)
+    internalVisible.value = false
+  })
 }
 </script>

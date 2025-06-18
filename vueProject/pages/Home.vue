@@ -2,9 +2,10 @@
 <script setup>
   import bar from "../components/bar.vue";
   import axios from 'axios'
-  import { ref } from "vue";
+  import { onMounted, ref } from "vue";
   import { ElMessage } from "element-plus";
   import { useRouter } from "vue-router";
+  import { sessionUtil } from "../scripts/session";
   const route = useRouter()
   localStorage.setItem('isSearch',true)
   const selectedType = ref(0)

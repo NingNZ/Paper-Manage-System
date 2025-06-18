@@ -1,15 +1,17 @@
 <script setup>
 import bar from "../components/bar.vue";
-import UploadDialog from "../components/UploadTest/UploadTestDialog.vue";
 import EditDialog from "../components/SearchResult/EditDialog.vue";
 import DeleteDialog from "../components/SearchResult/DeleteDialog.vue";
 import JournalManagerDialog from "../components/SearchResult/JournalManagerDialog.vue";
 import CategoryManagerDialog from "../components/SearchResult/CategoryManagerDialog.vue";
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from "vue-router";
-import { ElMessage } from "element-plus";
+import { ElMessage,ElLoading } from "element-plus";
+import NetworkGraph from "../components/SearchResult/NetworkGraph.vue";
 import axios from 'axios'
 import utils from "../scripts/utils";
+import { sessionUtil } from "../scripts/session";
+import { userNetUtils } from "../scripts/userNet";
 
 
 const allData = ref([]);
@@ -18,6 +20,9 @@ const selectedType = ref('0')
 const route = useRoute()
 var code = 0
 var msg = ""
+
+var permission = -1;
+
 // 弹窗控制
 const showUploadDialog = ref(false)
 const showEditDialog = ref(false)
@@ -80,23 +85,40 @@ const sendAndGet=() =>{
   })
 }
 onMounted(()=>{
-  if(localStorage.getItem('typeSave')){
-    selectedType.value = localStorage.getItem('typeSave')
-    searchWord.value = localStorage.getItem('keySave')
-    sendAndGet()
-    .then(({code,msg})=>{
-      if(code==200){
-        ElMessage.success(msg)
-      }else{
-        ElMessage.info(msg)
-      }
-    }).catch(({code,msg})=>{
-      ElMessage.error(msg)
-    })
-  }else{
-    selectedType.value='0'
-    searchWord.value=[]
-  }
+  sessionUtil.checkPermiss()
+  .then(res=>{
+    permission = res
+  }).catch(()=>{
+    permission = -1
+    ElMessage.error("服务器未连接")
+  }).finally(()=>{
+    if(localStorage.getItem('typeSave')){
+      selectedType.value = localStorage.getItem('typeSave')
+      searchWord.value = localStorage.getItem('keySave')
+      const loadingInstance = ElLoading.service({
+        lock: true,
+        text: '加载中...',
+        background: 'rgba(0, 0, 0, 0.2)'
+      })
+      sendAndGet()
+      .then(({code,msg})=>{
+        if(code==200){
+          ElMessage.success(msg)
+        }else{
+          ElMessage.info(msg)
+        }
+      }).catch(({code,msg})=>{
+        ElMessage.error(msg)
+      }).finally(()=>{
+        setTimeout(()=>{
+          loadingInstance.close()
+        },500)
+      })
+    }else{
+      selectedType.value='0'
+      searchWord.value=[]
+    }
+  })
 })
 const search = ()=>{
     if(!searchWord.value.trim()){
@@ -104,6 +126,11 @@ const search = ()=>{
     }else{
       localStorage.setItem('typeSave',selectedType.value)
       localStorage.setItem('keySave',searchWord.value)
+      const loadingInstance = ElLoading.service({
+        lock: true,
+        text: '加载中...',
+        background: 'rgba(0, 0, 0, 0.2)'
+      })
       sendAndGet()
       .then(({code,msg})=>{
         if(code==200){
@@ -113,7 +140,7 @@ const search = ()=>{
         }})
       .catch(({code,msg})=>{
           ElMessage.error(msg)
-        })
+        }).finally(()=>setTimeout(()=>loadingInstance.close(),500))
     }
 }
 localStorage.setItem('isSearch',true)
@@ -137,6 +164,7 @@ const paginatedData = computed(() => {
 })
 
 const handleEdit = (item) => {
+  
   currentEditItem.value = { ...item }
   utils.getSysType("true",'')
   .then(({code,data,msg})=>{
@@ -154,15 +182,21 @@ const handleEdit = (item) => {
 }
 const handleDownload = (item) =>{
   utils.downloadSysPaper(item.id)
-
+  .then(()=>{
+    ElMessage.success({message:"下载成功",duration:2000})
+  })
 }
 
-const updateCategory = (newCategory) => {
+const updateCategory = (newCategory,newTypeName) => {
   utils.updateSysPaper(currentEditItem.value.id,newCategory)
   .then(({code,data,msg})=>{
     if(code==200){
       ElMessage.success("更新成功");
-      sendAndGet();
+      // sendAndGet(); 不从数据库更新数据，只是局部更改所改变的行
+      const idx = allData.value.findIndex(row=>row.id===currentEditItem.value.id)
+      if(idx!==-1){
+        allData.value[idx].type=newTypeName;
+      }
     }else{
       ElMessage.error(msg)
     }
@@ -196,6 +230,45 @@ const confirmDelete = () => {
   })
   
 }
+
+// 查询功能
+const keyword = ref('')
+const showGraph = ref(false)
+const graphKeyword = ref('')
+
+const handleSearch = () => {
+  if (!keyword.value.trim()) {
+    ElMessage.warning('请输入用户账号再查询')
+    return
+  }
+  const userId = keyword.value.trim()
+  userNetUtils.checkUserIdExist(userId)
+    .then((data) => {
+      if (data.code == 200) {
+        ElMessage.success(data.msg)
+        graphKeyword.value = userId 
+        showGraph.value = true;
+      } else {
+        ElMessage.info(data.msg)
+      }
+    })
+    .catch((error) => {
+      console.error('checkUserIdExist catch:', error)
+      ElMessage.error(error.msg || '查询失败')
+    })
+}
+localStorage.setItem('isSearch',true)
+
+//刷新关系网络
+const isRotating = ref(false)
+const isFresh = ref(false)
+const refreshGraph = () => {
+  isRotating.value = true;
+  isFresh.value = true
+    setTimeout(() => {
+    isRotating.value = false
+  }, 400)
+}
 </script>
 
 <template>
@@ -204,8 +277,18 @@ const confirmDelete = () => {
 
     <div class="breadcrumb"><a href="/">首页</a> &gt; <a href="/search">查询结果</a></div>
 
+    <!-- 上传按钮隐藏，保留样式位置 -->
     <div class="upload-button-wrapper">
-      <button class="upload-btn" @click="showUploadDialog = true">上传论文</button>
+
+      <!-- 查询输入框 -->
+      <div class="custom-search-wrapper">
+        <input
+          class="custom-search-input"
+          v-model="keyword"
+          placeholder="请输入用户账号"
+        />
+        <button class="custom-search-btn" @click="handleSearch">查询</button>
+      </div>
     </div>
     <main class="main-content">
       <!-- 搜索栏 -->
@@ -252,40 +335,51 @@ const confirmDelete = () => {
               <td><b>{{ item.journal }}</b></td>
               <td><b>{{ item.type }}</b></td>
               <td>
-                <img src="../assets/download.svg" alt="下载" class="icon-action" @click="handleDownload(item)" />
+              <!-- 下载任何人都能看 -->
+                <img src="../assets/download.svg"
+                  alt="下载"
+                  class="icon-action"
+                  @click="handleDownload(item)" />
                 &nbsp;
-                <img src="../assets/edit.svg" alt="编辑" class="icon-action" @click="handleEdit(item)" />
+              <!-- 只有管理员能看 -->
+                <img v-if="permission === 1"
+                  src="../assets/edit.svg"
+                  alt="编辑"
+                  class="icon-action"
+                  @click="handleEdit(item)" />
                 &nbsp;
-                <img src="../assets/delete.svg" alt="删除" class="icon-action" @click="handleDelete(item)" />
+                <img v-if="permission === 1"
+                  src="../assets/delete.svg"
+                  alt="删除"
+                  class="icon-action"
+                  @click="handleDelete(item)" />
               </td>
+
             </tr>
           </tbody>
         </table>
       </div>
 
-  <div class="pagination">
-    <div class="bottom-left-buttons">
-      <button class="manage-btn" @click="showJournalDialog = true">管理期刊</button>
-      <button class="manage-btn" @click="showCategoryDialog = true">管理分类</button>
-    </div>
-
-    <!--分页器-->
-  <el-pagination
-    background
-    layout="prev, pager, next, sizes, jumper"
-    :total="total"
-    :page-size="pageSize"
-    :current-page="currentPage"
-    :page-sizes="[10, 20, 50]"
-    @current-change="handlePageChange"
-    @size-change="handleSizeChange"
-  />
-</div>
-
+      <!-- 分页器 -->
+      <div class="pagination">
+        <div class="bottom-left-buttons" v-if="permission === 1">
+          <button class="manage-btn" @click="showJournalDialog = true">管理期刊</button>
+          <button class="manage-btn" @click="showCategoryDialog = true">管理分类</button>
+        </div>
+        <div class="bottom-left-buttons" v-if="permission !== 1"></div>
+        <el-pagination
+          background
+          layout="prev, pager, next, sizes, jumper"
+          :total="total"
+          :page-size="pageSize"
+          :current-page="currentPage"
+          :page-sizes="[10, 20, 50]"
+          @current-change="handlePageChange"
+          @size-change="handleSizeChange"
+        />
+      </div>
     </main>
 
-    <!-- 上传弹窗组件 -->
-    <UploadDialog v-model:visible="showUploadDialog" />
     <EditDialog
       v-model="showEditDialog"
       :item="currentEditItem"
@@ -301,6 +395,37 @@ const confirmDelete = () => {
     />
     <CategoryManagerDialog v-model:visible="showCategoryDialog" />
     <JournalManagerDialog v-model:visible="showJournalDialog" />
+
+    <!-- 网络图弹窗 -->
+  <el-dialog
+    v-model="showGraph"
+    high="80%"
+    width="60%"
+    :close-on-click-modal="false"
+    @close="keyword=''"
+  >
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+      <h1 style="margin: 0;">论文关系网络</h1>
+      <img
+        src="../assets/fresh.svg"
+        alt="刷新"
+        class="refresh-icon"
+        :class="{ 'refresh-rotate': isRotating }"
+        @click="refreshGraph"
+        style="margin-right: 5%;"
+      />
+    </div>
+    <!-- 注意：这个 div 一定要有高度！ -->
+    <div style="height:500px; width: 100%;">
+      <NetworkGraph
+        v-if="showGraph"
+        v-model:fresh = "isFresh"
+        :user-id="graphKeyword"
+      />
+    </div>
+  </el-dialog>
+
+
   </div>
 </template>
 
@@ -310,7 +435,7 @@ const confirmDelete = () => {
   border-bottom: 1px solid #ddd;
 }
 .even-row {
-  background-color: #ffffff;
+  background-color: #fff;
 }
 .odd-row {
   background-color: #f5f5f5;
@@ -330,7 +455,6 @@ const confirmDelete = () => {
 }
 .upload-button-wrapper {
   margin: 6px 0 10px 20px;
-  margin: 6px 0 10px 20px;
 }
 .upload-btn {
   padding: 4px 12px;
@@ -346,10 +470,27 @@ const confirmDelete = () => {
   text-align: center;
   padding-top: 10px;
 }
-.main-content {
-  flex: 1;
-  text-align: center;
-  padding-top: 10px;
+.custom-search-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.custom-search-input {
+  height: 32px;
+  width: 220px;
+  border-radius: 6px;
+  padding: 0 10px;
+  border: 1px solid #ccc;
+}
+.custom-search-btn {
+  height: 32px;
+  padding: 0 14px;
+  background-color: #409eff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
 }
 .search-wrapper {
   height: 80px;
@@ -363,13 +504,11 @@ const confirmDelete = () => {
   align-items: center;
   gap: 8px;
 }
-
 .search-bar select {
   padding: 6px 12px;
   border: 1px solid black;
   border-radius: 4px;
 }
-
 .search-bar input {
   width: 500px;
   border-radius: 20px 0 0 20px;
@@ -400,63 +539,37 @@ table {
   border-collapse: collapse;
   font-size: 14px;
 }
-
-th {
-  position: sticky;
-  top: 0;
-  background-color: #f0f0f0;
-  z-index: 2; /* 确保不被遮挡 */
-}
-
 th, td {
   height: 40px;
   padding: 0 10px;
   border-bottom: 1px solid #eee;
   text-align: center;
 }
-
-thead {
-  background-color: #f0f0f0;
-}
 th {
   position: sticky;
   top: 0;
   z-index: 1;
   background: #f0f0f0;
 }
-td{
-  max-width: 200px; /* 限制最大宽度 */
+thead {
+  background-color: #f0f0f0;
+}
+td {
+  max-width: 200px;
   padding: 8px;
-  white-space: normal; /* 允许换行 */
-  word-wrap: break-word; /* 强制换行 */
-  overflow-wrap: break-word; /* 兼容性更好 */
-}
-thead {
-  background-color: #f0f0f0;
-}
-th {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  background: #f0f0f0;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 .icon-action {
   height: 1em;
   cursor: pointer;
-  transition: transform 0.2s, filter 0.2s;
   transition: transform 0.2s, filter 0.2s;
 }
 .icon-action:hover {
   transform: scale(1.2);
   filter: brightness(1.2);
 }
-.even-row {
-  background: #fff;
-}
-.odd-row {
-  background: #f5f5f5;
-}
-
 /* 分页器样式 */
 .pagination {
   width: 90%;
@@ -479,5 +592,15 @@ th {
   border-radius: 6px;
   font-size: 13px;
   cursor: pointer;
+}
+
+.refresh-icon {
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  transition: transform 0.4s cubic-bezier(.4,2,.6,1);
+}
+.refresh-rotate {
+  transform: rotate(240deg) scale(1.15);
 }
 </style>

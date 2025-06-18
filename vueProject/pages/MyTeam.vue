@@ -4,8 +4,11 @@ import CreateTeamDialog from "../components/MyTeam/CreateTeamDialog.vue";
 import JoinTeamDialog from "../components/MyTeam/JoinTeamDialog.vue";
 import LeaveConfirmDialog from "../components/MyTeam/LeaveConfirmDialog.vue";
 import { ref, computed, onMounted, useId, watch } from 'vue';
-import { ElMessage } from 'element-plus';
+import { ElMessage,ElLoading} from 'element-plus';
 import teamUtils from "../scripts/team";
+import { teamInfoUtils } from "../scripts/teamInfo"
+import { useRouter } from 'vue-router'
+const router = useRouter()
 
 const setAllData = (data)=>{
   fullTableData.value = Array.from({length:data.length},(_,i)=>({
@@ -15,8 +18,13 @@ const setAllData = (data)=>{
   }));
   fullTableData.value=[...fullTableData.value]
 }
-const sendAndSet = (userId)=>{
-  teamUtils.getMyTeamList(userId)
+const sendAndSet = ()=>{
+    const loadingInstance = ElLoading.service({
+      lock: true,
+      text: '加载中...',
+      background: 'rgba(0, 0, 0, 0.2)'
+    })
+  teamUtils.getMyTeamList()
   .then(({code,data,msg})=>{
     if(code==200){
       if(data.length==0){
@@ -32,7 +40,11 @@ const sendAndSet = (userId)=>{
   .catch(({code,data,msg})=>{
     ElMessage.error(msg)
     setAllData(data)
-  }) 
+  }).finally(()=>{
+    setTimeout(()=>{
+      loadingInstance.close()
+    },500)
+  })
 }
 onMounted(()=>{
   const userId = localStorage.getItem("userId")
@@ -67,14 +79,14 @@ const leaveDialogVisible = ref(false);
 const teamToLeave = ref(null);
 
 const confirmLeave = () => {
-  // console.log(teamToLeave.value)
+  console.log(teamToLeave.value)
   const teamId = teamToLeave.value.id
-  const uid = localStorage.getItem("userId");
-  teamUtils.dropMember(teamId,uid)
+  teamUtils.dropMember(teamId)
   .then(({code,msg})=>{
+    console.log(code,msg)
     if(code==200){
-      sendAndSet(uid);
       ElMessage.success("退出成功")
+      sendAndSet();
     }else if(code==390){
       ElMessage.error("组长不可以退出团队")
     }else{
@@ -90,14 +102,21 @@ const openLeaveDialog = (team) => {
   teamToLeave.value = team;
   leaveDialogVisible.value = true;
 };
+const enterTeam = (row)=>{
+  const teamId = row.id;
+  const teamName = row.name;
+    // 先存储团队 ID 和名称
+  localStorage.setItem("teamId", teamId);
+  localStorage.setItem("teamName", teamName);
+  router.push("/other");
+}
 
 const handleCreateTeam = (name)=>{
   console.log(name)
-  const leaderId = localStorage.getItem("userId")
-  teamUtils.createTeam(name,leaderId)
+  teamUtils.createTeam(name)
   .then(({code,msg})=>{
     if(code==200){
-      sendAndSet(leaderId)
+      sendAndSet()
       ElMessage.success(`团队"${name}"创建成功`)
     }else{
       ElMessage.error(msg)
@@ -124,9 +143,7 @@ const handleCreateTeam = (name)=>{
           <el-table-column prop="leader" label="团队组长" width="180" />
           <el-table-column label="操作">
             <template #default="scope">
-              <router-link to="/other">
-                <el-button type="primary" size="small" class="action-btn">进入</el-button>
-              </router-link>
+              <el-button type="primary" size="small" class="action-btn" @click="enterTeam(scope.row)">进入</el-button>
               <el-button type="danger" size="small" class="action-btn" @click="openLeaveDialog(scope.row)">退出</el-button>
             </template>
           </el-table-column>
@@ -164,7 +181,10 @@ const handleCreateTeam = (name)=>{
 </template>
 
 <style scoped>
-/* 同你原来的样式，未改动 */
+
+thead {
+  background-color: #f0f0f0;
+}
 .container {
   min-height: 100vh;
   background-color: #f4f4f4;
@@ -188,6 +208,42 @@ const handleCreateTeam = (name)=>{
   padding: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
+
+/* 表格样式 */
+.native-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+.native-table th,
+.native-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e0e0e0;
+}
+.even-row {
+  background-color: #ffffff;
+}
+.odd-row {
+  background-color: #f9f9f9;
+}
+
+.native-table thead th {
+  position: sticky;
+  top: 0;
+  background-color: #f0f0f0;
+  z-index: 1;
+}
+
+.table-wrapper {
+  max-height: 500px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ccc;
+  padding: 0;
+  border-radius: 12px;
+}
+
+/* 按钮样式 */
 .action-btn {
   transition: all 0.3s ease;
   margin: 0 5px;
@@ -196,6 +252,7 @@ const handleCreateTeam = (name)=>{
   filter: brightness(1.1);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
+
 .actions {
   margin: 20px 0;
   display: flex;
