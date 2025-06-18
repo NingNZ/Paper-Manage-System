@@ -6,11 +6,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-<<<<<<< HEAD
-=======
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
->>>>>>> 1e8193b (第二次迭代后端)
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,8 +20,6 @@ public class tool {
         row.put("msg",msg);
         return row;
     }
-<<<<<<< HEAD
-=======
     public static String generateHash(String Name,int length) {
         if (Name == null) {
             return null;
@@ -48,5 +43,4 @@ public class tool {
     public static double calculateScore(int num){
         return 10.0/num;
     }
->>>>>>> 1e8193b (第二次迭代后端)
 }

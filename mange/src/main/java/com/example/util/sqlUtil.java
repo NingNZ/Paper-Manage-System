@@ -33,8 +33,6 @@ public class sqlUtil {
             }
             return res;
         }
-<<<<<<< HEAD
-=======
     public static boolean excute (String sql, Object...params) throws SQLException {
         boolean res = false;
         try (Connection conn = DriverManager.getConnection(URL, USERNAME, PASSWORD);
@@ -47,5 +45,4 @@ public class sqlUtil {
         }
         return res;
     }
->>>>>>> 1e8193b (第二次迭代后端)
     }

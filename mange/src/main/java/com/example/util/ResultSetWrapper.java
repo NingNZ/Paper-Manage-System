@@ -46,10 +46,7 @@ public class ResultSetWrapper {
         index++;
         return index<length;
     }
-<<<<<<< HEAD
-=======
 
->>>>>>> 1e8193b (第二次迭代后端)
     public String getString(String label){
         if(index>=length) return null;
         return dataList.get(index).get(label);

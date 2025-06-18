@@ -5,15 +5,6 @@ import com.example.util.sqlUtil;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-<<<<<<< HEAD
-import java.util.HashMap;
-import java.util.Map;
-
-public class User {
-    private String id;
-    private String name;
-    private String email;
-=======
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,53 +26,33 @@ public class User {
     private int permission;
     private String email;
     private  double score;
->>>>>>> 1e8193b (第二次迭代后端)
     public boolean isNull(){
         return this.id==null;
     }
     public User(String id) {
-<<<<<<< HEAD
-        String sql1 = "select id,name,email from users where id = ?";
-=======
         String sql1 = "select id,pwd,name,email,score,permission from users where id = ?";
->>>>>>> 1e8193b (第二次迭代后端)
         try{
             ResultSetWrapper res = sqlUtil.query(sql1,id);
             if(!res.isBeforeFirst()) {
                 this.id = null;
                 this.name = null;
-<<<<<<< HEAD
-                this.email = null;
-=======
                 this.pwd = null;
                 this.email = null;
                 this.score = 0;
                 this.permission = -1;
->>>>>>> 1e8193b (第二次迭代后端)
             }
             else{
                 res.next();
                 this.id = id;
-<<<<<<< HEAD
-                this.name = res.getString("name");
-                this.email = res.getString("email");
-=======
                 this.pwd = res.getString("pwd");
                 this.name = res.getString("name");
                 this.email = res.getString("email");
                 this.score =  Double.parseDouble(res.getString("score"));
                 this.permission = Integer.parseInt(res.getString("permission"));
->>>>>>> 1e8193b (第二次迭代后端)
             }
         } catch (SQLException e) {
             this.id = null;
             this.name = null;
-<<<<<<< HEAD
-            this.email = null;
-        }
-
-    }
-=======
             this.pwd = null;
             this.email = null;
             this.score = 0;
@@ -101,7 +72,6 @@ public class User {
         String sql1 = "update users set name=?, set pwd=? ,set email=?, set score=? where id = ?";
         return sqlUtil.update(sql1,name,pwd,email,score,id);
     }
->>>>>>> 1e8193b (第二次迭代后端)
     public Map<String,Object> tranferToMap(){
         if(this.id==null){
             return null;
@@ -110,18 +80,13 @@ public class User {
             row.put("id",this.id);
             row.put("name",this.name);
             row.put("email",this.email);
-<<<<<<< HEAD
-=======
             row.put("score",this.score);
->>>>>>> 1e8193b (第二次迭代后端)
             return row;
         }
     }
     public boolean equalToUserId(String uid){
         return this.id.equals(uid);
     }
-<<<<<<< HEAD
-=======
 
     public String getPwd() {
         return pwd;
@@ -173,5 +138,4 @@ public class User {
         return Objects.hash(id);
     }
 
->>>>>>> 1e8193b (第二次迭代后端)
 }
