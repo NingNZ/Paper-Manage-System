@@ -148,12 +148,7 @@ import { sessionUtil } from '../scripts/session'
 const members = ref([])
 const role = ref(''); // 角色状态
 const teamName = ref(''); // 团队名称状态
-// // 获取查询参数
-// const teamId = route.query.teamId
-// const role = route.query.role
-// const teamName = route.query.teamName
-// const router = useRouter()
-
+const router = useRouter()
 onMounted(async ()=>{
   const state = await sessionUtil.checkPermiss()
   const teamId = localStorage.getItem("teamId")
@@ -434,5 +429,10 @@ const emit = defineEmits(['refresh-category'])
 :deep(.el-pagination) {
   align-self: flex-end;
   margin-top: 20px;
+}
+td, th {
+  max-width: 300px;        /* 设置最大宽度 */
+  word-break: break-all;   /* 长单词或连续字符也会换行 */
+  white-space: normal;     /* 允许自动换行 */
 }
 </style>

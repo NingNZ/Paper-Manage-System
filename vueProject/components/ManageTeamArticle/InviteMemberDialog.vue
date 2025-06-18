@@ -91,16 +91,27 @@ function handleSearch() {
   })
 }
 
-async function invite(member) {
+function invite(member) {
   // 确保 teamId 有值
   if (!teamId.value) {
     ElMessage.error('无法获取团队ID,请检查。')
     return
   }
+  teamUtils.memberInvite(teamId.value,member.id)
+  .then(({code,msg})=>{
+    if(code==200){
+      ElMessage.success("邀请成功，等待对方同意")
+    }else if(code==300){
+      ElMessage.info(msg)
+    }else{
+      ElMessage.error(msg)
+    }
+  }).catch(({code,msg})=>{
+    ElMessage.error(msg)
+  })
   console.log(`邀请用户: ${member.name} (ID: ${member.id}) 到团队: ${teamId.value}`);
 }
 
-const emit = defineEmits(['invite-sent'])
 
 function openDialog() {
   visible.value = true

@@ -7,6 +7,7 @@
       <aside class="sidebar">
         <div class="menu-group">
           <div
+            v-if="permission !== 1"
             class="menu-item"
             :class="{ active: activeSidebar === '我收到的消息' }"
             @click="setActive('我收到的消息')"
@@ -25,8 +26,24 @@
 
       <!-- 内容区域 -->
       <section class="content">
-        <div class="breadcrumb">
-          <a href="/">首页</a> &gt; <a href="/notice">我的消息</a> &gt; {{ activeSidebar }}
+        <div class="breadcrumb-wrapper">
+          <div class="breadcrumb">
+            <a href="/">首页</a> &gt; <a href="/notice">我的消息</a> &gt; {{ activeSidebar }}
+          </div>
+          <!-- 筛选框放在这里，右对齐 -->
+          <div class="top-controls">
+            <span class="select-label"></span>
+            <select v-model="selectedType" class="simple-select">
+              <option :value="'0#0#0#0'">个人消息</option>
+              <option
+                v-for="item in teamOptions"
+                :key="item.id"
+                :value="item.id"
+              >
+                {{ item.value }}
+              </option>
+            </select>
+          </div>
         </div>
 
         <div class="table-wrapper">
@@ -50,12 +67,13 @@
               <tr v-for="(item, index) in pagedItems" :key="index" :class="index % 2 === 0 ? 'even-row' : 'odd-row'">
                 <!-- 待处理通知 -->
                 <template v-if="activeSidebar === '待处理的通知'">
-                  <td class="message-col">{{ item.message }}</td>
+                  <td class="message-col"><span v-html="item.message"></span></td>
                   <td class="time-col">{{ formatDate(item.time) }}</td>
-                  <td class="status-col"><span class="status-gray">未处理</span></td>
+                  <td class="status-col"><span class="status-gray">{{ item.results }}</span></td>
                   <td class="action-col">
-                    <el-button size="small" type="success" plain @click="handleDecision(index, '通过')">通过</el-button>
-                    <el-button size="small" type="danger" plain @click="handleDecision(index, '拒绝')">拒绝</el-button>
+                    <el-button v-if="!item.state&&item.isRoot" size="small" type="primary" plain @click="handleDownload(index)">下载</el-button>
+                    <el-button v-if="!item.state" size="small" type="success" plain @click="handleDecision(index, 1)">通过</el-button>
+                    <el-button v-if="!item.state" size="small" type="danger" plain @click="handleDecision(index, 0)">拒绝</el-button>
                   </td>
                 </template>
 
@@ -63,17 +81,8 @@
                 <template v-else>
                   <td class="message-col">{{ item.message }}</td>
                   <td class="time-col">{{ formatDate(item.time) }}</td>
-                  <td class="status-col">
-                    <span :class="resultClass(item.result)">{{ item.result }}</span>
-                  </td>
-                  <td class="action-col">
-                    <img
-                      src="../assets/delete.svg"
-                      alt="删除"
-                      class="icon-action"
-                      @click="handleDelete(item)"
-                    />
-                  </td>
+                  <td class="status-col"><span :class="resultClass(item.state,item.ispass)">{{ item.results }}</span></td>
+                  <td class="action-col"></td>
                 </template>
               </tr>
             </tbody>
@@ -109,81 +118,253 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted ,watch} from 'vue';
 import bar from '../components/bar.vue'
+import { sessionUtil } from "../scripts/session";
+import teamUtils from '../scripts/team';
+import { ElMessage,ElLoading } from 'element-plus';
+import noticeUtils from '../scripts/notice.js';
+import { waitPaperUtils } from '../scripts/waitPaper.js';
 
-const activeSidebar = ref('待处理的通知')
+const permission = ref(-1)
+const teamOptions = ref([])  //得到我作为组长的团队列表
+const selectedType = ref('0#0#0#0')// 默认选中 "关键字"（value 为 0#0#0#0）
+
+onMounted(() => {
+  selectedType.value ='0#0#0#0'
+  localStorage.setItem("selectedType",selectedType.value);
+  teamUtils.getMainTeam()
+    .then(res => {
+      teamOptions.value = res.data.map(item => ({
+        id : item.id, //获取团队id
+        value : item.name //获取团队name
+      }))
+    })
+    .catch(({code,msg}) => {
+      // console.error("获取团队列表失败")
+      teamOptions.value = []
+      ElMessage.error(msg)
+    });
+
+    sessionUtil.checkPermiss()
+    .then(res => {
+      permission.value = res
+        })
+    .catch(() => {
+      permission.value = -1
+      ElMessage.error("服务器未连接")
+    }).finally(()=>{
+      loadNotices();  // 初始加载
+    })
+    
+});
+
+const activeSidebar = ref('待处理的通知')   // 默认选中 "待处理的通知"
 const currentPage = ref(1)
 const pageSize = ref(5)
+
+
+watch(selectedType, () => {
+  currentPage.value = 1;  // 每次切换重置分页
+  localStorage.setItem("selectedType",selectedType.value);
+  loadNotices();
+});
+watch(activeSidebar,()=>{
+  const localSaveOption = localStorage.getItem("selectedType")
+  selectedType.value = (localSaveOption==null)?'0#0#0#0': localSaveOption
+  currentPage.value = 1;  // 每次切换重置分页
+  loadNotices();
+})
 
 const setActive = (val) => {
   activeSidebar.value = val
   currentPage.value = 1
 }
 
-const noticeList = ref([
-  { message: '《AI研究进展》申请加入您的团队“AI研究小组”', time: '2025-06-01 10:30' },
-  { message: '《图神经网络》申请加入您的团队“图智能”', time: '2025-06-02 11:00' },
-  { message: '《Transformer结构优化》协作请求待处理', time: '2025-06-03 14:45' },
-  { message: '《神经网络安全性分析》加入请求', time: '2025-06-04 16:20' },
-  { message: '《大模型压缩》希望参与您的研究团队', time: '2025-06-05 09:50' }
-])
+const noticeList = ref([])
 
-const receivedList = ref([
-  { message: '您加入“AI研究小组”的请求已通过。', time: '2025-06-01 10:10', result: '通过' },
-  { message: '您的论文《图神经网络》投稿未通过审核。', time: '2025-06-02 12:00', result: '拒绝' },
-  { message: '“AI Lab”团队邀请您加入。', time: '2025-06-03 13:30', result: '通过' },
-  { message: '您的请求被拒绝。', time: '2025-06-04 15:00', result: '拒绝' }
-])
+const loadNotices = () => {
+    console.log(permission.value)
+    if(permission.value === 1) { // 如果是管理员
+      const loadingInstance = ElLoading.service({
+        lock: true,
+        text: '加载中...',
+        background: 'rgba(0, 0, 0, 0.2)'
+      })
+      noticeUtils.Sys_getNotices_OP()
+      .then(({code,msg,data})=>{
+        setTableData_Sys(data)
+      })
+      .catch(({code,msg,data})=>{
+        ElMessage.error(msg)
+        noticeList.value = []
+      }).finally(()=>{
+        setTimeout(()=>{
+          loadingInstance.close()
+        },500)
+      })
+    } 
+    else{                        // 如果是用户
+      const loadingInstance = ElLoading.service({
+        lock: true,
+        text: '加载中...',
+        background: 'rgba(0, 0, 0, 0.2)'
+      })
+        if (activeSidebar.value === '待处理的通知') {
+              noticeUtils.getNotices_OP(selectedType.value)
+              .then(({code,msg,data})=>{
+                setTableData_WithOp(data)
+              })
+              .catch(({code,msg,data})=>{
+                ElMessage.error(msg)
+              }).finally(()=>{
+                setTimeout(()=>{
+                  loadingInstance.close();
+                },500)
+              })
+        } else { // 我收到的消息
+               noticeUtils.getNotices_NoOP(selectedType.value)
+              .then(({code,msg,data})=>{
+                setTableData_WithoutOp(data)
+              })
+              .catch(({code,msg,data})=>{
+                ElMessage.error(msg)
+              }).finally(()=>{
+                setTimeout(()=>{
+                  loadingInstance.close();
+                },500)
+              })
+            
+        }
+    }
+};
+const setTableData_Sys = (data)=>{
+  noticeList.value = data.map(item => ({
+  msgId : item.msgId, // 假设有一个唯一的消息ID
+  message: `<ul class="notice-list">
+              <li><strong>团队</strong> “${item.teamName}” <span style="color:#888;">(${item.teamId})</span> 上传了一篇论文：</li>
+              <li><strong>Title:</strong> <span style="color:#1976d2;">${item.paper.title}</span></li>
+              <li><strong>Journal:</strong> <span style="color:#1976d2;">${item.paper.journal}</span>&nbsp;&nbsp;&nbsp;<strong>Type:</strong> <span style="color:#1976d2;">${item.paper.type}</span></li>
+              <li><strong>Authors:</strong> <span style="color:#1976d2;"><i>${item.paper.authors}</i></span></li>
+              <li><strong>Time:</strong> <span style="color:#1976d2;">${item.paper.time}</span></li>
+            </ul>`,
+  time: item.time,
+  state:item.state,
+  paperId:item.paper.id,
+  isRoot:1,
+  results: item.state === 0 ? '未处理' : item.result === 1 ? '我已通过' : '我已拒绝'
+  }))
+}
+
+
+const setTableData_WithOp = (data)=>{
+            // 假设后端返回字段：paperName, teamName, time
+  if(selectedType.value === '0#0#0#0'){    //待处理的通知，个人消息
+        noticeList.value = data.map(item => ({
+        msgId : item.id, // 假设有一个唯一的消息ID
+        message: `团队“${item.team}”  (${item.teamId})邀请您加入`,
+        time: item.time,
+        state:item.state,
+        results: item.state === 0 ? '未处理' : item.result === 1 ? '我已同意' : '我已拒绝'
+      }))
+  } else {   //待处理的通知，团队消息
+    noticeList.value = data.map(item => ({
+      msgId : item.id, // 假设有一个唯一的消息ID
+      message: `${item.userName}(id:${item.userId})申请加入您的团队“${item.team}”`,
+      time: item.time,
+      state:item.state,
+      results: item.state === 0 ? '未处理' : item.result === 1 ? '我已同意' : '我已拒绝'
+    }));
+  }
+}
+
+const setTableData_WithoutOp = (data)=>{
+   // 假设后端返回字段：paperName, teamName, time, result
+    if(selectedType.value === '0#0#0#0'){ // 我收到的消息，个人消息
+        noticeList.value = data.map(item => ({
+        msgId : item.id, // 假设有一个唯一的消息ID
+        message: `我申请加入团队“${item.team}”`,
+        time: item.time,
+        state:item.state,
+        ispass:item.result,
+        results: item.state === 0 ? '等待对方处理' : item.result === 1 ? '已被接受' : '已被拒绝'
+      }));
+    } else { // 我收到的消息，团队消息
+        const inviteData = data[0].invite
+        const submitData = data[0].submit
+        const inviteList = inviteData.map(item => ({
+        msgId: item.id,
+        message: `邀请<${item.userName}(id:${item.userId})>加入我的团队“${item.team}”`,
+        time: item.time,
+        state: item.state,
+        ispass: item.result,
+        results: item.state === 0 ? '等待对方处理' : item.result === 1 ? '已被接受' : '已被拒绝'
+        }));
+
+        const submitList = submitData.map(item => ({
+        msgId: item.id,
+        message: `团队提交的论文《${item.paper.title}》`,
+        time: item.time,
+        state: item.state,
+        ispass: item.result,
+        results: item.state === 0 ? '等待管理员审核' : item.result === 1 ? '已被接受' : '已被拒绝'
+        }));
+
+        noticeList.value = [...inviteList, ...submitList];
+        console.log(inviteData)
+        console.log(submitData)
+    }
+    console.log(noticeList.value)
+}
+
+const handleDecision = (index,select)=>{
+  if(permission.value === 1){
+    console.log(select);
+    noticeUtils.Sys_Solve(noticeList.value[index].msgId,select)
+    .then(({code,msg})=>{
+      if(code==200){
+        ElMessage.success("操作成功")
+      }else{
+        ElMessage.error(msg)
+      }
+    }).catch(({code,msg})=>{
+      ElMessage.error(msg)
+    }).finally(()=>{
+      loadNotices()
+    })
+  }else{
+    noticeUtils.userSolveMsg(noticeList.value[index].msgId,select)
+    .then(({code,msg})=>{
+      if(code==200){
+        ElMessage.success("操作成功");
+      }
+      else if(code==300){
+        ElMessage.info(msg)
+      }else{
+        ElMessage.error(msg)
+      }
+    })
+    .catch(({code,msg})=>{
+      ElMessage.error(msg)
+    }).finally(()=>{
+      loadNotices()
+    })
+  }
+
+}
 
 const pagedItems = computed(() => {
-  const list = activeSidebar.value === '待处理的通知' ? noticeList.value : receivedList.value
-  const start = (currentPage.value - 1) * pageSize.value
-  return list.slice(start, start + pageSize.value)
-})
+  const start = (currentPage.value - 1) * pageSize.value;
+  return noticeList.value.slice(start, start + pageSize.value);
+});
 
-const totalItems = computed(() => {
-  return activeSidebar.value === '待处理的通知' ? noticeList.value.length : receivedList.value.length
-})
+const totalItems = computed(() => noticeList.value.length);
+
 
 const hasItems = computed(() => totalItems.value > 0)
 
 const formatDate = (datetime) => datetime.split(' ')[0]
 
-const resultClass = (result) => {
-  if (result === '通过') return 'status-green'
-  if (result === '拒绝') return 'status-red'
-  return ''
-}
-
-const handleDecision = (index, decision) => {
-  const item = pagedItems.value[index]
-  const realIndex = noticeList.value.findIndex(n => n.message === item.message && n.time === item.time)
-  if (realIndex !== -1) {
-    noticeList.value.splice(realIndex, 1)
-  }
-  receivedList.value.unshift({
-    message: item.message,
-    time: item.time,
-    result: decision
-  })
-  // 处理页数变化（如果删除后当前页没有数据则回到上一页）
-  if ((currentPage.value - 1) * pageSize.value >= noticeList.value.length && currentPage.value > 1) {
-    currentPage.value--
-  }
-}
-
-const handleDelete = (item) => {
-  const index = receivedList.value.findIndex(
-    (i) => i.message === item.message && i.time === item.time && i.result === item.result
-  )
-  if (index !== -1) {
-    receivedList.value.splice(index, 1)
-  }
-  if ((currentPage.value - 1) * pageSize.value >= receivedList.value.length && currentPage.value > 1) {
-    currentPage.value--
-  }
-}
 
 const handlePageChange = (page) => {
   currentPage.value = page
@@ -192,7 +373,24 @@ const handleSizeChange = (size) => {
   pageSize.value = size
   currentPage.value = 1
 }
+
+const resultClass = (state,ispass) => {
+  console.log(state,ispass)
+  if (state == '0') return 'status-gray'
+  else if (state=='1' && ispass =='0') return 'status-red'
+  else if (state=='1' && ispass =='1') return 'status-green'
+  return 'status-gray'
+}
+
+const handleDownload = (index)=>{
+  console.log(noticeList.value[index].paperId)
+  waitPaperUtils.downloadWaitPaper(noticeList.value[index].paperId)
+  .then(()=>{
+    ElMessage.success("下载成功")
+  })
+}
 </script>
+
 
 <style scoped>
 thead {
@@ -252,6 +450,12 @@ thead {
   padding: 20px;
   display: flex;
   flex-direction: column;
+}
+
+.breadcrumb-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .breadcrumb {
@@ -350,5 +554,60 @@ thead {
   text-align: center;
   color: #999;
   font-size: 16px;
+}
+
+.top-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.select-label {
+  font-size: 14px;
+  color: #333;
+  white-space: nowrap;
+  width: auto; /* Ensure the text won't break */
+}
+
+.simple-select {
+  padding: 6px 12px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  transition: border-color 0.3s ease;
+
+  width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.simple-select:hover {
+  border-color: #3398ff;
+}
+
+.simple-select:focus {
+  outline: none;
+  border-color: #3398ff;
+  box-shadow: 0 0 0 2px rgba(51, 152, 255, 0.2);
+}
+.notice-list {
+  margin: 0 0 0 10px;
+  padding: 12px 18px;
+  text-align: left ;
+  background: #f4f8fb;
+  border-radius: 8px;
+  list-style-type: disc;
+  color: #333;
+  font-size: 15px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.notice-list li {
+  margin-bottom: 6px;
+  line-height: 1.8;
+}
+.notice-list li:last-child {
+  margin-bottom: 0;
 }
 </style>

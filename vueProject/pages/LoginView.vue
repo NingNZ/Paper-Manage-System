@@ -110,9 +110,9 @@ function handleLogin() {
 
 function handleRegi() {
   // 用户账号校验
-  const accountPattern = /^[A-Za-z0-9]{6,18}$/;
+  const accountPattern = /^[a-z0-9]{6,18}$/;
   if (!accountPattern.test(accountRegi.value)) {
-    ElMessage.error("用户账号格式不正确：应为 6-18 位字母或数字组合");
+    ElMessage.error("用户账号格式不正确：应为 6-18 位小写字母或数字组合");
     return;
   }
 
@@ -126,27 +126,28 @@ function handleRegi() {
   // 密码校验
   const passwordPattern = /^[A-Za-z0-9]{6,18}$/;
   if (!passwordPattern.test(passRegi.value)) {
-    ElMessage.error("密码格式不正确：应为 6-18 位字母或数字的组合");
+    ElMessage.error("密码格式不正确：应为 6-18 位大小写字母或数字的组合");
     return;
   }
 
   let data1 = {
-    username: userRegi.value,
+    userId:accountRegi.value,
+    name: userRegi.value,
     password: passRegi.value,
-    access: 'c'
   }
 
-  axios.post("http://localhost:5213/last/user/register", qs.stringify(data1))
+  axios.post(utils.url+"/register", qs.stringify(data1))
     .then((res) => {
       if (res.data.code == 200) {
-        router.replace('/')
-        ElMessage.success(res.data.msg);
+        ElMessage.success("注册成功");
       } else {
         ElMessage.error(res.data.msg);
       }
       userRegi.value = '';
       passRegi.value = '';
       accountRegi.value = '';
+    }).catch(()=>{
+      ElMessage.error("服务器未连接")
     })
   DialogVisible.value = false;
 }
@@ -187,7 +188,7 @@ function changePassword() {
       /><br><br>
       <el-button type="primary" @click="handleLogin" style="margin-left: 50px;">登录</el-button>
       <el-button type="primary" @click="DialogVisible=true;">注册</el-button>
-      <a @click="DialogVisible2=true" style="font-style: italic; font-size: small; text-decoration: underline;">修改密码</a>
+      <a v-if="false" @click="DialogVisible2=true" style="font-style: italic; font-size: small; text-decoration: underline;">修改密码</a>
     </el-card>
   </div>
 

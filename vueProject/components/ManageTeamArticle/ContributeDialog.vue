@@ -248,14 +248,16 @@ const submitForm=()=>{
   const teamId = localStorage.getItem("teamId");
   formData.append('teamId',teamId);
   //
-  axios.post(utils.url+"/sysPaper/new",formData,{
+  axios.post(utils.url+"/wait/newPaper",formData,{
     headers:{
       'Content-Type':'multipart/form-data'
     },
   })
   .then(response =>{
     if(response.data.code==200){
-      ElMessage.success("上传成功")
+      ElMessage.success("文件投递成功，等待管理员审核")
+    }else if(response.data.code==300){
+      ElMessage.info(response.data.msg)
     }else{
       ElMessage.error(response.data.msg)
     }

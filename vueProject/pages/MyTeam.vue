@@ -18,7 +18,7 @@ const setAllData = (data)=>{
   }));
   fullTableData.value=[...fullTableData.value]
 }
-const sendAndSet = (userId)=>{
+const sendAndSet = ()=>{
     const loadingInstance = ElLoading.service({
       lock: true,
       text: '加载中...',
@@ -79,14 +79,14 @@ const leaveDialogVisible = ref(false);
 const teamToLeave = ref(null);
 
 const confirmLeave = () => {
-  // console.log(teamToLeave.value)
+  console.log(teamToLeave.value)
   const teamId = teamToLeave.value.id
-  const uid = localStorage.getItem("userId");
-  teamUtils.dropMember(teamId,uid)
+  teamUtils.dropMember(teamId)
   .then(({code,msg})=>{
+    console.log(code,msg)
     if(code==200){
-      sendAndSet(uid);
       ElMessage.success("退出成功")
+      sendAndSet();
     }else if(code==390){
       ElMessage.error("组长不可以退出团队")
     }else{
@@ -109,24 +109,6 @@ const enterTeam = (row)=>{
   localStorage.setItem("teamId", teamId);
   localStorage.setItem("teamName", teamName);
   router.push("/other");
-  // teamInfoUtils.CheckTeamRole(teamId)
-  //   .then(( temp ) => {
-  //     let role = ''; // 默认角色为空
-
-  //     if (temp === 1) {
-  //       // 是组长
-  //       role = 'leader';
-  //     } else if (temp === 0) {
-  //       // 是组员
-  //       role = 'member';
-  //     }
-  //     localStorage.setItem("teamRole", role);  // ✅ 存储身份信息
-  //         // 跳转到团队文章页面
-  //     router.push("/other");
-  //   })
-  //   .catch(({ msg }) => {
-  //     ElMessage.error(msg || "无法连接服务器");
-  //   });
 }
 
 const handleCreateTeam = (name)=>{
