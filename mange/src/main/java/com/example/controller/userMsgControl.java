@@ -238,7 +238,7 @@ public class userMsgControl {
             }
             try {
                 if(team.findMember(logId)) {
-                    msg.dropSelfFromDB();
+                    //msg.dropSelfFromDB();
                     return tool.msgCreate(300,"你已经在团队中");
                 }
                 msg.updatResult(option);

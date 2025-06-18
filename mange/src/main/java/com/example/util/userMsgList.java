@@ -7,7 +7,7 @@ import com.example.instance.userMsg;
 public class userMsgList {
     public static ArrayList<userMsg> getPersonalMsgList(String userId,int type) throws SQLException {
         ArrayList<userMsg> out = new ArrayList<>();
-        String sql1 = "select id from member_takein_msg where userId = ? and type = ? order by state asc,result asc,time";
+        String sql1 = "select id from member_takein_msg where userId = ? and type = ? order by state asc,result desc,time desc";
         ResultSetWrapper res = sqlUtil.query(sql1,userId,type);
         while(res.next()){
             String id = res.getString("id");

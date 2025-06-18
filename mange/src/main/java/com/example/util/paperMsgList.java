@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 public class paperMsgList {
     public static ArrayList<paperMsg> getMsgList() throws SQLException {
-        String sql = "select id from checkPaperMsg order by state,result,time";
+        String sql = "select id from checkPaperMsg order by state,result desc,time desc";
         ResultSetWrapper res = sqlUtil.query(sql);
         ArrayList<paperMsg> list = new ArrayList<>();
         while(res.next()){

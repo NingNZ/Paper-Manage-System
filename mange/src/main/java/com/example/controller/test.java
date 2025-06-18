@@ -12,13 +12,7 @@ import java.util.HashMap;
 @RestController
 public class test {
     @RequestMapping("/test")
-    public HashMap<String,Object> linkTest(@RequestParam String paperId){
-        try {
-            paperMsg msg = new paperMsg(paperId);
-            return msg.transformToMap();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
-        }
+    public String linkTest(){
+        return "hello world";
     }
 }
