@@ -196,7 +196,7 @@ const fetchMyPapers = () => {
       } else {
         ElMessage.error(msg)
       }
-      workloadScore.value = papers.value.length?papers.value.reduce((sum, item) => sum + item.score, 0) / papers.value.length:0;
+      workloadScore.value = data.length?(data.reduce((sum, item) => sum + Number(item.score), 0) / data.length).toFixed(2):0;
     })
     .catch(({code,data,msg}) => {
       ElMessage.error(msg)

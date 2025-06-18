@@ -430,4 +430,9 @@ const emit = defineEmits(['refresh-category'])
   align-self: flex-end;
   margin-top: 20px;
 }
+td, th {
+  max-width: 300px;        /* 设置最大宽度 */
+  word-break: break-all;   /* 长单词或连续字符也会换行 */
+  white-space: normal;     /* 允许自动换行 */
+}
 </style>

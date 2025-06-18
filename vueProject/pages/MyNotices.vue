@@ -329,6 +329,8 @@ const handleDecision = (index,select)=>{
       }
     }).catch(({code,msg})=>{
       ElMessage.error(msg)
+    }).finally(()=>{
+      loadNotices()
     })
   }else{
     noticeUtils.userSolveMsg(noticeList.value[index].msgId,select)
@@ -344,6 +346,8 @@ const handleDecision = (index,select)=>{
     })
     .catch(({code,msg})=>{
       ElMessage.error(msg)
+    }).finally(()=>{
+      loadNotices()
     })
   }
 
