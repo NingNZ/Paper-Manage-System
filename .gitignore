@@ -1,2 +1,4 @@
 /vueProject/node_modules/
 /mange/uploadSysFiles
+/mange/src/main/resources/keystore.p12
+/vueProject/cert/
