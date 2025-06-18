@@ -1,18 +1,22 @@
 package com.example.controller;
 
 import com.example.instance.Paper;
-import com.example.util.paperUtil;
+import com.example.instance.paperMsg;
+import com.example.instance.waitPaper;
 import com.example.util.tool;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -22,12 +26,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @RestController
-public class sysPaperControl {
-    @PostMapping("/sysPaper/new")
+public class waitPaperControl {
+    @PostMapping("/wait/newPaper")
     public Map<String,Object> solveNewSysPaper(
             @RequestParam("title") String title,
             @RequestParam("authors") String authorsJson, // 接收 JSON 字符串
@@ -37,36 +39,57 @@ public class sysPaperControl {
             @RequestParam("teamId") String teamId,
             @RequestParam("file") MultipartFile file
     ) {
-        System.out.println("enter");
+        System.out.println("enterIn");
         System.out.println(authorsJson);
         ObjectMapper mapper = new ObjectMapper();
         String[] authors;
+        paperMsg existMsg;
+
+        //判断是否重复提交
+        try {
+            existMsg = paperMsg.checkMsgExist(title,teamId);
+            if(existMsg!=null && !existMsg.isNull()){
+                if(existMsg.getState()==0){
+                    return tool.msgCreate(300,"已经提交过该申请,等待管理员审核");
+                }else{
+                    waitPaper waitpaper = new waitPaper(existMsg.getWaitPaperId());
+                    existMsg.dropSelfFromDB();
+                    waitpaper.dropFromWaitArea();
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return tool.msgCreate(400,"数据库处理错误");
+        }
+
+        //提交
         try {
             authors = mapper.readValue(authorsJson,String[].class);
-            String id = Paper.insertToSysPaper(title, journalId, authors, typeId, date);
-            Paper paper = null;
+            String id = waitPaper.insertToWaitArea(title, journalId, authors,typeId,teamId, date);
+            waitPaper paper = null;
             try {
-                if(id==null) return tool.msgCreate(400,"文件主键重复,上传失败");
-                paper = new Paper(id);
+                paper = new waitPaper(id);
                 if(paper.fileLocalSave(file)){
+                    paperMsg.insertToDB(id,teamId,tool.getTimeYMD());
                     return tool.msgCreate(200,"upload success");
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
-
+                return tool.msgCreate(400,"数据库处理错误");
             }
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
         return tool.msgCreate(400,"file upload fail");
     }
-    @GetMapping("/sysPaper/download")
+
+    @GetMapping("/wait/download")
     public ResponseEntity<Resource> downloadFile(@RequestParam String paperId) {
 
         System.out.println(paperId);
-        Paper target = null;
+        waitPaper target = null;
         try {
-            target = new Paper(paperId);
+            target = new waitPaper (paperId);
         } catch (SQLException e) {
             e.printStackTrace();
             return ResponseEntity
@@ -100,35 +123,5 @@ public class sysPaperControl {
                 )
                 .body(resource);
     }
-    @DeleteMapping("/sysPaper/delete")
-    public Map<String,Object> deleteFile(@RequestParam String paperId){
-        try {
-            Paper paper = new Paper(paperId);
-            if(paper.fileSqlDelete()){
-                return tool.msgCreate(200,"delete success");
-            }else{
-                return tool.msgCreate(400,"删除错误,系统故障");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return tool.msgCreate(400,"删除错误,检查文件是否存在");
-        }
-    }
-    @GetMapping("/sysPaper/update")
-    public Map<String,Object> updateFile(@RequestParam String paperId,@RequestParam String typeId){
-        try {
-            Paper paper = new Paper(paperId);
-            if(paper.isNull()){
-                return tool.msgCreate(400,"文件不存在");
-            }else;
-            if(paper.fileSqlTypeUpdate(typeId)){
-                return tool.msgCreate(200,"更新成功");
-            }else{
-                return tool.msgCreate(400,"更新失败");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return tool.msgCreate(400,"系统错误");
-        }
-    }
+
 }

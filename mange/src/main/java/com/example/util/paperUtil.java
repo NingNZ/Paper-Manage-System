@@ -73,6 +73,7 @@ public class paperUtil {
         }
         return paperIdList;
     }
+<<<<<<< HEAD
     public static String generateHash(String Name,int length) {
         if (Name == null) {
             return null;
@@ -87,4 +88,6 @@ public class paperUtil {
         res = res.replace(' ','&');
         return res.replace('.','%');
     }
+=======
+>>>>>>> 1e8193b (第二次迭代后端)
 }

@@ -1,24 +1,18 @@
 package com.example.controller;
-import com.example.instance.JourList;
-import com.example.instance.Paper;
-import com.example.instance.Team;
-import com.example.instance.TypeList;
+import com.example.instance.*;
 import com.example.util.paperUtil;
 import com.example.util.tool;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.regex.Pattern;
 
 @RestController
 public class searchResultControl {
     @GetMapping("/search")
     public List<Map<String,Object>> searchResult(@RequestParam String type,
                                           @RequestParam String key) {
-        System.out.println(type);
-        System.out.println(key);
         List<Map<String, Object>> resultList = new ArrayList<>();
         boolean isError = false;
         ArrayList<String> paperIdList = new ArrayList<>();
@@ -127,18 +121,4 @@ public class searchResultControl {
         }
         return res;
     }
-    @GetMapping("/teamMember")
-    public List<Map<String,Object>> getTeamMember(@RequestParam String teamId){
-        Team oneTeam = new Team(teamId);
-        List<Map<String,Object>> res = new ArrayList<>();
-        if(oneTeam.isNull()){
-            res.add(tool.msgCreate(400,"not find the team"));
-            return res;
-        }else{
-            res = oneTeam.getMemberList();
-            res.add(0,tool.msgCreate(200,"success"));
-            return res;
-        }
-    }
-
 }

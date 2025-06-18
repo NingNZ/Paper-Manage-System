@@ -33,7 +33,11 @@ public class TeamList {
             this.teamList=null;
         }
     }
+<<<<<<< HEAD
     public List<Map<String,Object>> transfer(){
+=======
+    public ArrayList<Map<String,Object>> transfer(){
+>>>>>>> 1e8193b (第二次迭代后端)
         if(this.isNull()) return null;
         ArrayList<Map<String,Object>> res = new ArrayList<>();
         for(Team each:this.teamList){
@@ -42,4 +46,18 @@ public class TeamList {
         }
         return res;
     }
+<<<<<<< HEAD
+=======
+    public ArrayList<Map<String,Object>> transferOnlyManage(String userId){
+        if(this.isNull()) return null;
+        ArrayList<Map<String,Object>> res = new ArrayList<>();
+        for(Team each:this.teamList){
+            if(each.getLeaderId().equals(userId)){
+                Map<String,Object> row = each.getInfo();
+                if(row!=null) res.add(row);
+            }
+        }
+        return res;
+    }
+>>>>>>> 1e8193b (第二次迭代后端)
 }
